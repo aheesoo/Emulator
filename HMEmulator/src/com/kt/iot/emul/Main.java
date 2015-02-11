@@ -627,7 +627,7 @@ public class Main {
 			textDeviceID.setData("size", 16);
 			textDeviceID.setData("type", "uuid");
 			
-		} else if(combo.getSelectionIndex() == 2) { // 침임감지
+		} else if(combo.getSelectionIndex() == 2) { // 사용자 등록 통보
 			new Label(groupBody, SWT.NULL).setText("DeviceID");
 			Text textDeviceID = new Text(groupBody, SWT.SINGLE | SWT.BORDER);
 			textDeviceID.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
