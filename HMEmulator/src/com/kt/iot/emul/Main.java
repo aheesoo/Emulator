@@ -628,37 +628,47 @@ public class Main {
 			textDeviceID.setData("type", "uuid");
 			
 		} else if(combo.getSelectionIndex() == 2) { // 사용자 등록 통보
-			new Label(groupBody, SWT.NULL).setText("DeviceID");
+			new Label(groupBody, SWT.NULL).setText("External System ID");
+			Text textModel = new Text(groupBody, SWT.SINGLE | SWT.BORDER);
+			textModel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			textModel.setText("EXAMPLE_LOWSYSTEM");
+			textModel.setData("size", 20);
+			textModel.setData("type", "char");
+			
+			new Label(groupBody, SWT.NULL).setText("Device ID");
 			Text textDeviceID = new Text(groupBody, SWT.SINGLE | SWT.BORDER);
 			textDeviceID.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			textDeviceID.setText(client.deviceId);
-			textDeviceID.setData("size", 16);
-			textDeviceID.setData("type", "uuid");
+			textDeviceID.setText("D901CCTV01");
+			textDeviceID.setData("size", 40);
+			textDeviceID.setData("type", "char");
 			
-			Date now = new Date();
-			SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+			new Label(groupBody, SWT.NULL).setText("Device Type");
+			Text textDeviceType = new Text(groupBody, SWT.SINGLE | SWT.BORDER);
+			textDeviceType.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			textDeviceType.setText("현관 출입문");
+			textDeviceType.setData("size", 40);
+			textDeviceType.setData("type", "char");
 			
-			new Label(groupBody, SWT.NULL).setText("DateTime");
-			Text textDateTime = new Text(groupBody, SWT.SINGLE | SWT.BORDER);
-			textDateTime.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			textDateTime.setText(format.format(now));
-			textDateTime.setData("size", 14);
-			textDateTime.setData("type", "char");
+			new Label(groupBody, SWT.NULL).setText("Model Name\n(product type ID)");
+			Text textMAC = new Text(groupBody, SWT.SINGLE | SWT.BORDER);
+			textMAC.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			textMAC.setText("SNB-6004");
+			textMAC.setData("size", 30);
+			textMAC.setData("type", "char");
 			
-			new Label(groupBody, SWT.NULL).setText("DetectionMode");
-			Text textDetectionMode = new Text(groupBody, SWT.SINGLE | SWT.BORDER);
-			textDetectionMode.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			textDetectionMode.setText(Integer.toString(client.detectionmode));
-			textDetectionMode.setData("size", 4);
-			textDetectionMode.setData("type", "int");
+			new Label(groupBody, SWT.NULL).setText("User ID");
+			Text textSAID = new Text(groupBody, SWT.SINGLE | SWT.BORDER);
+			textSAID.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			textSAID.setText("Test Everything");
+			textSAID.setData("size", 11);
+			textSAID.setData("type", "char");
 			
-			new Label(groupBody, SWT.NULL).setText("Picture");
-			Text textPicture = new Text(groupBody, SWT.SINGLE | SWT.BORDER);
-			textPicture.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			textPicture.setText("샘플 침임감지 이미지");
-			textPicture.setData("size", -1);
-			textPicture.setData("type", "char");
-			textPicture.setEditable(false);
+			new Label(groupBody, SWT.NULL).setText("User PW");
+			Text textSecret = new Text(groupBody, SWT.SINGLE | SWT.BORDER);
+			textSecret.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			textSecret.setText("Test Everything");
+			textSecret.setData("size", 40);
+			textSecret.setData("type", "char");
 			
 		} else if(combo.getSelectionIndex() == 3) { // ucloud 공간 부족
 			if(comboVersion.getSelectionIndex() == 2) {
