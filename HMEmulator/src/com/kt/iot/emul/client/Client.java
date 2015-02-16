@@ -3,7 +3,9 @@ package com.kt.iot.emul.client;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -17,11 +19,20 @@ import com.google.gson.GsonBuilder;
 import com.kt.iot.emul.Main;
 import com.kt.iot.emul.model.Header;
 import com.kt.iot.emul.util.Util;
+import com.kt.iot.emul.vo.CmdDataInfoVO;
 import com.kt.iot.emul.vo.ComnRespVO;
+import com.kt.iot.emul.vo.DataTypeVO;
+import com.kt.iot.emul.vo.DevBasVO;
+import com.kt.iot.emul.vo.DevCommChDtlVO;
+import com.kt.iot.emul.vo.DevDtlVO;
+import com.kt.iot.emul.vo.DevInfoRetvRespVO;
+import com.kt.iot.emul.vo.MsgHeadVO;
 import com.kt.iot.emul.vo.TcpHdrVO;
 import com.kt.iot.emul.vo.CommChAthnRespVO;
 import com.kt.iot.emul.util.JsonPacketMaker;
 import com.kt.iot.emul.util.TCPUtil;
+import com.kt.iot.emul.code.StdSysTcpCode;
+import com.kt.iot.emul.code.StdSysTcpCode.MthdType;
 
 public class Client extends Thread {
 	public String SERVERIP = "211.42.137.221";												
@@ -32,9 +43,12 @@ public class Client extends Thread {
 	private InputStream inputStream;
 	
 	private boolean mRun = false;
+	private short tcpCode;
+	private StdSysTcpCode mthdType;
 	
 	public static final int MSG_HEADER_SIZE = 35;
 	public static final int MSG_PACKLEN_SIZE = 4;
+	
 	
 	public int scheduled = 1;
 	public String timeFrom = "1530";
@@ -82,9 +96,12 @@ public class Client extends Thread {
 			e.printStackTrace();
 		}
 	}*/	
-	public void sendData(byte[] header, byte[] body) throws IOException{
+	
+	public void sendData(byte[] header, byte[] body, short mthdCode) throws IOException{
 		byte[] packet = JsonPacketMaker.getTcpPacket(header, body);
 		outputStream.write(packet);
+//		mthdCode = MthdType.ATHN_COMMCHATHN_DEV_TCP.getValue();
+		tcpCode = mthdCode;
 	}	
 	
 	public void run(){
@@ -94,7 +111,7 @@ public class Client extends Thread {
 		
 		try {
 			socket = new Socket(SERVERIP, SERVERPORT);
-			
+			Main.report("connected : " + SERVERIP + ":" + SERVERPORT, true);
 			try {
 				inputStream = socket.getInputStream();
 				outputStream = socket.getOutputStream();
@@ -104,6 +121,7 @@ public class Client extends Thread {
 				int len = 0;
 				int totlen = 0;
 				while(mRun){
+//					while(wanted > 0){
 					try{
 			    		len = inputStream.read( buffer, offset, wanted );
 				        if( len <= 0)
@@ -117,7 +135,7 @@ public class Client extends Thread {
 			        wanted -= len;
 			        offset += len;
 			        totlen += len;
-					
+//					}
 				}
 				byte[] result = new byte[totlen];
 		    	System.arraycopy(buffer, 0, result, 0, totlen );
@@ -169,33 +187,109 @@ public class Client extends Thread {
 		byte[] data = new byte[dataLength];
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		
-		CommChAthnRespVO commChAthnRespVO = gson.fromJson(new String(data), CommChAthnRespVO.class);
-		
-		/** 인증요청번호 */
-		String	athnRqtNo = commChAthnRespVO.getAthnRqtNo();
-		/** 인증번호 */
-		String	athnNo = commChAthnRespVO.getAthnNo();
-		/** 수신암호화여부 */
-		String	rcvEcodYn = commChAthnRespVO.getRcvEcodYn();
-		/** 수신암호화유형코드(그룹: 1006) */
-		String	rcvEcodTypeCd = commChAthnRespVO.getRcvEcodTypeCd();
-		/** 수신암호화키값 */
-		String	rcvEcodKeyVal = commChAthnRespVO.getRcvEcodKeyVal();
-		/** 송신암호화여부 */
-		String	sndEcodYn = commChAthnRespVO.getSndEcodYn();
-		/** 송신암호화유형코드(그룹: 1006) */
-		String	sndEcodTypeCd = commChAthnRespVO.getSndEcodTypeCd();
-		/** 송신암호화키값 */
-		String	sndEcodKeyVal = commChAthnRespVO.getSndEcodKeyVal();
-		
-		Main.report("athnRqtNo : " + athnRqtNo, true);
-		Main.report("athnNo : " + athnNo, true);
-		Main.report("rcvEcodYn : " + rcvEcodYn, true);
-		Main.report("rcvEcodTypeCd : " + rcvEcodTypeCd, true);
-		Main.report("rcvEcodKeyVal : " + rcvEcodKeyVal, true);
-		Main.report("sndEcodYn : " + sndEcodYn, true);
-		Main.report("sndEcodTypeCd : " + sndEcodTypeCd, true);
-		Main.report("sndEcodKeyVal : " + sndEcodKeyVal, true);
+		if(MthdType.ATHN_COMMCHATHN_EXTRSYS_TCP.equals(tcpCode)){
+			CommChAthnRespVO commChAthnRespVO = gson.fromJson(new String(data), CommChAthnRespVO.class);
+			
+			String respMsg = commChAthnRespVO.getRespMsg();
+			Main.report("RespMsg : " + respMsg, true);
+			
+			Main.report(new String(data), true);
+			
+			/** 통신채널 인증 토큰 */
+			String commChAthnNo = commChAthnRespVO.getMsgHeadVO().getCommChAthnNo();
+			Main.athnNo = commChAthnNo;
+			
+			/** 인증요청번호 *//*
+			String	athnRqtNo = commChAthnRespVO.getAthnRqtNo();
+			*//** 인증번호 *//*
+			String	athnNo = commChAthnRespVO.getAthnNo();
+			*//** 수신암호화여부 *//*
+			String	rcvEcodYn = commChAthnRespVO.getRcvEcodYn();
+			*//** 수신암호화유형코드(그룹: 1006) *//*
+			String	rcvEcodTypeCd = commChAthnRespVO.getRcvEcodTypeCd();
+			*//** 수신암호화키값 *//*
+			String	rcvEcodKeyVal = commChAthnRespVO.getRcvEcodKeyVal();
+			*//** 송신암호화여부 *//*
+			String	sndEcodYn = commChAthnRespVO.getSndEcodYn();
+			*//** 송신암호화유형코드(그룹: 1006) *//*
+			String	sndEcodTypeCd = commChAthnRespVO.getSndEcodTypeCd();
+			*//** 송신암호화키값 *//*
+			String	sndEcodKeyVal = commChAthnRespVO.getSndEcodKeyVal();
+			
+			Main.report("athnRqtNo : " + athnRqtNo, true);
+			Main.report("athnNo : " + athnNo, true);
+			Main.report("rcvEcodYn : " + rcvEcodYn, true);
+			Main.report("rcvEcodTypeCd : " + rcvEcodTypeCd, true);
+			Main.report("rcvEcodKeyVal : " + rcvEcodKeyVal, true);
+			Main.report("sndEcodYn : " + sndEcodYn, true);
+			Main.report("sndEcodTypeCd : " + sndEcodTypeCd, true);
+			Main.report("sndEcodKeyVal : " + sndEcodKeyVal, true);*/
+		} 
+		else if(MthdType.KEEP_ALIVE_COMMCHATHN_TCP.equals(tcpCode)){
+			
+		}
+		else if(MthdType.INITA_DEV_RETV.equals(tcpCode)){
+			DevInfoRetvRespVO devInfoRetvRespVO = gson.fromJson(new String(data), DevInfoRetvRespVO.class);
+			
+			String respMsg = devInfoRetvRespVO.getRespMsg();
+			Main.report("RespMsg : " + respMsg, true);
+			
+			/** 명령데이터리스트(31) *//*
+			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();
+			*//** 장치정보목록 *//*
+			List<DevBasVO> devBasVOs = new ArrayList<DevBasVO>();
+			
+			cmdDataInfoVOs = devInfoRetvRespVO.getCmdDataInfoVOs();
+			for(int i=0; i<cmdDataInfoVOs.size(); i++){
+				Main.report("dataTypeCd : " + cmdDataInfoVOs.get(i).getDataTypeCd(), true);
+				Main.report("athnNo : " + cmdDataInfoVOs.get(i).getCmdData(), true);			}
+			devBasVOs = devInfoRetvRespVO.getDevBasVOs();
+			for(int j=0; j< devBasVOs.size(); j++){
+				Main.report("extrSysId : " + devBasVOs.get(j).getExtrSysId(), true);
+				Main.report("devId : " + devBasVOs.get(j).getDevId(), true);
+				Main.report("devNm : " + devBasVOs.get(j).getDevNm(), true);
+				Main.report("modelNm : " + devBasVOs.get(j).getModelNm(), true);
+				
+				List<DevDtlVO> devDtlVOs = devBasVOs.get(j).getDevDtlVOs();
+				for(int a=0; a<devDtlVOs.size(); a++){
+					Main.report("atribNm : " + devDtlVOs.get(a).getAtribNm(), true);
+					Main.report("atribVal : " + devDtlVOs.get(a).getAtribVal(), true);
+				}
+				List<DataTypeVO> dataTypeVOs = devBasVOs.get(j).getDataTypeVOs();
+				for(int b=0; b<dataTypeVOs.size(); b++){
+					Main.report("dataTypeCtgCd : " + dataTypeVOs.get(b).getDataTypeCtgCd(), true);
+					Main.report("dataTypeCd : " + dataTypeVOs.get(b).getDataTypeCd(), true);
+				}
+				List<DevCommChDtlVO> devCommChDtlVOs = devBasVOs.get(j).getDevCommChDtlVOs();
+				for(int c=0; c<devCommChDtlVOs.size(); c++){
+					Main.report("comChId : " + devCommChDtlVOs.get(c).getCommChId(), true);
+					Main.report("comChCd : " + devCommChDtlVOs.get(c).getCommChCd(), true);
+					Main.report("ipadr : " + devCommChDtlVOs.get(c).getIpadr(), true);
+					Main.report("ifTypeCd : " + devCommChDtlVOs.get(c).getIfTypeCd(), true);
+					Main.report("cnctTypeCd : " + devCommChDtlVOs.get(c).getCnctTypeCd(), true);
+					Main.report("portNo : " + devCommChDtlVOs.get(c).getPortNo(), true);
+				}
+			}*/
+			
+			Main.report(new String(data), true);
+		}
+		else if(MthdType.INITA_DEV_UDATERPRT.equals(tcpCode)){
+			ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
+			
+			/** 메세지헤더 */
+			MsgHeadVO msgHeadVO = comnRespVO.getMsgHeadVO();
+			/** 응답코드 */
+			String respCd = comnRespVO.getRespCd();
+			/** 응답메시지 */
+			String respMsg = comnRespVO.getRespMsg();
+			
+			Main.report("RespMsg : " +respMsg , true);
+		}
 	}
 	
+	class ScheduledJob extends TimerTask {
+		public void run() {
+			Main.keepAlive();
+		}
+	}
 }
