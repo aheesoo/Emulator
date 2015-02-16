@@ -121,8 +121,6 @@ public class Main {
 		groupDevice = new Group(shell, SWT.NULL);
 		groupDevice.setText("");
 		groupDevice.setLayout(new GridLayout(2, false));
-//		groupDevice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		groupDevice.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		groupDevice.setLayoutData(new GridData(615, 50));
 		
 		Label deviceNameLabel = new Label(groupDevice, SWT.NULL);
@@ -250,14 +248,6 @@ public class Main {
 		groupDevice.setText("Detail Function");
 		groupDevice.setLayout(new GridLayout(2, false));
 		
-//		Label deviceNameLabel = new Label(groupDevice, SWT.NULL);
-//		deviceNameLabel.setLayoutData(new GridData(85, 0));
-//		deviceNameLabel.setVisible(false);
-//		
-//		Label deviceInputLabel = new Label(groupDevice, SWT.NULL);
-//		deviceInputLabel.setLayoutData(new GridData(85, 0));
-//		deviceInputLabel.setVisible(false);
-		
 		new Label(groupDevice, SWT.NULL).setText("Function");
 		comboDev = new Combo(groupDevice, SWT.BORDER);
 		comboDev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -335,9 +325,9 @@ public class Main {
 		if(MthdType.ATHN_COMMCHATHN_EXTRSYS_TCP.equals(value)){
 			CommChAthnRqtVO commChAthnRqtVO = new CommChAthnRqtVO();
 			
-			String athnRqtNo = "";
-			String commChId = "";
-			String extrSysId = "";
+			String athnRqtNo = "12345678";
+			String commChId = "MPU_INTERGRATION_CHANNEL";
+			String extrSysId = "EXAMPLE_LOWSYSTEM";
 			MsgHeadVO msgHeadVO = new MsgHeadVO();
 			
 			commChAthnRqtVO.setAthnRqtNo(athnRqtNo);
@@ -354,7 +344,7 @@ public class Main {
 		else if(MthdType.INITA_DEV_RETV.equals(value)){
 			DevInfoRetvRqtVO devInfoRetvRqtVO = new DevInfoRetvRqtVO();
 			
-			String extrSysId = "";/** 외부시스템아이디 */
+			String extrSysId = "EXAMPLE_LOWSYSTEM";/** 외부시스템아이디 */
 			Integer	m2mSvcNo = 0;/** M2M서비스번호 */
 			List<String> inclDevIds = new ArrayList<String>();/** 포함장치아이디목록 */
 			List<String> excluDevIds = new ArrayList<String>();/** 배타장치아이디목록 */

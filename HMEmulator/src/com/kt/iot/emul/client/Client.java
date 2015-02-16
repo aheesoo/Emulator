@@ -26,6 +26,7 @@ import com.kt.iot.emul.vo.DevBasVO;
 import com.kt.iot.emul.vo.DevCommChDtlVO;
 import com.kt.iot.emul.vo.DevDtlVO;
 import com.kt.iot.emul.vo.DevInfoRetvRespVO;
+import com.kt.iot.emul.vo.KeepAliveRespVO;
 import com.kt.iot.emul.vo.MsgHeadVO;
 import com.kt.iot.emul.vo.TcpHdrVO;
 import com.kt.iot.emul.vo.CommChAthnRespVO;
@@ -43,8 +44,6 @@ public class Client extends Thread {
 	private InputStream inputStream;
 	
 	private boolean mRun = false;
-	private short tcpCode;
-	private StdSysTcpCode mthdType;
 	
 	public static final int MSG_HEADER_SIZE = 35;
 	public static final int MSG_PACKLEN_SIZE = 4;
@@ -100,8 +99,6 @@ public class Client extends Thread {
 	public void sendData(byte[] header, byte[] body, short mthdCode) throws IOException{
 		byte[] packet = JsonPacketMaker.getTcpPacket(header, body);
 		outputStream.write(packet);
-//		mthdCode = MthdType.ATHN_COMMCHATHN_DEV_TCP.getValue();
-		tcpCode = mthdCode;
 	}	
 	
 	public void run(){
@@ -176,19 +173,26 @@ public class Client extends Thread {
 	
 	private void processRcvPacket(byte[] dataBuffer){
 		Main.report("receive data : "+Util.byte2Hex(dataBuffer), true);
+		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		
 		byte[] packLen = new byte[MSG_PACKLEN_SIZE];
 		byte[] header = new byte[MSG_HEADER_SIZE];
 		
-		System.arraycopy(dataBuffer, 0, packLen, 0, 4);
+		System.arraycopy(dataBuffer, 0, packLen, 0, MSG_PACKLEN_SIZE);
 		int packLenValue = Util.byte2Int(packLen);
+		
+		System.arraycopy(dataBuffer, 0, header, MSG_PACKLEN_SIZE, MSG_PACKLEN_SIZE+MSG_HEADER_SIZE);
+		
+		TcpHdrVO tcpHderVO = gson.fromJson(new String(header), TcpHdrVO.class);
+		MthdType mthd = tcpHderVO.getMthdType();
 		
 		int dataLength = packLenValue - header.length;
 		byte[] data = new byte[dataLength];
-		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
+		System.arraycopy(dataBuffer, 0, data, header.length + packLen.length, packLenValue); // body data
 		
-		if(MthdType.ATHN_COMMCHATHN_EXTRSYS_TCP.equals(tcpCode)){
-			CommChAthnRespVO commChAthnRespVO = gson.fromJson(new String(data), CommChAthnRespVO.class);
+		if(MthdType.ATHN_COMMCHATHN_EXTRSYS_TCP.equals(mthd)){
+//			CommChAthnRespVO commChAthnRespVO = gson.fromJson(new String(data), CommChAthnRespVO.class);
+			CommChAthnRespVO commChAthnRespVO = gson.fromJson(new String(dataBuffer), CommChAthnRespVO.class);
 			
 			String respMsg = commChAthnRespVO.getRespMsg();
 			Main.report("RespMsg : " + respMsg, true);
@@ -225,11 +229,16 @@ public class Client extends Thread {
 			Main.report("sndEcodTypeCd : " + sndEcodTypeCd, true);
 			Main.report("sndEcodKeyVal : " + sndEcodKeyVal, true);*/
 		} 
-		else if(MthdType.KEEP_ALIVE_COMMCHATHN_TCP.equals(tcpCode)){
+		else if(MthdType.KEEP_ALIVE_COMMCHATHN_TCP.equals(mthd)){
+			KeepAliveRespVO keepAliveRespVO = gson.fromJson(new String(dataBuffer), KeepAliveRespVO.class);
 			
+			String respMsg = keepAliveRespVO.getRespMsg();
+			Main.report("RespMsg : " + respMsg, true);
+			
+			Main.report(new String(data), true);
 		}
-		else if(MthdType.INITA_DEV_RETV.equals(tcpCode)){
-			DevInfoRetvRespVO devInfoRetvRespVO = gson.fromJson(new String(data), DevInfoRetvRespVO.class);
+		else if(MthdType.INITA_DEV_RETV.equals(mthd)){
+			DevInfoRetvRespVO devInfoRetvRespVO = gson.fromJson(new String(dataBuffer), DevInfoRetvRespVO.class);
 			
 			String respMsg = devInfoRetvRespVO.getRespMsg();
 			Main.report("RespMsg : " + respMsg, true);
@@ -273,8 +282,8 @@ public class Client extends Thread {
 			
 			Main.report(new String(data), true);
 		}
-		else if(MthdType.INITA_DEV_UDATERPRT.equals(tcpCode)){
-			ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
+		else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){
+			ComnRespVO comnRespVO = gson.fromJson(new String(dataBuffer), ComnRespVO.class);
 			
 			/** 메세지헤더 */
 			MsgHeadVO msgHeadVO = comnRespVO.getMsgHeadVO();
