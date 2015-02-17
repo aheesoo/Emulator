@@ -107,7 +107,8 @@ public class Client extends Thread {
 				outputStream.flush();
 				
 				Main.report("send hexcode : " + Util.byte2Hex(packet), true);
-				Main.report("send json : " + new String(packet), true);
+				Main.report("send header : " + new String(header), true);
+				Main.report("send body : " + new String(body), true);
 			}
 		} catch (SocketException e) {
 			Main.btnInit();
