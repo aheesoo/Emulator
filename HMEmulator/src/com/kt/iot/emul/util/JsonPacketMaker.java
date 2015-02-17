@@ -45,13 +45,15 @@ public class JsonPacketMaker
 	public static byte[] getTcpPacket(byte[] header, byte[] body)
 	{
 		int packetlength =  header.length + body.length;
+		System.out.println("packetLength : "+packetlength);
 		byte[] arrPacketlength =  ConvertUtil.intTobytes(packetlength);
+		System.out.println(" arrPacketlngth ===> "+new String(arrPacketlength));
 		byte[] packet = new byte[packetlength + 4];
 
 		System.arraycopy(arrPacketlength, 0, packet, 0, 4);
 		System.arraycopy(header, 0, packet, 4, header.length);
 		System.arraycopy(body, 0, packet, 4 + header.length, body.length);
-
+System.out.println(" packet : "+new String(packet));
 		return packet;
 	}
 	

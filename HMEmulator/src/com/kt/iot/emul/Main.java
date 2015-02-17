@@ -60,7 +60,8 @@ public class Main {
 	
 	private static Text textName;
 	
-	private Combo textHost;
+//	private Combo textHost;
+	private Text textHost;
 	private Text textPort; 
 	private static Text textRes;
 	
@@ -99,11 +100,14 @@ public class Main {
 		proxyInputLabel.setVisible(false);		
 		
 		new Label(groupProxy, SWT.NULL).setText("Host");
-		textHost = new Combo(groupProxy, SWT.BORDER);
+//		textHost = new Combo(groupProxy, SWT.BORDER);
+		textHost = new Text(groupProxy, SWT.BORDER);
 		textHost.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		textHost.add("211.42.137.221", 0);
-		textHost.add("121.156.46.132", 1);
-		textHost.select(0);
+		textHost.setText("211.42.137.221");
+//		textHost.add("127.0.0.1", 0);
+//		textHost.add("211.42.137.221", 0);
+//		textHost.add("121.156.46.132", 1);
+//		textHost.select(0);
 		
 		new Label(groupProxy, SWT.NULL).setText("Port");
 		textPort = new Text(groupProxy, SWT.SINGLE | SWT.BORDER);
@@ -195,18 +199,19 @@ public class Main {
 					try {
 						short methType = 0;
 						StdSysTcpCode.MthdType methcode = null;
-						if(combo.getSelectionIndex() == 0) {
+						if(comboDev.getSelectionIndex() == 0) {
 							methType = MthdType.KEEP_ALIVE_COMMCHATHN_TCP.getValue(); //TCP채널 KeepAlive
 							methcode = MthdType.KEEP_ALIVE_COMMCHATHN_TCP;
-    	            	} else if(combo.getSelectionIndex() == 1) {
+    	            	} else if(comboDev.getSelectionIndex() == 1) {
     	            		methType = MthdType.INITA_DEV_RETV.getValue();//장치정보조회
     	            		methcode = MthdType.INITA_DEV_RETV;
-    	            	} else if(combo.getSelectionIndex() == 2) {
+    	            	} else if(comboDev.getSelectionIndex() == 2) {
     	            		methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고
     	            		methcode = MthdType.INITA_DEV_UDATERPRT;
     	            	} 
 						
 						byte[] header = getHeader(methcode).toPacket();
+//						byte[] header = getHeader(methcode).getBytes();
 
 						String strBody = getBody(methType);
 						byte[] body = strBody.getBytes();
@@ -261,17 +266,18 @@ public class Main {
 	}
 		
 	public void initSendData(){
-		StdSysTcpCode.MthdType mthType = MthdType.ATHN_COMMCHATHN_EXTRSYS_TCP; 
+		StdSysTcpCode.MthdType mthType = MthdType.ATHN_COMMCHATHN_DEV_TCP; 
 		try {
-			byte[] header = getHeader(MthdType.ATHN_COMMCHATHN_EXTRSYS_TCP).toPacket();
-
-			StdSysTcpCode.MthdType mthdType = MthdType.ATHN_COMMCHATHN_EXTRSYS_TCP;
+			byte[] header = getHeader(MthdType.ATHN_COMMCHATHN_DEV_TCP).toPacket();
+//			byte[] header = getHeader(MthdType.ATHN_COMMCHATHN_DEV_TCP).getBytes();
 			
+			StdSysTcpCode.MthdType mthdType = MthdType.ATHN_COMMCHATHN_DEV_TCP;
 			String strBody = getBody(mthdType.getValue());
 			byte[] body = strBody.getBytes();
 			
+			System.out.println(" body : "+ new String(body) +" \n header : "+ new String(header));
     		client.sendData(header, body, mthdType.getValue());
-        		
+
 		} catch(Exception e) {
 			report(e.toString(), true);
         	e.printStackTrace();
@@ -280,6 +286,9 @@ public class Main {
 	
 	private static TcpHdrVO tcpHdrVO = new TcpHdrVO();
 	public static TcpHdrVO getHeader(StdSysTcpCode.MthdType mthdType){
+//	public static String getHeader(StdSysTcpCode.MthdType mthdType){
+		String header = "";
+		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		Long trmTransactionId = System.currentTimeMillis();
 		try {
 			tcpHdrVO.setMainVer( (byte) 1 );
@@ -313,7 +322,8 @@ public class Main {
 			report(e.toString(), true);
         	e.printStackTrace();
 		}
-		
+//		header = gson.toJson(tcpHdrVO);
+//		return header;
 		return tcpHdrVO;
 		
 	}
@@ -322,7 +332,7 @@ public class Main {
 		String strBody = "";
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		
-		if(MthdType.ATHN_COMMCHATHN_EXTRSYS_TCP.equals(value)){
+		if(MthdType.ATHN_COMMCHATHN_DEV_TCP.equals(value)){
 			CommChAthnRqtVO commChAthnRqtVO = new CommChAthnRqtVO();
 			
 			String athnRqtNo = "12345678";
@@ -411,7 +421,7 @@ public class Main {
 	public static void btnInit() {
 		display.syncExec(new Runnable() {
 			public void run() {
-				buttonInit.setText("Connect");
+				buttonInit.setText("TCP 채널 인즏 Connect");
 				buttonSend.setEnabled(false);
 			}
 		});
@@ -427,6 +437,7 @@ public class Main {
 				try {
 					StdSysTcpCode.MthdType mthdType = MthdType.KEEP_ALIVE_COMMCHATHN_TCP;
 					byte[] header = getHeader(mthdType).toPacket();
+//					byte[] header = getHeader(mthdType).getBytes();
 					
 					String strBody = getBody(mthdType.getValue());
 					byte[] body = strBody.getBytes();

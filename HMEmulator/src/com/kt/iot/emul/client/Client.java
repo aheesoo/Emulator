@@ -36,7 +36,7 @@ import com.kt.iot.emul.code.StdSysTcpCode;
 import com.kt.iot.emul.code.StdSysTcpCode.MthdType;
 
 public class Client extends Thread {
-	public String SERVERIP = "211.42.137.221";												
+	public String SERVERIP = "127.0.0.1";//"211.42.137.221";												
 	public int SERVERPORT = 9077;
 	public int version = 1;
 	private Socket socket;
@@ -44,6 +44,7 @@ public class Client extends Thread {
 	private InputStream inputStream;
 	
 	private boolean mRun = false;
+	private int maxRecvLength = 4096;
 	
 	public static final int MSG_HEADER_SIZE = 35;
 	public static final int MSG_PACKLEN_SIZE = 4;
@@ -98,12 +99,27 @@ public class Client extends Thread {
 	
 	public void sendData(byte[] header, byte[] body, short mthdCode) throws IOException{
 		byte[] packet = JsonPacketMaker.getTcpPacket(header, body);
-		outputStream.write(packet);
-	}	
+		try {
+			outputStream = socket.getOutputStream();
+//			inputStream = socket.getInputStream();
+			if(outputStream != null){
+				outputStream.write(packet);
+				outputStream.flush();
+				
+				Main.report("send hexcode : " + Util.byte2Hex(packet), true);
+				Main.report("send json : " + new String(packet), true);
+			}
+		} catch (SocketException e) {
+			Main.btnInit();
+			Main.report("disconnected : " + this.SERVERIP + ":" + this.SERVERPORT, true);
+			e.printStackTrace();
+		}
+		
+	}
 	
 	public void run(){
 		mRun = true;
-		int maxRecvLength = 4096;
+		
 		byte[] buffer = new byte[maxRecvLength];
 		
 		try {
@@ -111,8 +127,6 @@ public class Client extends Thread {
 			Main.report("connected : " + SERVERIP + ":" + SERVERPORT, true);
 			try {
 				inputStream = socket.getInputStream();
-				outputStream = socket.getOutputStream();
-				
 				int offset = 0;
 				int wanted = maxRecvLength;
 				int len = 0;
@@ -139,10 +153,6 @@ public class Client extends Thread {
 				
 		    	processRcvPacket(result);
 			    
-			} catch (SocketException e) {
-				Main.btnInit();
-				Main.report("disconnected : " + this.SERVERIP + ":" + this.SERVERPORT, true);
-				e.printStackTrace();
 			} catch (Exception e) {
 				Main.btnInit();
 				Main.report(e.toString(), true);
