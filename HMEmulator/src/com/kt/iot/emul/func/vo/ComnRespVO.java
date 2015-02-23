@@ -12,10 +12,12 @@
  *       ------------------------------------
  *        byw  : 2013. 12. 11.       :            : 신규 개발.
  */
-package com.kt.iot.emul.vo;
+package com.kt.iot.emul.func.vo;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+
+import com.kt.iot.emul.vo.MsgHeadVO;
 
 /**
  * <PRE>

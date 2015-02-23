@@ -40,14 +40,14 @@ import com.kt.iot.emul.code.StdSysTcpCode.MthdType;
 import com.kt.iot.emul.code.GwCode.UseYn;
 import com.kt.iot.emul.code.StdSysTcpCode.EncdngType;
 import com.kt.iot.emul.vo.CmdDataInfoVO;
-import com.kt.iot.emul.vo.CommChAthnRespVO;
-import com.kt.iot.emul.vo.ComnRqtVO;
+import com.kt.iot.emul.func.vo.CommChAthnRespVO;
+import com.kt.iot.emul.func.vo.ComnRqtVO;
 import com.kt.iot.emul.vo.DevBasVO;
-import com.kt.iot.emul.vo.DevInfoUdateRprtRqtVO;
+import com.kt.iot.emul.func.vo.DevInfoUdateRprtRqtVO;
 import com.kt.iot.emul.vo.MsgHeadVO;
 import com.kt.iot.emul.vo.TcpHdrVO;
-import com.kt.iot.emul.vo.CommChAthnRqtVO;
-import com.kt.iot.emul.vo.DevInfoRetvRqtVO;
+import com.kt.iot.emul.func.vo.CommChAthnRqtVO;
+import com.kt.iot.emul.func.vo.DevInfoRetvRqtVO;
 
 public class Main {
 	private static Client client = new Client();
@@ -103,7 +103,8 @@ public class Main {
 //		textHost = new Combo(groupProxy, SWT.BORDER);
 		textHost = new Text(groupProxy, SWT.BORDER);
 		textHost.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		textHost.setText("211.42.137.221");
+//		textHost.setText("211.42.137.221");
+		textHost.setText("127.0.0.1");
 //		textHost.add("127.0.0.1", 0);
 //		textHost.add("211.42.137.221", 0);
 //		textHost.add("121.156.46.132", 1);
@@ -169,20 +170,18 @@ public class Main {
 				switch (event.type) {
 				case SWT.Selection:
 					if("TCP 채널 인증 Connect".equals(buttonInit.getText())) {
-						
 						client = new Client(textHost.getText(), Integer.parseInt(textPort.getText()));
 						client.start();
-						
 						initSendData();
-						
 						setDevice();
 						groupDevice.layout();
-						
 						buttonInit.setText("Disconnect");
 						buttonSend.setEnabled(true);
 					} else {
 						buttonInit.setText("TCP 채널 인증 Connect");
 						buttonSend.setEnabled(false);
+						
+						groupDevice.setVisible(false);
 						
 						client.closeClient();
 					}
@@ -248,6 +247,10 @@ public class Main {
 			if(controls[i].getVisible()) {
 				controls[i].dispose();
 			}
+		}
+		
+		if(groupDevice.getVisible() == false){
+			groupDevice.setVisible(true);
 		}
 		
 		groupDevice.setText("Detail Function");

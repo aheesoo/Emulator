@@ -12,7 +12,7 @@
  *       ------------------------------------
  *        byw  : 2013. 12. 11.       :            : 신규 개발.
  */
-package com.kt.iot.emul.vo;
+package com.kt.iot.emul.func.vo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,8 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.kt.iot.emul.vo.CmdDataInfoVO;
-import com.kt.iot.emul.vo.ComnRespVO;
+import com.kt.iot.emul.func.vo.ComnRespVO;
+import com.kt.iot.emul.vo.DevBasVO;
 
 /**
  * <PRE>

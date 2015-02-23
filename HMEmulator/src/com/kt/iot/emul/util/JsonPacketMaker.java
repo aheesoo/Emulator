@@ -24,8 +24,8 @@ import com.google.gson.GsonBuilder;
 import com.kt.iot.emul.util.JsonPacketMaker;
 import com.kt.iot.emul.util.ConvertUtil;
 import com.kt.iot.emul.vo.TcpHdrVO;
-import com.kt.iot.emul.vo.CommChAthnRqtVO;
-import com.kt.iot.emul.vo.ComnRqtVO;
+import com.kt.iot.emul.func.vo.CommChAthnRqtVO;
+import com.kt.iot.emul.func.vo.ComnRqtVO;
 import com.kt.iot.emul.vo.MsgHeadVO;
 
 /**

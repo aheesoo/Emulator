@@ -1,6 +1,6 @@
-package com.kt.iot.emul.vo;
+package com.kt.iot.emul.func.vo;
 
-import com.kt.iot.emul.vo.ComnRespVO;
+import com.kt.iot.emul.func.vo.ComnRespVO;
 
 
 public class KeepAliveRespVO extends ComnRespVO

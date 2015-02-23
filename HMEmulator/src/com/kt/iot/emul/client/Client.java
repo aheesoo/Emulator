@@ -20,16 +20,16 @@ import com.kt.iot.emul.Main;
 import com.kt.iot.emul.model.Header;
 import com.kt.iot.emul.util.Util;
 import com.kt.iot.emul.vo.CmdDataInfoVO;
-import com.kt.iot.emul.vo.ComnRespVO;
+import com.kt.iot.emul.func.vo.ComnRespVO;
 import com.kt.iot.emul.vo.DataTypeVO;
 import com.kt.iot.emul.vo.DevBasVO;
 import com.kt.iot.emul.vo.DevCommChDtlVO;
 import com.kt.iot.emul.vo.DevDtlVO;
-import com.kt.iot.emul.vo.DevInfoRetvRespVO;
-import com.kt.iot.emul.vo.KeepAliveRespVO;
+import com.kt.iot.emul.func.vo.DevInfoRetvRespVO;
+import com.kt.iot.emul.func.vo.KeepAliveRespVO;
 import com.kt.iot.emul.vo.MsgHeadVO;
 import com.kt.iot.emul.vo.TcpHdrVO;
-import com.kt.iot.emul.vo.CommChAthnRespVO;
+import com.kt.iot.emul.func.vo.CommChAthnRespVO;
 import com.kt.iot.emul.util.JsonPacketMaker;
 import com.kt.iot.emul.util.TCPUtil;
 import com.kt.iot.emul.code.StdSysTcpCode;
@@ -107,8 +107,9 @@ public class Client extends Thread {
 				outputStream.flush();
 				
 				Main.report("send hexcode : " + Util.byte2Hex(packet), true);
-				Main.report("send header : " + new String(header), true);
-				Main.report("send body : " + new String(body), true);
+//				Main.report("\n send header : " + new String(header), true);
+				Main.report("\n send header : " + Util.byte2Hex(header), true);
+				Main.report("\n send body : " + new String(body), true);
 			}
 		} catch (SocketException e) {
 			Main.btnInit();
