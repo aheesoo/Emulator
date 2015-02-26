@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -31,6 +32,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kt.iot.emul.client.Client;
 import com.kt.iot.emul.model.Header;
+import com.kt.iot.emul.util.ConvertUtil;
 import com.kt.iot.emul.util.Util;
 import com.kt.iot.emul.code.StdSysTcpCode;
 import com.kt.iot.emul.code.StdSysTcpCode.HdrType;
@@ -42,9 +44,25 @@ import com.kt.iot.emul.code.StdSysTcpCode.EncdngType;
 import com.kt.iot.emul.vo.CmdDataInfoVO;
 import com.kt.iot.emul.func.vo.CommChAthnRespVO;
 import com.kt.iot.emul.func.vo.ComnRqtVO;
+import com.kt.iot.emul.func.vo.ItgColecDataVO;
+import com.kt.iot.emul.func.vo.ItgColecDataVO.ColecRowVO;
+import com.kt.iot.emul.func.vo.ItgColecDataVO.DevColecDataVO;
+import com.kt.iot.emul.func.vo.ItgColecDataVO.SysColecDataVO;
 import com.kt.iot.emul.vo.DevBasVO;
 import com.kt.iot.emul.func.vo.DevInfoUdateRprtRqtVO;
+import com.kt.iot.emul.vo.BinDataInfoVO;
+import com.kt.iot.emul.vo.BinSetupDataInfoVO;
+import com.kt.iot.emul.vo.DtDataInfoVO;
+import com.kt.iot.emul.vo.EvDataInfoVO;
+import com.kt.iot.emul.vo.GenlSetupDataInfoVO;
+import com.kt.iot.emul.vo.LoDataInfoVO;
 import com.kt.iot.emul.vo.MsgHeadVO;
+import com.kt.iot.emul.vo.SclgDataInfoVO;
+import com.kt.iot.emul.vo.SclgSetupDataInfoVO;
+import com.kt.iot.emul.vo.SclgTimeDataInfoVO;
+import com.kt.iot.emul.vo.SnsnDataInfoVO;
+import com.kt.iot.emul.vo.StrDataInfoVO;
+import com.kt.iot.emul.vo.SttusDataInfoVO;
 import com.kt.iot.emul.vo.TcpHdrVO;
 import com.kt.iot.emul.func.vo.CommChAthnRqtVO;
 import com.kt.iot.emul.func.vo.DevInfoRetvRqtVO;
@@ -207,6 +225,9 @@ public class Main {
     	            	} else if(comboDev.getSelectionIndex() == 2) {
     	            		methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고
     	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+    	            	} else if(comboDev.getSelectionIndex() == 3) {
+    	            		methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집
+    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
     	            	} 
 						
 						byte[] header = getHeader(methcode).toPacket();
@@ -262,6 +283,7 @@ public class Main {
 		comboDev.add("KeepAlive", 0);
 		comboDev.add("장치정보 조회", 1);
 		comboDev.add("장치정보 갱신보고", 2);
+		comboDev.add("데이터 수집");
 		comboDev.select(0);
 		
 		comboDev.setVisible(true);
@@ -360,10 +382,12 @@ public class Main {
 			String extrSysId = "EXAMPLE_LOWSYSTEM";/** 외부시스템아이디 */
 			Integer	m2mSvcNo = 0;/** M2M서비스번호 */
 			List<String> inclDevIds = new ArrayList<String>();/** 포함장치아이디목록 */
+			inclDevIds.add("D901CCTV01");
 			List<String> excluDevIds = new ArrayList<String>();/** 배타장치아이디목록 */
+			excluDevIds.add("");
 			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();/** 명령데이터리스트(31) */
-			String modelNm = "";/** 모델명 */
-			String useYn = "";/** 사용여부 */
+			String modelNm = "SNB-6004";/** 모델명 */
+			String useYn = "Y";/** 사용여부 */
 			Date cretDtSt = new Date();/** 생성일시시작 */
 			Date cretDtFns = new Date();/** 생성일시종료 */
 			Date amdDtSt = new Date();/** 수정일시시작 */
@@ -388,7 +412,7 @@ public class Main {
 			DevInfoUdateRprtRqtVO devInfoUpdateRprtRqtVO = new DevInfoUdateRprtRqtVO();
 			
 			/** 외부시스템아이디 */
-			String extrSysId = "";
+			String extrSysId = "EXAMPLE_LOWSYSTEM";
 			/** 정보갱신유형 */
 			String	infoUpdTypeCd = "";
 			/** 장치정보목록 */
@@ -400,6 +424,154 @@ public class Main {
 			
 			strBody = gson.toJson(devInfoUpdateRprtRqtVO);
 		}
+		else if(MthdType.COLEC_ITGDATA_RECV.equals(value)){
+			ItgColecDataVO itgColecDataVO = new ItgColecDataVO();
+			
+			/** 외부시스템아이디 */
+			String extrSysId = "EXAMPLE_LOWSYSTEM";
+			/** 헤더확장필드 */
+			HashMap<String, Object> mapHeaderExtension = new HashMap<String, Object>();
+			
+			/** rowColData **/
+			ColecRowVO colecRowVO = new ColecRowVO();
+			List<ColecRowVO> colecRowVOs = new ArrayList<ColecRowVO>();
+			
+			SnsnDataInfoVO snsnDataInfoVO = new SnsnDataInfoVO();
+			List<SnsnDataInfoVO> snsnDataInfoVOs =  new ArrayList<SnsnDataInfoVO>();
+			String dataTypeCd_Snsn = "10001003";
+			Double snsnVal = 0.7;
+			snsnDataInfoVO.setDataTypeCd(dataTypeCd_Snsn);
+			snsnDataInfoVO.setSnsnVal(snsnVal);
+			snsnDataInfoVOs.add(snsnDataInfoVO);
+			
+			SttusDataInfoVO sttusDataInfoVO = new SttusDataInfoVO();
+			List<SttusDataInfoVO> sttusDataInfoVOs = new ArrayList<SttusDataInfoVO>();
+			String dataTypeCd_sttus = "20001003";
+			Double sttusVal = 1.0;
+			sttusDataInfoVO.setDataTypeCd(dataTypeCd_sttus);
+			sttusDataInfoVO.setSttusVal(snsnVal);
+			sttusDataInfoVOs.add(sttusDataInfoVO);
+			
+			LoDataInfoVO loDataInfoVO = new LoDataInfoVO();
+			String dataTypeCd_Lo = "30001003";
+			Double latit = 1.0;
+			Double lngit = 1.0;
+			loDataInfoVO.setDataTypeCd(dataTypeCd_Lo);
+			loDataInfoVO.setLatit(latit);
+			loDataInfoVO.setLngit(lngit);
+			
+			BinDataInfoVO binDataInfoVO = new BinDataInfoVO();
+			List<BinDataInfoVO> binDataInfoVOs = new ArrayList<BinDataInfoVO>();
+			String dataTypeCd_Bin = "40001003";
+			byte[] binData = new byte[3];
+			binData[0] = (byte) 0x50;
+			binData[1] = (byte) 0x51;
+			binData[2] = (byte) 0x52;
+			binDataInfoVO.setDataTypeCd(dataTypeCd_Bin);
+			binDataInfoVO.setBinData(binData);
+			binDataInfoVOs.add(binDataInfoVO);
+			
+			StrDataInfoVO strDataInfoVO = new StrDataInfoVO();
+			List<StrDataInfoVO> strDataInfoVOs = new ArrayList<StrDataInfoVO>();
+			String snsnTagCd = "60001003";
+			String strVal = "";
+			strDataInfoVO.setSnsnTagCd(snsnTagCd);
+			strDataInfoVO.setStrVal(strVal);
+			strDataInfoVOs.add(strDataInfoVO);
+			
+			DtDataInfoVO dtDataInfoVO = new DtDataInfoVO();
+			List<DtDataInfoVO> dtDataInfoVOs = new ArrayList<DtDataInfoVO>();
+			String snsnTagCd_Dt = "61000837";
+			Date dtVal = new Date();
+			dtDataInfoVO.setSnsnTagCd(snsnTagCd_Dt);
+			dtDataInfoVO.setDtVal(dtVal);
+			dtDataInfoVOs.add(dtDataInfoVO);
+			
+			EvDataInfoVO evDataInfoVO = new EvDataInfoVO();
+			String evOccSysId = "EXAMPLE_LOWSYSTEM";
+			String evTyepCd = "0001";
+			String evDivId = "1234";
+			String evClasCd = "";
+			String evOccId = "EXAM_EV_0001";
+			String evTrtSttus = "0002";
+			evDataInfoVO.setEvOccSysId(evOccSysId);
+			evDataInfoVO.setEvTypeCd(evTyepCd);
+			evDataInfoVO.setEvDivId(evDivId);
+			evDataInfoVO.setEvClasCd(evClasCd);
+			evDataInfoVO.setEvOccId(evOccId);
+			evDataInfoVO.setEvTrtSttus(evTrtSttus);
+			
+			GenlSetupDataInfoVO genlSetupDataInfoVO = new GenlSetupDataInfoVO();
+			List<GenlSetupDataInfoVO> genlSetupDataInfoVOs = new ArrayList<GenlSetupDataInfoVO>();
+			String snsnTagCd_Gen = "”80000739";
+			String setupVal = "ON";
+			genlSetupDataInfoVO.setSetupVal(setupVal);
+			genlSetupDataInfoVO.setSnsnTagCd(snsnTagCd_Gen);
+			genlSetupDataInfoVOs.add(genlSetupDataInfoVO);
+			
+			SclgSetupDataInfoVO sclgSetupDataInfoVO = new SclgSetupDataInfoVO();
+			SclgDataInfoVO sclgDataInfoVO = new SclgDataInfoVO();
+			SclgTimeDataInfoVO sclgTimeDataInfoVO = new SclgTimeDataInfoVO();
+			List<SclgSetupDataInfoVO> sclgSetupDataInfoVOs = new ArrayList<SclgSetupDataInfoVO>();
+			List<SclgDataInfoVO> sclgDataInfoVOs = new ArrayList<SclgDataInfoVO>();
+			List<SclgTimeDataInfoVO> sclgTimeDataInfoVOs = new ArrayList<SclgTimeDataInfoVO>();
+			String stTime = "120000";
+			String fnsTime = "165959";
+			sclgTimeDataInfoVO.setFnsTime(fnsTime);
+			sclgTimeDataInfoVO.setStTime(stTime);
+			sclgTimeDataInfoVOs.add(sclgTimeDataInfoVO);
+			String dowCd = "";
+			sclgDataInfoVO.setDowCd(dowCd);
+			sclgDataInfoVO.setSclgTimeDataInfoVOs(sclgTimeDataInfoVOs);
+			sclgDataInfoVOs.add(sclgDataInfoVO);
+			String snsnTagCd_Scl = "";
+			sclgSetupDataInfoVO.setSnsnTagCd(snsnTagCd_Scl);
+			sclgSetupDataInfoVO.setSclgDataInfoVOs(sclgDataInfoVOs);
+			sclgSetupDataInfoVOs.add(sclgSetupDataInfoVO);
+			
+			BinSetupDataInfoVO binSetupDataInfoVO = new BinSetupDataInfoVO();
+			List<BinSetupDataInfoVO> binSetupDataInfoVos = new ArrayList<BinSetupDataInfoVO>();
+			String snsnTagCd_Bin = "90000739";
+			byte[] setupVal_Bin = new byte[3];
+			binData[0] = (byte) 0x50;
+			binData[1] = (byte) 0x51;
+			binData[2] = (byte) 0x52;
+			binSetupDataInfoVO.setSnsnTagCd(snsnTagCd_Bin);
+			binSetupDataInfoVO.setSetupVal(setupVal_Bin);
+			binSetupDataInfoVos.add(binSetupDataInfoVO);
+
+			colecRowVO.setSnsnDataInfoVOs(snsnDataInfoVOs);
+			colecRowVO.setSttusDataInfoVOs(sttusDataInfoVOs);
+			colecRowVO.setLoDataInfoVO(loDataInfoVO);
+			colecRowVO.setBinDataInfoVOs(binDataInfoVOs);
+			colecRowVO.setStrDataInfoVOs(strDataInfoVOs);
+			colecRowVO.setDtDataInfoVOs(dtDataInfoVOs);
+			colecRowVO.setEvDataInfoVO(evDataInfoVO);
+			colecRowVO.setGenlSetupDataInfoVOs(genlSetupDataInfoVOs);
+			colecRowVO.setSclgSetupDataInfoVOs(sclgSetupDataInfoVOs);
+			colecRowVO.setBinSetupDataInfoVOs(binSetupDataInfoVos);
+			
+			colecRowVOs.add(colecRowVO);
+
+			/** 시스템수집데이터 **/
+			SysColecDataVO sysColecDataVO = new SysColecDataVO();
+			sysColecDataVO.setColecRowVOs(colecRowVOs);
+			/** 장비수집데이터리스트 */
+			DevColecDataVO devColecDataVO = new DevColecDataVO();
+			List<DevColecDataVO> devColecDataVOs = new ArrayList<DevColecDataVO>();
+			String devId = "";
+			devColecDataVO.setDevId(devId);
+			devColecDataVO.setColecRowVOs(colecRowVOs);
+			devColecDataVOs.add(devColecDataVO);
+			
+			itgColecDataVO.setExtrSysId(extrSysId);
+			itgColecDataVO.setMapHeaderExtension(mapHeaderExtension);
+			itgColecDataVO.setSysColecDataVO(sysColecDataVO);
+			itgColecDataVO.setDevColecDataVOs(devColecDataVOs);
+			
+			strBody = gson.toJson(itgColecDataVO);
+		}
+		
 		return strBody;
 		
 	}

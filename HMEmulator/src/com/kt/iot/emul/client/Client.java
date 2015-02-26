@@ -100,7 +100,7 @@ public class Client extends Thread {
 	public void sendData(byte[] header, byte[] body, short mthdCode) throws IOException{
 		byte[] packet = JsonPacketMaker.getTcpPacket(header, body);
 		try {
-			outputStream = socket.getOutputStream();
+//			outputStream = socket.getOutputStream();
 //			inputStream = socket.getInputStream();
 			if(outputStream != null){
 				outputStream.write(packet);
@@ -128,32 +128,43 @@ public class Client extends Thread {
 			socket = new Socket(SERVERIP, SERVERPORT);
 			Main.report("connected : " + SERVERIP + ":" + SERVERPORT, true);
 			try {
+				outputStream = socket.getOutputStream();
 				inputStream = socket.getInputStream();
-				int offset = 0;
-				int wanted = maxRecvLength;
-				int len = 0;
-				int totlen = 0;
 				while(mRun){
-//					while(wanted > 0){
+					int offset = 0;
+					int wanted = maxRecvLength;
+					int len = 0;
+					int totlen = 0;
+					while(wanted > 0){
+//					while((len = inputStream.read( buffer, offset, wanted )) != -1)
+//					for(;;){
 					try{
-			    		len = inputStream.read( buffer, offset, wanted );
-				        if( len <= 0)
-				        {
-				        	break;
-				        }
-			    	}catch(Exception e)
-			    	{
-			    		break;
-			    	}
-			        wanted -= len;
-			        offset += len;
-			        totlen += len;
-//					}
+				    		len = inputStream.read( buffer, offset, wanted );
+					        if( len <= 0)
+					        {
+					        	break;
+					        }
+				    	}catch(Exception e)
+				    	{
+				    		break;
+				    	}
+				        wanted -= len;
+				        offset += len;
+				        totlen += len;
+					}
+					byte[] result = new byte[totlen];
+					System.arraycopy(buffer, 0, result, 0, totlen );
+					processRcvPacket(result);
+					
+					/*ByteArrayOutputStream lByteArrayOutputStream = new ByteArrayOutputStream(wanted * 2);
+					len=inputStream.read(buffer);
+					offset += len;
+					lByteArrayOutputStream.write(buffer, 0, len);
+					System.out.println(" len : "+len);
+					System.out.println(" offset : "+offset);
+					byte[] result = lByteArrayOutputStream.toByteArray();
+					processRcvPacket(result);*/
 				}
-				byte[] result = new byte[totlen];
-		    	System.arraycopy(buffer, 0, result, 0, totlen );
-				
-		    	processRcvPacket(result);
 			    
 			} catch (Exception e) {
 				Main.btnInit();
@@ -184,6 +195,7 @@ public class Client extends Thread {
 	}
 	
 	private void processRcvPacket(byte[] dataBuffer){
+		System.out.println(" receive data hexcode : "+Util.byte2Hex(dataBuffer));
 		Main.report("receive data : "+Util.byte2Hex(dataBuffer), true);
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		
@@ -215,31 +227,6 @@ public class Client extends Thread {
 			String commChAthnNo = commChAthnRespVO.getMsgHeadVO().getCommChAthnNo();
 			Main.athnNo = commChAthnNo;
 			
-			/** 인증요청번호 *//*
-			String	athnRqtNo = commChAthnRespVO.getAthnRqtNo();
-			*//** 인증번호 *//*
-			String	athnNo = commChAthnRespVO.getAthnNo();
-			*//** 수신암호화여부 *//*
-			String	rcvEcodYn = commChAthnRespVO.getRcvEcodYn();
-			*//** 수신암호화유형코드(그룹: 1006) *//*
-			String	rcvEcodTypeCd = commChAthnRespVO.getRcvEcodTypeCd();
-			*//** 수신암호화키값 *//*
-			String	rcvEcodKeyVal = commChAthnRespVO.getRcvEcodKeyVal();
-			*//** 송신암호화여부 *//*
-			String	sndEcodYn = commChAthnRespVO.getSndEcodYn();
-			*//** 송신암호화유형코드(그룹: 1006) *//*
-			String	sndEcodTypeCd = commChAthnRespVO.getSndEcodTypeCd();
-			*//** 송신암호화키값 *//*
-			String	sndEcodKeyVal = commChAthnRespVO.getSndEcodKeyVal();
-			
-			Main.report("athnRqtNo : " + athnRqtNo, true);
-			Main.report("athnNo : " + athnNo, true);
-			Main.report("rcvEcodYn : " + rcvEcodYn, true);
-			Main.report("rcvEcodTypeCd : " + rcvEcodTypeCd, true);
-			Main.report("rcvEcodKeyVal : " + rcvEcodKeyVal, true);
-			Main.report("sndEcodYn : " + sndEcodYn, true);
-			Main.report("sndEcodTypeCd : " + sndEcodTypeCd, true);
-			Main.report("sndEcodKeyVal : " + sndEcodKeyVal, true);*/
 		} 
 		else if(MthdType.KEEP_ALIVE_COMMCHATHN_TCP.equals(mthd)){
 			KeepAliveRespVO keepAliveRespVO = gson.fromJson(new String(dataBuffer), KeepAliveRespVO.class);
@@ -295,6 +282,18 @@ public class Client extends Thread {
 			Main.report(new String(data), true);
 		}
 		else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){
+			ComnRespVO comnRespVO = gson.fromJson(new String(dataBuffer), ComnRespVO.class);
+			
+			/** 메세지헤더 */
+			MsgHeadVO msgHeadVO = comnRespVO.getMsgHeadVO();
+			/** 응답코드 */
+			String respCd = comnRespVO.getRespCd();
+			/** 응답메시지 */
+			String respMsg = comnRespVO.getRespMsg();
+			
+			Main.report("RespMsg : " +respMsg , true);
+		}
+		else if(MthdType.COLEC_ITGDATA_RECV.equals(mthd)){
 			ComnRespVO comnRespVO = gson.fromJson(new String(dataBuffer), ComnRespVO.class);
 			
 			/** 메세지헤더 */
