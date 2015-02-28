@@ -356,6 +356,19 @@ public class Main {
 	public static String getBody(Short value){
 		String strBody = "";
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
+		MsgHeadVO msgHeadVO = new MsgHeadVO();
+		msgHeadVO.setCmpreType("1");
+		msgHeadVO.setCommChAthnNo("2");
+		msgHeadVO.setEcodType("3");
+		msgHeadVO.setEncdngType("4");
+		msgHeadVO.setHdrLen((short)0);
+		msgHeadVO.setHdrType("5");
+		msgHeadVO.setMapHeaderExtension(null);
+		msgHeadVO.setMethodType("test");
+		msgHeadVO.setMsgExchPtrn("6");
+		msgHeadVO.setMsgType("7");
+		msgHeadVO.setProtVer("8");
+		msgHeadVO.setTrmTransacId("20140505195220_EXAMPLE_LOWSYSTEM");
 		
 		if(MthdType.ATHN_COMMCHATHN_DEV_TCP.equals(value)){
 			CommChAthnRqtVO commChAthnRqtVO = new CommChAthnRqtVO();
@@ -363,7 +376,6 @@ public class Main {
 			String athnRqtNo = "12345678";
 			String commChId = "MPU_INTERGRATION_CHANNEL";
 			String extrSysId = "EXAMPLE_LOWSYSTEM";
-			MsgHeadVO msgHeadVO = new MsgHeadVO();
 			
 			commChAthnRqtVO.setAthnRqtNo(athnRqtNo);
 			commChAthnRqtVO.setCommChId(commChId);
@@ -384,8 +396,18 @@ public class Main {
 			List<String> inclDevIds = new ArrayList<String>();/** 포함장치아이디목록 */
 			inclDevIds.add("D901CCTV01");
 			List<String> excluDevIds = new ArrayList<String>();/** 배타장치아이디목록 */
-			excluDevIds.add("");
+			excluDevIds.add("testDevice");
+			CmdDataInfoVO cmdDataInfoVO = new CmdDataInfoVO();
 			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();/** 명령데이터리스트(31) */
+			String dataTypeCd = "";
+			byte[] cmdData = new byte[3];
+			cmdData[0] = (byte) 0x50;
+			cmdData[1] = (byte) 0x51;
+			cmdData[2] = (byte) 0x52;
+			cmdDataInfoVO.setDataTypeCd(dataTypeCd);
+			cmdDataInfoVO.setCmdData(cmdData);
+			cmdDataInfoVOs.add(cmdDataInfoVO);
+			
 			String modelNm = "SNB-6004";/** 모델명 */
 			String useYn = "Y";/** 사용여부 */
 			Date cretDtSt = new Date();/** 생성일시시작 */
@@ -404,6 +426,7 @@ public class Main {
 			devInfoRetvRqtVO.setInclDevIds(inclDevIds);
 			devInfoRetvRqtVO.setExcluDevIds(excluDevIds);
 			devInfoRetvRqtVO.setCmdDataInfoVOs(cmdDataInfoVOs);
+			devInfoRetvRqtVO.setMsgHeadVO(msgHeadVO);
 			
 			strBody = gson.toJson(devInfoRetvRqtVO);
 			
@@ -421,6 +444,7 @@ public class Main {
 			devInfoUpdateRprtRqtVO.setExtrSysId(extrSysId);
 			devInfoUpdateRprtRqtVO.setInfoUpdTypeCd(infoUpdTypeCd);
 			devInfoUpdateRprtRqtVO.setDevBasVOs(devBasVOs);
+			devInfoUpdateRprtRqtVO.setMsgHeadVO(msgHeadVO);
 			
 			strBody = gson.toJson(devInfoUpdateRprtRqtVO);
 		}
@@ -568,6 +592,7 @@ public class Main {
 			itgColecDataVO.setMapHeaderExtension(mapHeaderExtension);
 			itgColecDataVO.setSysColecDataVO(sysColecDataVO);
 			itgColecDataVO.setDevColecDataVOs(devColecDataVOs);
+			itgColecDataVO.setMsgHeadVO(msgHeadVO);
 			
 			strBody = gson.toJson(itgColecDataVO);
 		}
