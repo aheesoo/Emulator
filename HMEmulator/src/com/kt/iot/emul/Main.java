@@ -215,6 +215,7 @@ public class Main {
 				case SWT.Selection:
 					try {
 						short methType = 0;
+						int isRequest = 0;
 						StdSysTcpCode.MthdType methcode = null;
 						if(comboDev.getSelectionIndex() == 0) {
 							methType = MthdType.KEEP_ALIVE_COMMCHATHN_TCP.getValue(); //TCP채널 KeepAlive
@@ -228,9 +229,13 @@ public class Main {
     	            	} else if(comboDev.getSelectionIndex() == 3) {
     	            		methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집
     	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-    	            	} 
+    	            	} else if(comboDev.getSelectionIndex() == 4) {
+    	            		methType = MthdType.CONTL_ITGCNVY_DATA.getValue();// 데이터 전달
+    	            		methcode = MthdType.CONTL_ITGCNVY_DATA;
+    	            		isRequest = 1;
+    	            	}
 						
-						byte[] header = getHeader(methcode).toPacket();
+						byte[] header = getHeader(methcode, isRequest).toPacket();
 //						byte[] header = getHeader(methcode).getBytes();
 
 						String strBody = getBody(methType);
@@ -293,8 +298,7 @@ public class Main {
 	public void initSendData(){
 		StdSysTcpCode.MthdType mthType = MthdType.ATHN_COMMCHATHN_DEV_TCP; 
 		try {
-			byte[] header = getHeader(MthdType.ATHN_COMMCHATHN_DEV_TCP).toPacket();
-//			byte[] header = getHeader(MthdType.ATHN_COMMCHATHN_DEV_TCP).getBytes();
+			byte[] header = getHeader(MthdType.ATHN_COMMCHATHN_DEV_TCP, 0).toPacket();
 			
 			StdSysTcpCode.MthdType mthdType = MthdType.ATHN_COMMCHATHN_DEV_TCP;
 			String strBody = getBody(mthdType.getValue());
@@ -310,8 +314,7 @@ public class Main {
 	}
 	
 	private static TcpHdrVO tcpHdrVO = new TcpHdrVO();
-	public static TcpHdrVO getHeader(StdSysTcpCode.MthdType mthdType){
-//	public static String getHeader(StdSysTcpCode.MthdType mthdType){
+	public static TcpHdrVO getHeader(StdSysTcpCode.MthdType mthdType, int isRequest){
 		String header = "";
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		Long trmTransactionId = System.currentTimeMillis();
@@ -319,7 +322,11 @@ public class Main {
 			tcpHdrVO.setMainVer( (byte) 1 );
 			tcpHdrVO.setSubVer( (byte) 1 );
 			tcpHdrVO.setHdrType(HdrType.BASIC);
-			tcpHdrVO.setMsgType(MsgType.REQUEST);
+			if(isRequest == 0){
+				tcpHdrVO.setMsgType(MsgType.REQUEST);
+			} else{
+				tcpHdrVO.setMsgType(MsgType.REPORT);
+			}
 			tcpHdrVO.setMsgExchPtrn(MsgExchPtrn.ONE_WAY_ACK);
 			tcpHdrVO.setMthdType(mthdType);
 			tcpHdrVO.setTrmTransactionId(trmTransactionId);
@@ -347,8 +354,6 @@ public class Main {
 			report(e.toString(), true);
         	e.printStackTrace();
 		}
-//		header = gson.toJson(tcpHdrVO);
-//		return header;
 		return tcpHdrVO;
 		
 	}
@@ -357,17 +362,17 @@ public class Main {
 		String strBody = "";
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		MsgHeadVO msgHeadVO = new MsgHeadVO();
-		msgHeadVO.setCmpreType("1");
-		msgHeadVO.setCommChAthnNo("2");
-		msgHeadVO.setEcodType("3");
-		msgHeadVO.setEncdngType("4");
-		msgHeadVO.setHdrLen((short)0);
-		msgHeadVO.setHdrType("5");
-		msgHeadVO.setMapHeaderExtension(null);
+//		msgHeadVO.setCmpreType("1");
+//		msgHeadVO.setCommChAthnNo("2");
+//		msgHeadVO.setEcodType("3");
+//		msgHeadVO.setEncdngType("4");
+//		msgHeadVO.setHdrLen((short)0);
+//		msgHeadVO.setHdrType("5");
+//		msgHeadVO.setMapHeaderExtension(null);
 		msgHeadVO.setMethodType("test");
-		msgHeadVO.setMsgExchPtrn("6");
-		msgHeadVO.setMsgType("7");
-		msgHeadVO.setProtVer("8");
+//		msgHeadVO.setMsgExchPtrn("6");
+//		msgHeadVO.setMsgType("7");
+//		msgHeadVO.setProtVer("8");
 		msgHeadVO.setTrmTransacId("20140505195220_EXAMPLE_LOWSYSTEM");
 		
 		if(MthdType.ATHN_COMMCHATHN_DEV_TCP.equals(value)){
@@ -388,7 +393,7 @@ public class Main {
 			CommChAthnRespVO commChAthnRqtVO = new CommChAthnRespVO();
 			strBody = gson.toJson(commChAthnRqtVO);
 		} 
-		else if(MthdType.INITA_DEV_RETV.equals(value)){
+		else if(MthdType.INITA_DEV_RETV.equals(value)){ //331 조회
 			DevInfoRetvRqtVO devInfoRetvRqtVO = new DevInfoRetvRqtVO();
 			
 			String extrSysId = "EXAMPLE_LOWSYSTEM";/** 외부시스템아이디 */
@@ -431,7 +436,7 @@ public class Main {
 			strBody = gson.toJson(devInfoRetvRqtVO);
 			
 		}
-		else if(MthdType.INITA_DEV_UDATERPRT.equals(value)){
+		else if(MthdType.INITA_DEV_UDATERPRT.equals(value)){//332 갱신보고
 			DevInfoUdateRprtRqtVO devInfoUpdateRprtRqtVO = new DevInfoUdateRprtRqtVO();
 			
 			/** 외부시스템아이디 */
@@ -448,7 +453,7 @@ public class Main {
 			
 			strBody = gson.toJson(devInfoUpdateRprtRqtVO);
 		}
-		else if(MthdType.COLEC_ITGDATA_RECV.equals(value)){
+		else if(MthdType.COLEC_ITGDATA_RECV.equals(value)){//411 데이터수집 request
 			ItgColecDataVO itgColecDataVO = new ItgColecDataVO();
 			
 			/** 외부시스템아이디 */
@@ -595,6 +600,8 @@ public class Main {
 			itgColecDataVO.setMsgHeadVO(msgHeadVO);
 			
 			strBody = gson.toJson(itgColecDataVO);
+		} else if(MthdType.CONTL_ITGCNVY_DATA.equals(value)){ //525 데이터 전달 report -> VO없음
+			
 		}
 		
 		return strBody;
@@ -636,7 +643,7 @@ public class Main {
 			public void run() {
 				try {
 					StdSysTcpCode.MthdType mthdType = MthdType.KEEP_ALIVE_COMMCHATHN_TCP;
-					byte[] header = getHeader(mthdType).toPacket();
+					byte[] header = getHeader(mthdType, 0).toPacket();
 //					byte[] header = getHeader(mthdType).getBytes();
 					
 					String strBody = getBody(mthdType.getValue());

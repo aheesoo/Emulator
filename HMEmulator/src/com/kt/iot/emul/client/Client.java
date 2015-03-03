@@ -27,9 +27,11 @@ import com.kt.iot.emul.vo.DevCommChDtlVO;
 import com.kt.iot.emul.vo.DevDtlVO;
 import com.kt.iot.emul.func.vo.DevInfoRetvRespVO;
 import com.kt.iot.emul.func.vo.KeepAliveRespVO;
+import com.kt.iot.emul.func.vo.LastValQueryRqtVO;
 import com.kt.iot.emul.vo.MsgHeadVO;
 import com.kt.iot.emul.vo.TcpHdrVO;
 import com.kt.iot.emul.func.vo.CommChAthnRespVO;
+import com.kt.iot.emul.util.ConvertUtil;
 import com.kt.iot.emul.util.JsonPacketMaker;
 import com.kt.iot.emul.util.TCPUtil;
 import com.kt.iot.emul.code.StdSysTcpCode;
@@ -214,12 +216,20 @@ public class Client extends Thread {
 		System.out.println("receive data - String : "+new String(dataBuffer));
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		
-		//byte[] packLen = new byte[MSG_PACKLEN_SIZE];
-		byte[] header = new byte[MSG_HEADER_SIZE];
+		short headerLen = MSG_HEADER_SIZE;
+		byte[] headerSizeBuf = new byte[2];
+		System.arraycopy(dataBuffer, 2, headerSizeBuf, 0, 1);
+		short headerSize = ConvertUtil.bytesToshort(headerSizeBuf);
+		if(headerLen < headerSize){
+			headerLen = headerSize;
+		}
 		
-		System.arraycopy(dataBuffer, 0, header, 0, MSG_HEADER_SIZE);
+//		byte[] header = new byte[MSG_HEADER_SIZE];
+		byte[] header = new byte[headerLen];
 		
-//		TcpHdrVO tcpHderVO = gson.fromJson(new String(header), TcpHdrVO.class);
+//		System.arraycopy(dataBuffer, 0, header, 0, MSG_HEADER_SIZE);
+		System.arraycopy(dataBuffer, 0, header, 0, headerLen);
+		
 		TcpHdrVO tcpHdrVO = new TcpHdrVO();
 		tcpHdrVO.setPacket(header);
 		MthdType mthd = tcpHdrVO.getMthdType();
@@ -236,7 +246,6 @@ public class Client extends Thread {
 				
 				String respMsg = commChAthnRespVO.getRespMsg();
 				Main.report("RespMsg : " + respMsg, true);
-				
 				Main.report(new String(data), true);
 				
 				/** 통신채널 인증 토큰 */
@@ -252,7 +261,7 @@ public class Client extends Thread {
 				
 				Main.report(new String(data), true);
 			}
-			else if(MthdType.INITA_DEV_RETV.equals(mthd)){
+			else if(MthdType.INITA_DEV_RETV.equals(mthd)){//331
 				System.out.println(" data ----> "+new String(data));
 				DevInfoRetvRespVO devInfoRetvRespVO = gson.fromJson(new String(data), DevInfoRetvRespVO.class);
 				
@@ -299,7 +308,7 @@ public class Client extends Thread {
 				
 				Main.report(new String(data), true);
 			}
-			else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){
+			else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){//332
 				ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
 				
 				/** 메세지헤더 */
@@ -326,7 +335,7 @@ public class Client extends Thread {
 				Main.report(new String(data), true);
 			}
 		}else{ // 서버 수신
-			if(MthdType.INITA_DEV_RETV.equals(mthd)){
+			if(MthdType.INITA_DEV_RETV.equals(mthd)){//333 장치정보조회 임시code
 				DevInfoRetvRespVO devInfoRetvRespVO = gson.fromJson(new String(data), DevInfoRetvRespVO.class);
 				
 				String respMsg = devInfoRetvRespVO.getRespMsg();
@@ -334,7 +343,7 @@ public class Client extends Thread {
 				
 				Main.report(new String(data), true);
 			}
-			else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){
+			else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){ //334 장치정보 갱신보고 임시code
 				ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
 				
 				/** 메세지헤더 */
@@ -345,6 +354,14 @@ public class Client extends Thread {
 				String respMsg = comnRespVO.getRespMsg();
 				
 				Main.report("RespMsg : " +respMsg , true);
+				Main.report(new String(data), true);
+			}else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){//711 최종값 쿼리 임시(code없음)
+				LastValQueryRqtVO lastValQueryRqtVO = gson.fromJson(new String(data), LastValQueryRqtVO.class);
+				
+				/** 메세지헤더 */
+				MsgHeadVO msgHeadVO = lastValQueryRqtVO.getMsgHeadVO();
+				
+				Main.report("== Success==\n", true);
 				Main.report(new String(data), true);
 			}
 		}
