@@ -26,6 +26,7 @@ import com.kt.iot.emul.vo.DevBasVO;
 import com.kt.iot.emul.vo.DevCommChDtlVO;
 import com.kt.iot.emul.vo.DevDtlVO;
 import com.kt.iot.emul.func.vo.DevInfoRetvRespVO;
+import com.kt.iot.emul.func.vo.DevInfoRetvRqtVO;
 import com.kt.iot.emul.func.vo.KeepAliveRespVO;
 import com.kt.iot.emul.func.vo.LastValQueryRqtVO;
 import com.kt.iot.emul.vo.MsgHeadVO;
@@ -64,6 +65,7 @@ public class Client extends Thread {
 	
 	public int voiceCnt = 0;
 	
+	private ScheduledJob job = new ScheduledJob();
 	private Timer jobScheduler = new Timer();	
 	
 	public Client() {}
@@ -87,23 +89,9 @@ public class Client extends Thread {
 	 * @param message
 	 *            text entered by client
 	 */
-	/*public void sendData(byte[] header, byte[] body) throws IOException{
-		try {
-			byte[] packet = JsonPacketMaker.getTcpPacket(header, body);
-			byte[] recvPacket =TCPUtil.sendAndRecv(SERVERIP, SERVERPORT, packet, 3000, 4096);
-			
-			processRcvPacket(recvPacket);
-			
-		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
-		}
-	}*/	
 	public void sendData(byte[] header, byte[] body, short mthdCode) throws IOException{
 		byte[] packet = JsonPacketMaker.getTcpPacket(header, body);
 		try {
-//			outputStream = socket.getOutputStream();
-//			inputStream = socket.getInputStream();
 			if(outputStream != null){
 				outputStream.write(packet);
 				outputStream.flush();
@@ -133,32 +121,6 @@ public class Client extends Thread {
 				outputStream = socket.getOutputStream();
 				inputStream = socket.getInputStream();
 				while(mRun){
-					/*int offset = 0;
-					int wanted = maxRecvLength;
-					int len = 0;
-					int totlen = 0;
-					while(wanted > 0){
-					//while((len = inputStream.read( buffer, offset, wanted )) != -1){
-						try{
-				    		len = inputStream.read( buffer, offset, wanted );
-					        if( len <= 0)
-					        {
-					        	break;
-					        }
-				    	}catch(Exception e)
-				    	{
-				    		break;
-				    	}
-				        wanted -= len;
-				        offset += len;
-				        totlen += len;
-				        System.out.println("len : "+len+" / offset : "+offset+" / totlen : "+totlen+" / wanted : "+wanted);
-					}
-					System.out.println("while out len : "+len);
-					byte[] result = new byte[totlen];
-					System.arraycopy(buffer, 0, result, 0, totlen );
-					processRcvPacket(result);*/
-					
 					
 					/******** read packet *********/
 					byte[] packetArr = new byte[4];
@@ -218,7 +180,7 @@ public class Client extends Thread {
 		
 		short headerLen = MSG_HEADER_SIZE;
 		byte[] headerSizeBuf = new byte[2];
-		System.arraycopy(dataBuffer, 2, headerSizeBuf, 0, 1);
+		System.arraycopy(dataBuffer, 2, headerSizeBuf, 0, 2);
 		short headerSize = ConvertUtil.bytesToshort(headerSizeBuf);
 		if(headerLen < headerSize){
 			headerLen = headerSize;
@@ -239,10 +201,9 @@ public class Client extends Thread {
 		byte[] data = new byte[dataLength];
 		System.arraycopy(dataBuffer, header.length, data, 0, packLenValue-header.length); // body data
 		
-		if(MsgType.RESPONSE.equals(msgType)){ // 요청에 대한 수신
+		if(MsgType.RESPONSE.equals(msgType)){ // 요청(Request)에 대한 수신
 			if(MthdType.ATHN_COMMCHATHN_EXTRSYS_TCP.equals(mthd)){
 				CommChAthnRespVO commChAthnRespVO = gson.fromJson(new String(data), CommChAthnRespVO.class);
-//				CommChAthnRespVO commChAthnRespVO = gson.fromJson(new String(dataBuffer), CommChAthnRespVO.class);
 				
 				String respMsg = commChAthnRespVO.getRespMsg();
 				Main.report("RespMsg : " + respMsg, true);
@@ -251,6 +212,9 @@ public class Client extends Thread {
 				/** 통신채널 인증 토큰 */
 				String commChAthnNo = commChAthnRespVO.getMsgHeadVO().getCommChAthnNo();
 				Main.athnNo = commChAthnNo;
+				
+				/** 통신채널 인증 후 keepalive 주기적 요청 */
+				jobScheduler.scheduleAtFixedRate(job, 30000, 30000);
 				
 			} 
 			else if(MthdType.KEEP_ALIVE_COMMCHATHN_TCP.equals(mthd)){
@@ -268,44 +232,6 @@ public class Client extends Thread {
 				String respMsg = devInfoRetvRespVO.getRespMsg();
 				Main.report("RespMsg : " + respMsg, true);
 				Main.report(" Receive Msg : "+new String(data), true);
-				
-				/** 명령데이터리스트(31) *//*
-				List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();
-				*//** 장치정보목록 *//*
-				List<DevBasVO> devBasVOs = new ArrayList<DevBasVO>();
-				
-				cmdDataInfoVOs = devInfoRetvRespVO.getCmdDataInfoVOs();
-				for(int i=0; i<cmdDataInfoVOs.size(); i++){
-					Main.report("dataTypeCd : " + cmdDataInfoVOs.get(i).getDataTypeCd(), true);
-					Main.report("athnNo : " + cmdDataInfoVOs.get(i).getCmdData(), true);			}
-				devBasVOs = devInfoRetvRespVO.getDevBasVOs();
-				for(int j=0; j< devBasVOs.size(); j++){
-					Main.report("extrSysId : " + devBasVOs.get(j).getExtrSysId(), true);
-					Main.report("devId : " + devBasVOs.get(j).getDevId(), true);
-					Main.report("devNm : " + devBasVOs.get(j).getDevNm(), true);
-					Main.report("modelNm : " + devBasVOs.get(j).getModelNm(), true);
-					
-					List<DevDtlVO> devDtlVOs = devBasVOs.get(j).getDevDtlVOs();
-					for(int a=0; a<devDtlVOs.size(); a++){
-						Main.report("atribNm : " + devDtlVOs.get(a).getAtribNm(), true);
-						Main.report("atribVal : " + devDtlVOs.get(a).getAtribVal(), true);
-					}
-					List<DataTypeVO> dataTypeVOs = devBasVOs.get(j).getDataTypeVOs();
-					for(int b=0; b<dataTypeVOs.size(); b++){
-						Main.report("dataTypeCtgCd : " + dataTypeVOs.get(b).getDataTypeCtgCd(), true);
-						Main.report("dataTypeCd : " + dataTypeVOs.get(b).getDataTypeCd(), true);
-					}
-					List<DevCommChDtlVO> devCommChDtlVOs = devBasVOs.get(j).getDevCommChDtlVOs();
-					for(int c=0; c<devCommChDtlVOs.size(); c++){
-						Main.report("comChId : " + devCommChDtlVOs.get(c).getCommChId(), true);
-						Main.report("comChCd : " + devCommChDtlVOs.get(c).getCommChCd(), true);
-						Main.report("ipadr : " + devCommChDtlVOs.get(c).getIpadr(), true);
-						Main.report("ifTypeCd : " + devCommChDtlVOs.get(c).getIfTypeCd(), true);
-						Main.report("cnctTypeCd : " + devCommChDtlVOs.get(c).getCnctTypeCd(), true);
-						Main.report("portNo : " + devCommChDtlVOs.get(c).getPortNo(), true);
-					}
-				}*/
-				
 				Main.report(new String(data), true);
 			}
 			else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){//332
@@ -335,34 +261,44 @@ public class Client extends Thread {
 				Main.report(new String(data), true);
 			}
 		}else{ // 서버 수신
+			byte[] resHeader = null;
+			byte[] resBody = null; 
+			String strBody = null;
 			if(MthdType.INITA_DEV_RETV.equals(mthd)){//333 장치정보조회 임시code
-				DevInfoRetvRespVO devInfoRetvRespVO = gson.fromJson(new String(data), DevInfoRetvRespVO.class);
-				
-				String respMsg = devInfoRetvRespVO.getRespMsg();
-				Main.report("RespMsg : " + respMsg, true);
-				
 				Main.report(new String(data), true);
+
+				//서버 요청에 대한 회신 데이터작성
+				strBody = Main.getResBody(mthd.getValue(), data);
+				resBody = strBody.getBytes();
 			}
 			else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){ //334 장치정보 갱신보고 임시code
-				ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
-				
-				/** 메세지헤더 */
-				MsgHeadVO msgHeadVO = comnRespVO.getMsgHeadVO();
-				/** 응답코드 */
-				String respCd = comnRespVO.getRespCd();
-				/** 응답메시지 */
-				String respMsg = comnRespVO.getRespMsg();
-				
-				Main.report("RespMsg : " +respMsg , true);
 				Main.report(new String(data), true);
-			}else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){//711 최종값 쿼리 임시(code없음)
+				strBody = Main.getResBody(mthd.getValue(), data);
+				resBody = strBody.getBytes();
+			}
+			else if(MthdType.CONTL_ITGCNVY_DATA.equals(mthd)){ //525 데이터 전달 report -> VO없음
+				Main.report(new String(data), true);
+				strBody = Main.getResBody(mthd.getValue(), data);
+				resBody = strBody.getBytes();
+				
+				/** report GW 송신 */
+				//VO없음
+				
+			}
+			else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){//711 최종값 쿼리 임시(code없음)
 				LastValQueryRqtVO lastValQueryRqtVO = gson.fromJson(new String(data), LastValQueryRqtVO.class);
 				
-				/** 메세지헤더 */
-				MsgHeadVO msgHeadVO = lastValQueryRqtVO.getMsgHeadVO();
-				
-				Main.report("== Success==\n", true);
 				Main.report(new String(data), true);
+				strBody = Main.getResBody(mthd.getValue(), data);
+				resBody = strBody.getBytes();
+			}
+			
+			/** 서버요청에 대한 응답발신 */
+			resHeader = Main.getHeader(mthd, 1).toPacket();
+			try {
+				this.sendData(resHeader, resBody, mthd.getValue());
+			} catch (Exception e) {
+				// TODO: handle exception
 			}
 		}
 	}
