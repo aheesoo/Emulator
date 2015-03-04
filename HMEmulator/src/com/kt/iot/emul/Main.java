@@ -45,6 +45,7 @@ import com.kt.iot.emul.vo.CmdDataInfoVO;
 import com.kt.iot.emul.func.vo.CommChAthnRespVO;
 import com.kt.iot.emul.func.vo.ComnRespVO;
 import com.kt.iot.emul.func.vo.ComnRqtVO;
+import com.kt.iot.emul.func.vo.DevCommChAthnRqtVO;
 import com.kt.iot.emul.func.vo.DevInfoRetvRespVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO;
 import com.kt.iot.emul.func.vo.ItgColecDataVO;
@@ -69,7 +70,7 @@ import com.kt.iot.emul.vo.SnsnDataInfoVO;
 import com.kt.iot.emul.vo.StrDataInfoVO;
 import com.kt.iot.emul.vo.SttusDataInfoVO;
 import com.kt.iot.emul.vo.TcpHdrVO;
-import com.kt.iot.emul.func.vo.CommChAthnRqtVO;
+//import com.kt.iot.emul.func.vo.CommChAthnRqtVO;
 import com.kt.iot.emul.func.vo.DevInfoRetvRqtVO;
 
 public class Main {
@@ -88,7 +89,7 @@ public class Main {
 	private Text textPort; 
 	private static Text textRes;
 	
-	private Group groupDevice;
+	private static Group groupDevice;
 	private Group groupHeader; 
 	private Group groupBody;
 	
@@ -126,17 +127,16 @@ public class Main {
 //		textHost = new Combo(groupProxy, SWT.BORDER);
 		textHost = new Text(groupProxy, SWT.BORDER);
 		textHost.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//		textHost.setText("211.42.137.221");
-		textHost.setText("127.0.0.1");
+		textHost.setText("192.168.0.117");//192.168.0.63으로 하면 response는 내려와
+//		textHost.setText("192.168.0.63");
 //		textHost.add("127.0.0.1", 0);
-//		textHost.add("211.42.137.221", 0);
 //		textHost.add("121.156.46.132", 1);
 //		textHost.select(0);
 		
 		new Label(groupProxy, SWT.NULL).setText("Port");
 		textPort = new Text(groupProxy, SWT.SINGLE | SWT.BORDER);
 		textPort.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		textPort.setText("9077");
+		textPort.setText("9075");
 		
 		new Label(groupProxy, SWT.NULL).setText("Version");
 		comboVersion = new Combo(groupProxy, SWT.BORDER);
@@ -169,7 +169,7 @@ public class Main {
 		
 		buttonInit = new Button(shell, SWT.PUSH);
 		buttonInit.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		buttonInit.setText("TCP 채널 인증 Connect");
+		buttonInit.setText("Connect");
 		
 		buttonSend = new Button(shell, SWT.PUSH);
 		buttonSend.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -192,18 +192,24 @@ public class Main {
 			public void handleEvent(Event event) {
 				switch (event.type) {
 				case SWT.Selection:
-					if("TCP 채널 인증 Connect".equals(buttonInit.getText())) {
+					if("Connect".equals(buttonInit.getText())) {
 						client = new Client(textHost.getText(), Integer.parseInt(textPort.getText()));
 						client.start();
+						
+//						initSendData();
+//						setDevice();
+//						groupDevice.layout();
+						buttonInit.setText("TCP 채널 인증");
+//						buttonSend.setEnabled(true);
+					} else if("TCP 채널 인증".equals(buttonInit.getText())){
 						initSendData();
 						setDevice();
 						groupDevice.layout();
 						buttonInit.setText("Disconnect");
 						buttonSend.setEnabled(true);
 					} else {
-						buttonInit.setText("TCP 채널 인증 Connect");
+						buttonInit.setText("Disconnect");
 						buttonSend.setEnabled(false);
-						
 						groupDevice.setVisible(false);
 						
 						client.closeClient();
@@ -222,6 +228,7 @@ public class Main {
 						short methType = 0;
 						int isRequest = 0;
 						StdSysTcpCode.MthdType methcode = null;
+						
 						if(comboDev.getSelectionIndex() == 0) {
 							methType = MthdType.KEEP_ALIVE_COMMCHATHN_TCP.getValue(); //TCP채널 KeepAlive
 							methcode = MthdType.KEEP_ALIVE_COMMCHATHN_TCP;
@@ -296,7 +303,7 @@ public class Main {
 		
 	}
 		
-	public void initSendData(){
+	public static void initSendData(){
 		StdSysTcpCode.MthdType mthType = MthdType.ATHN_COMMCHATHN_DEV_TCP; 
 		try {
 			byte[] header = getHeader(MthdType.ATHN_COMMCHATHN_DEV_TCP, 0).toPacket();
@@ -379,15 +386,17 @@ public class Main {
 		msgHeadVO.setTrmTransacId("20140505195220_EXAMPLE_LOWSYSTEM");
 		
 		if(MthdType.ATHN_COMMCHATHN_DEV_TCP.equals(value)){
-			CommChAthnRqtVO commChAthnRqtVO = new CommChAthnRqtVO();
+			DevCommChAthnRqtVO commChAthnRqtVO = new DevCommChAthnRqtVO();
 			
-			String athnRqtNo = "12345678";
-			String commChId = "MPU_INTERGRATION_CHANNEL";
-			String extrSysId = "EXAMPLE_LOWSYSTEM";
+			String athnRqtNo = "100001";
+			String commChId = "GiGA_Home_IoT_TCP";
+			String extrSysId = "GiGA_Home_IoT";
+			String devId = "ZW140900005";
 			
 			commChAthnRqtVO.setAthnRqtNo(athnRqtNo);
 			commChAthnRqtVO.setCommChId(commChId);
 			commChAthnRqtVO.setExtrSysId(extrSysId);
+			commChAthnRqtVO.setDevId(devId);;
 			commChAthnRqtVO.setMsgHeadVO(msgHeadVO);
 			
 			strBody = gson.toJson(commChAthnRqtVO);
@@ -616,7 +625,7 @@ public class Main {
 		String strBody = "";
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		
-		if(MthdType.INITA_DEV_RETV.equals(value)){
+		if(value == 333){
 			DevInfoRetvRqtVO devInfoRetvRqtVO = gson.fromJson(new String(data), DevInfoRetvRqtVO.class);
 			DevInfoRetvRespVO devInfoRetvRespVO = new DevInfoRetvRespVO();
 			/** 명령데이터리스트(31) */
@@ -639,7 +648,7 @@ public class Main {
 			
 			strBody = gson.toJson(devInfoRetvRespVO);
 		} 
-		else if(MthdType.CONTL_ITGCNVY_DATA.equals(value)){
+		else if(value == 334){
 			DevInfoUdateRprtRqtVO devInfoUdateRprtRqtVO = gson.fromJson(new String(data), DevInfoUdateRprtRqtVO.class);
 			ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
 			
@@ -659,7 +668,7 @@ public class Main {
 			
 			strBody = gson.toJson(comnRespVO);
 		}
-		else if(MthdType.INITA_DEV_UDATERPRT.equals(value)){
+		else if(MthdType.QUERY_LASTVAL.equals(value)){
 			LastValQueryRqtVO lastValQueryRqtVO = gson.fromJson(new String(data), LastValQueryRqtVO.class);
 			LastValQueryRespVO lastValQueryRespVO = gson.fromJson(new String(data), LastValQueryRespVO.class);
 			
@@ -820,8 +829,9 @@ public class Main {
 	public static void btnInit() {
 		display.syncExec(new Runnable() {
 			public void run() {
-				buttonInit.setText("TCP 채널 인즏 Connect");
+				buttonInit.setText("Connect");
 				buttonSend.setEnabled(false);
+				groupDevice.setVisible(false);
 			}
 		});
 	}

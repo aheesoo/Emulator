@@ -24,7 +24,7 @@ import com.google.gson.GsonBuilder;
 import com.kt.iot.emul.util.JsonPacketMaker;
 import com.kt.iot.emul.util.ConvertUtil;
 import com.kt.iot.emul.vo.TcpHdrVO;
-import com.kt.iot.emul.func.vo.CommChAthnRqtVO;
+import com.kt.iot.emul.func.vo.DevCommChAthnRqtVO;
 import com.kt.iot.emul.func.vo.ComnRqtVO;
 import com.kt.iot.emul.vo.MsgHeadVO;
 
@@ -57,7 +57,7 @@ System.out.println(" packet : "+new String(packet));
 		return packet;
 	}
 	
-	public static byte[] getCommChAthnRqtVOPacket(TcpHdrVO tcpHdrVO , CommChAthnRqtVO commChAthnRqtVO) throws Exception
+	public static byte[] getCommChAthnRqtVOPacket(TcpHdrVO tcpHdrVO , DevCommChAthnRqtVO commChAthnRqtVO) throws Exception
 	{
 		byte[] header = tcpHdrVO.toPacket();
 		String strBody = JsonPacketMaker.gson.toJson(commChAthnRqtVO);

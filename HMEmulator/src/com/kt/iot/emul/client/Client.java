@@ -117,6 +117,7 @@ public class Client extends Thread {
 		try {
 			socket = new Socket(SERVERIP, SERVERPORT);
 			Main.report("connected : " + SERVERIP + ":" + SERVERPORT, true);
+
 			try {
 				outputStream = socket.getOutputStream();
 				inputStream = socket.getInputStream();
@@ -174,7 +175,8 @@ public class Client extends Thread {
 	}
 	
 	private void processRcvPacket(byte[] dataBuffer, int packLenValue) throws Exception{
-		Main.report("receive data - hex code : "+Util.byte2Hex(dataBuffer), true);
+		Main.report("\n received data - hex code : "+Util.byte2Hex(dataBuffer), true);
+		Main.report("\n received data - String : "+new String(dataBuffer), true);
 		System.out.println("receive data - String : "+new String(dataBuffer));
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		
@@ -196,7 +198,6 @@ public class Client extends Thread {
 		tcpHdrVO.setPacket(header);
 		MthdType mthd = tcpHdrVO.getMthdType();
 		MsgType msgType = tcpHdrVO.getMsgType();
-		
 		int dataLength = packLenValue - header.length;
 		byte[] data = new byte[dataLength];
 		System.arraycopy(dataBuffer, header.length, data, 0, packLenValue-header.length); // body data
@@ -264,14 +265,14 @@ public class Client extends Thread {
 			byte[] resHeader = null;
 			byte[] resBody = null; 
 			String strBody = null;
-			if(MthdType.INITA_DEV_RETV.equals(mthd)){//333 장치정보조회 임시code
+			if(mthd.getValue() == 333){//333 장치정보조회 임시code
 				Main.report(new String(data), true);
 
 				//서버 요청에 대한 회신 데이터작성
 				strBody = Main.getResBody(mthd.getValue(), data);
 				resBody = strBody.getBytes();
 			}
-			else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){ //334 장치정보 갱신보고 임시code
+			else if(mthd.getValue() == 334){ //334 장치정보 갱신보고 임시code
 				Main.report(new String(data), true);
 				strBody = Main.getResBody(mthd.getValue(), data);
 				resBody = strBody.getBytes();
@@ -285,7 +286,7 @@ public class Client extends Thread {
 				//VO없음
 				
 			}
-			else if(MthdType.INITA_DEV_UDATERPRT.equals(mthd)){//711 최종값 쿼리 임시(code없음)
+			else if(MthdType.QUERY_LASTVAL.equals(mthd)){//711 최종값 쿼리
 				LastValQueryRqtVO lastValQueryRqtVO = gson.fromJson(new String(data), LastValQueryRqtVO.class);
 				
 				Main.report(new String(data), true);

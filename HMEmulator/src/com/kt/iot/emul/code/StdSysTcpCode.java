@@ -422,6 +422,18 @@ public class StdSysTcpCode
 		CHK_SYS_CHKPACKTRCV( ((short)612) ),
 		/** 장치점검 체크패킷수신 */
 		CHK_DEV_CHKPACKTRCV( ((short)622) ),
+		/** 최종값 쿼리 */
+		QUERY_LASTVAL( (short) 711 ),
+		/** 집계값 쿼리 */
+		QUERY_SUMVAL( (short) 721 ),
+		/** 펌웨어 정보 요청 */
+		FRMWR_INFO_RQT( ((short)811)),
+		/** 펌웨어 업데이트 상태 전송 */
+		FRMWR_UDATE_STTUS( (short) 813),
+		/** 펌웨어 데이터 TCP 요청 */
+		FRMWR_DATA_TCP_RQT( (short) 816),
+		/** 패키지 데이터 TCP 요청 */
+		PKG_DATA_TCP_RQT((short) 817)
 		;
 
 		private final Short value;
