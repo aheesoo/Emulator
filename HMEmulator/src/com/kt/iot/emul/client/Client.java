@@ -265,42 +265,56 @@ public class Client extends Thread {
 			byte[] resHeader = null;
 			byte[] resBody = null; 
 			String strBody = null;
-			if(mthd.getValue() == 333){//333 장치정보조회 임시code
+			if(MthdType.INITA_DEV_RETV_PLTFRM.equals(mthd)){//333 장치정보조회
 				Main.report(new String(data), true);
-
 				//서버 요청에 대한 회신 데이터작성
-				strBody = Main.getResBody(mthd.getValue(), data);
+				strBody = Main.packetUtil.getResBody(mthd.getValue(), data);
 				resBody = strBody.getBytes();
 			}
-			else if(mthd.getValue() == 334){ //334 장치정보 갱신보고 임시code
+			else if(MthdType.INITA_DEV_UDATERPRT_PLTFRM.equals(mthd)){ //334 장치정보 갱신보고
 				Main.report(new String(data), true);
-				strBody = Main.getResBody(mthd.getValue(), data);
+				strBody = Main.packetUtil.getResBody(mthd.getValue(), data);
 				resBody = strBody.getBytes();
 			}
 			else if(MthdType.CONTL_ITGCNVY_DATA.equals(mthd)){ //525 데이터 전달 report -> VO없음
 				Main.report(new String(data), true);
-				strBody = Main.getResBody(mthd.getValue(), data);
+				strBody = Main.packetUtil.getResBody(mthd.getValue(), data);
 				resBody = strBody.getBytes();
 				
 				/** report GW 송신 */
-				//VO없음
+				processSndReportData(mthd, data);
 				
 			}
 			else if(MthdType.QUERY_LASTVAL.equals(mthd)){//711 최종값 쿼리
 				LastValQueryRqtVO lastValQueryRqtVO = gson.fromJson(new String(data), LastValQueryRqtVO.class);
 				
 				Main.report(new String(data), true);
-				strBody = Main.getResBody(mthd.getValue(), data);
+				strBody = Main.packetUtil.getResBody(mthd.getValue(), data);
 				resBody = strBody.getBytes();
 			}
 			
 			/** 서버요청에 대한 응답발신 */
-			resHeader = Main.getHeader(mthd, 1).toPacket();
+			resHeader = Main.packetUtil.getHeader(mthd, 1).toPacket();
 			try {
 				this.sendData(resHeader, resBody, mthd.getValue());
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
+		}
+	}
+	
+	//send report
+	private void processSndReportData(MthdType mthd, byte[] data) throws Exception{
+		byte[] reptHeader = null;
+		byte[] reptBody = null; 
+		String strBody = null;
+		reptHeader = Main.packetUtil.getHeader(mthd, 2).toPacket();
+		strBody = Main.packetUtil.getReptBody(mthd.getValue(), data);
+		reptBody = strBody.getBytes();
+		try {
+			this.sendData(reptHeader, reptBody, mthd.getValue());
+		} catch (Exception e) {
+			// TODO: handle exception
 		}
 	}
 	

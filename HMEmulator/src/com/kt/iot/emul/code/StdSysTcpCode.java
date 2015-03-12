@@ -386,6 +386,10 @@ public class StdSysTcpCode
 		INITA_DEV_RETV( ((short)331) ),
 		/** 장치정보 갱신보고 */
 		INITA_DEV_UDATERPRT( ((short)332) ),
+		/** 장치 정보 조회 (플랫폼) */
+		INITA_DEV_RETV_PLTFRM( ((short) 333)),
+		/** 장치정보 갱신보고 (플랫폼) */
+		INITA_DEV_UDATERPRT_PLTFRM ( ((short)334) ),
 		/** 수집설정 필터링조건조회 */
 		COLEC_SETUP_FLTRCONDRETV( ((short)341) ),
 		/** 수집설정 필터링조건해지 */
