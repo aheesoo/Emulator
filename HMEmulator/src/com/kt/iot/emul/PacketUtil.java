@@ -21,6 +21,7 @@ import com.kt.iot.emul.func.vo.DevCommChAthnRqtVO;
 import com.kt.iot.emul.func.vo.DevInfoRetvRespVO;
 import com.kt.iot.emul.func.vo.DevInfoRetvRqtVO;
 import com.kt.iot.emul.func.vo.DevInfoUdateRprtRqtVO;
+import com.kt.iot.emul.func.vo.DevLoginRqtVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO.CnvyRowVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO.DevCnvyDataVO;
@@ -54,6 +55,8 @@ public class PacketUtil {
 
 	public static String athnNo;
 	private static TcpHdrVO tcpHdrVO = new TcpHdrVO();
+	
+	private static String extrSysId = "GiGA_Home_IoT";
 	
 	public static TcpHdrVO getHeader(StdSysTcpCode.MthdType mthdType, int isRequest){
 		String header = "";
@@ -119,20 +122,26 @@ public class PacketUtil {
 		msgHeadVO.setTrmTransacId("20140505195220_EXAMPLE_LOWSYSTEM");
 		
 		if(MthdType.ATHN_COMMCHATHN_DEV_TCP.equals(value)){
-			DevCommChAthnRqtVO commChAthnRqtVO = new DevCommChAthnRqtVO();
+//			DevCommChAthnRqtVO commChAthnRqtVO = new DevCommChAthnRqtVO();
+			DevLoginRqtVO devLoginRqtVO = new DevLoginRqtVO();
 			
-			String athnRqtNo = "100001";
+			String athnRqtNo = "1001";
 			String commChId = "GiGA_Home_IoT_TCP";
-			String extrSysId = "GiGA_Home_IoT";
-			String devId = "ZW140900005";
+//			String extrSysId = "GiGA_Home_IoT";
+			String devId = "HGD_00112233_KT_IOT_GATEWAY1";
 			
-			commChAthnRqtVO.setAthnRqtNo(athnRqtNo);
+			/*commChAthnRqtVO.setAthnRqtNo(athnRqtNo);
 			commChAthnRqtVO.setCommChId(commChId);
 			commChAthnRqtVO.setExtrSysId(extrSysId);
 			commChAthnRqtVO.setDevId(devId);;
-			commChAthnRqtVO.setMsgHeadVO(msgHeadVO);
+			commChAthnRqtVO.setMsgHeadVO(msgHeadVO);*/
 			
-			strBody = gson.toJson(commChAthnRqtVO);
+			devLoginRqtVO.setAthnRqtNo(athnRqtNo);
+			devLoginRqtVO.setDeviceId(devId);
+			devLoginRqtVO.setExtrSysId(extrSysId);
+			devLoginRqtVO.setMsgHeadVO(msgHeadVO);
+			
+			strBody = gson.toJson(devLoginRqtVO);
 		} 
 		else if(MthdType.KEEP_ALIVE_COMMCHATHN_TCP.equals(value)){
 			CommChAthnRespVO commChAthnRqtVO = new CommChAthnRespVO();
@@ -141,12 +150,12 @@ public class PacketUtil {
 		else if(MthdType.INITA_DEV_RETV.equals(value)){ //331 조회
 			DevInfoRetvRqtVO devInfoRetvRqtVO = new DevInfoRetvRqtVO();
 			
-			String extrSysId = "EXAMPLE_LOWSYSTEM";/** 외부시스템아이디 */
+//			String extrSysId = "GiGA_Home_IoT";/** 외부시스템아이디 */
 			Integer	m2mSvcNo = 0;/** M2M서비스번호 */
 			List<String> inclDevIds = new ArrayList<String>();/** 포함장치아이디목록 */
-			inclDevIds.add("D901CCTV01");
+			inclDevIds.add("HGD_00112233_KT_IOT_GATEWAY1");
 			List<String> excluDevIds = new ArrayList<String>();/** 배타장치아이디목록 */
-			excluDevIds.add("testDevice");
+			excluDevIds.add("HGD_00112233_KT_IOT_GATEWAY1");
 			CmdDataInfoVO cmdDataInfoVO = new CmdDataInfoVO();
 			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();/** 명령데이터리스트(31) */
 			String dataTypeCd = "";
@@ -185,7 +194,7 @@ public class PacketUtil {
 			DevInfoUdateRprtRqtVO devInfoUpdateRprtRqtVO = new DevInfoUdateRprtRqtVO();
 			
 			/** 외부시스템아이디 */
-			String extrSysId = "EXAMPLE_LOWSYSTEM";
+//			String extrSysId = "GiGA_Home_IoT";
 			/** 정보갱신유형 */
 			String	infoUpdTypeCd = "";
 			/** 장치정보목록 */
@@ -202,7 +211,7 @@ public class PacketUtil {
 			ItgColecDataVO itgColecDataVO = new ItgColecDataVO();
 			
 			/** 외부시스템아이디 */
-			String extrSysId = "EXAMPLE_LOWSYSTEM";
+//			String extrSysId = "EXAMPLE_LOWSYSTEM";
 			/** 헤더확장필드 */
 			HashMap<String, Object> mapHeaderExtension = new HashMap<String, Object>();
 			
@@ -251,8 +260,8 @@ public class PacketUtil {
 //			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();
 			//** 장치정보목록 */
 			DevBasVO devBasVO = new DevBasVO();
-			devBasVO.setExtrSysId("EXAMPLE_LOWSYSTEM");
-			devBasVO.setDevId("D901CCTV01");
+			devBasVO.setExtrSysId(extrSysId);
+			devBasVO.setDevId("HGD_00112233_KT_IOT_GATEWAY1");
 			devBasVO.setM2mSvcNo(1010);
 			List<DevBasVO> devBasVOs = new ArrayList<DevBasVO>();
 			devBasVOs.add(devBasVO);
@@ -410,7 +419,7 @@ public class PacketUtil {
 		dtDataInfoVOs.add(dtDataInfoVO);
 		
 		EvDataInfoVO evDataInfoVO = new EvDataInfoVO();
-		String evOccSysId = "EXAMPLE_LOWSYSTEM";
+		String evOccSysId = "GiGA_Home_IoT";
 		String evTyepCd = "0001";
 		String evDivId = "1234";
 		String evClasCd = "";
