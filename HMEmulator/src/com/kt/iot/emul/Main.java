@@ -87,9 +87,13 @@ public class Main {
 //	private Combo textHost;
 	private Text textHost;
 	private Text textPort; 
+	private static Text authNum;
+	private static Text extrSysId;
+	private static Text deviceId;
 	private static Text textRes;
 	
 	private static Group groupDevice;
+	private static Group initData;
 	private Group groupHeader; 
 	private Group groupBody;
 	
@@ -101,6 +105,8 @@ public class Main {
 	private static Shell shell;
 	
 	public static String athnNo;
+	public static String extrSystemId;
+	public static String devId;
 	public static PacketUtil packetUtil;
 	
 	public Main() {
@@ -152,6 +158,34 @@ public class Main {
 		groupDevice.setLayout(new GridLayout(2, false));
 		groupDevice.setLayoutData(new GridData(615, 50));
 		
+		
+		initData = new Group(shell, SWT.NULL);
+		initData.setText("");
+		initData.setLayout(new GridLayout(2, false));
+		initData.setLayoutData(new GridData(615, 80));
+		
+		new Label(initData, SWT.NULL).setText("authNum");
+		authNum = new Text(initData, SWT.BORDER);
+		authNum.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		authNum.setText("1001");
+		
+		new Label(initData, SWT.NULL).setText("systemId");
+		extrSysId = new Text(initData, SWT.BORDER);
+		extrSysId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		extrSysId.setText("GiGA_Home_IoT");
+		
+		new Label(initData, SWT.NULL).setText("deviceId");
+		deviceId = new Text(initData, SWT.BORDER);
+		deviceId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		deviceId.setText("HGD_00112233_KT_IOT_GATEWAY1");
+		/*Label initLabel = new Label(groupDevice, SWT.NULL);
+		initLabel.setLayoutData(new GridData(85, 0));
+		initLabel.setVisible(false);
+		
+		Label initInputLabel = new Label(groupDevice, SWT.NULL);
+		initInputLabel.setLayoutData(new GridData(85, 0));
+		initInputLabel.setVisible(false);*/
+		
 		Label deviceNameLabel = new Label(groupDevice, SWT.NULL);
 		deviceNameLabel.setLayoutData(new GridData(85, 0));
 		deviceNameLabel.setVisible(false);
@@ -201,6 +235,7 @@ public class Main {
 //						setDevice();
 //						groupDevice.layout();
 						buttonInit.setText("TCP 채널 인증");
+//						initSetDevice();
 //						buttonSend.setEnabled(true);
 					} else if("TCP 채널 인증".equals(buttonInit.getText())){
 						initSendData();
@@ -275,6 +310,40 @@ public class Main {
 		display.dispose();
 	}
 	
+	/*private void initSetDevice(){
+
+		Control[] controls = initData.getChildren();
+		for(int i = 0; i < controls.length; i++) {
+			if(controls[i].getVisible()) {
+				controls[i].dispose();
+			}
+		}
+		
+		if(initData.getVisible() == false){
+			initData.setVisible(true);
+		}
+		
+		new Label(initData, SWT.NULL).setText("authNum");
+		authNum = new Text(initData, SWT.BORDER);
+		authNum.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		authNum.setText("1001");
+		
+		new Label(initData, SWT.NULL).setText("systemId");
+		extrSysId = new Text(initData, SWT.BORDER);
+		extrSysId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		extrSysId.setText("1001");
+		
+		new Label(initData, SWT.NULL).setText("deviceId");
+		deviceId = new Text(initData, SWT.BORDER);
+		deviceId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		deviceId.setText("1001");
+		
+		authNum.setVisible(true);
+		extrSysId.setVisible(true);
+		deviceId.setVisible(true);
+		
+	}*/
+	
 	private void setDevice(){
 
 		Control[] controls = groupDevice.getChildren();
@@ -282,6 +351,10 @@ public class Main {
 			if(controls[i].getVisible()) {
 				controls[i].dispose();
 			}
+		}
+		
+		if(initData.getVisible() == true){
+			initData.setVisible(false);
 		}
 		
 		if(groupDevice.getVisible() == false){
@@ -305,7 +378,12 @@ public class Main {
 	}
 		
 	public static void initSendData(){
-		StdSysTcpCode.MthdType mthType = MthdType.ATHN_COMMCHATHN_DEV_TCP; 
+		StdSysTcpCode.MthdType mthType = MthdType.ATHN_COMMCHATHN_DEV_TCP;
+		
+		athnNo = authNum.getText();
+		extrSystemId = extrSysId.getText();
+		devId = deviceId.getText();
+		
 		try {
 			byte[] header = packetUtil.getHeader(MthdType.ATHN_COMMCHATHN_DEV_TCP, 0).toPacket();
 			

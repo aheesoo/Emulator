@@ -115,7 +115,7 @@ public class PacketUtil {
 //		msgHeadVO.setHdrLen((short)0);
 //		msgHeadVO.setHdrType("5");
 //		msgHeadVO.setMapHeaderExtension(null);
-		msgHeadVO.setMethodType("test");
+		msgHeadVO.setMethodType("Request");
 //		msgHeadVO.setMsgExchPtrn("6");
 //		msgHeadVO.setMsgType("7");
 //		msgHeadVO.setProtVer("8");
@@ -125,10 +125,10 @@ public class PacketUtil {
 //			DevCommChAthnRqtVO commChAthnRqtVO = new DevCommChAthnRqtVO();
 			DevLoginRqtVO devLoginRqtVO = new DevLoginRqtVO();
 			
-			String athnRqtNo = "1001";
+			String athnRqtNo = Main.athnNo;
+			String extrSysId = Main.extrSystemId;
+			String devId = Main.devId;
 			String commChId = "GiGA_Home_IoT_TCP";
-//			String extrSysId = "GiGA_Home_IoT";
-			String devId = "HGD_00112233_KT_IOT_GATEWAY1";
 			
 			/*commChAthnRqtVO.setAthnRqtNo(athnRqtNo);
 			commChAthnRqtVO.setCommChId(commChId);
@@ -156,16 +156,9 @@ public class PacketUtil {
 			inclDevIds.add("HGD_00112233_KT_IOT_GATEWAY1");
 			List<String> excluDevIds = new ArrayList<String>();/** 배타장치아이디목록 */
 			excluDevIds.add("HGD_00112233_KT_IOT_GATEWAY1");
-			CmdDataInfoVO cmdDataInfoVO = new CmdDataInfoVO();
+			
 			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();/** 명령데이터리스트(31) */
-			String dataTypeCd = "";
-			byte[] cmdData = new byte[3];
-			cmdData[0] = (byte) 0x50;
-			cmdData[1] = (byte) 0x51;
-			cmdData[2] = (byte) 0x52;
-			cmdDataInfoVO.setDataTypeCd(dataTypeCd);
-			cmdDataInfoVO.setCmdData(cmdData);
-			cmdDataInfoVOs.add(cmdDataInfoVO);
+			cmdDataInfoVOs.add(getCmdData("2501"));
 			
 			String modelNm = "SNB-6004";/** 모델명 */
 			String useYn = "Y";/** 사용여부 */
@@ -198,7 +191,11 @@ public class PacketUtil {
 			/** 정보갱신유형 */
 			String	infoUpdTypeCd = "";
 			/** 장치정보목록 */
+			DevBasVO devBasVO = new DevBasVO();
 			List<DevBasVO> devBasVOs = new ArrayList<DevBasVO>();
+			
+			devBasVO.getBinSetupDataInfoVOs().add(getBinSetupData("7006"));
+			devBasVOs.add(devBasVO);
 			
 			devInfoUpdateRprtRqtVO.setExtrSysId(extrSysId);
 			devInfoUpdateRprtRqtVO.setInfoUpdTypeCd(infoUpdTypeCd);
@@ -256,8 +253,8 @@ public class PacketUtil {
 			DevInfoRetvRqtVO devInfoRetvRqtVO = gson.fromJson(new String(data), DevInfoRetvRqtVO.class);
 			DevInfoRetvRespVO devInfoRetvRespVO = new DevInfoRetvRespVO();
 			/** 명령데이터리스트(31) */
-//			CmdDataInfoVO cmdDataInfoVO = new CmdDataInfoVO();
-//			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();
+			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();/** 명령데이터리스트(31) */
+			cmdDataInfoVOs.add(getCmdData("7005"));
 			//** 장치정보목록 */
 			DevBasVO devBasVO = new DevBasVO();
 			devBasVO.setExtrSysId(extrSysId);
@@ -266,18 +263,19 @@ public class PacketUtil {
 			List<DevBasVO> devBasVOs = new ArrayList<DevBasVO>();
 			devBasVOs.add(devBasVO);
 			
-			
 			devInfoRetvRespVO.setMsgHeadVO(devInfoRetvRqtVO.getMsgHeadVO());
 			devInfoRetvRespVO.setRespCd(respCd);
 			devInfoRetvRespVO.setRespMsg(respMsg);
 			devInfoRetvRespVO.setDevBasVOs(devBasVOs);
 			devInfoRetvRespVO.setCmdDataInfoVOs(devInfoRetvRqtVO.getCmdDataInfoVOs());
+			devInfoRetvRespVO.setCmdDataInfoVOs(cmdDataInfoVOs);
 			
 			strBody = gson.toJson(devInfoRetvRespVO);
 		} 
 		else if(value == 334){
 			DevInfoUdateRprtRqtVO devInfoUdateRprtRqtVO = gson.fromJson(new String(data), DevInfoUdateRprtRqtVO.class);
-			ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
+//			ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
+			ComnRespVO comnRespVO = new ComnRespVO();
 			
 			comnRespVO.setRespCd(respCd);
 			comnRespVO.setRespMsg(respMsg);
@@ -287,7 +285,7 @@ public class PacketUtil {
 		}
 		else if(MthdType.INITA_DEV_UDATERPRT.equals(value)){
 			ItgCnvyDataVO itgCnvyDataVO = gson.fromJson(new String(data), ItgCnvyDataVO.class);
-			ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
+			ComnRespVO comnRespVO = new ComnRespVO();
 			
 			comnRespVO.setRespCd(respCd);
 			comnRespVO.setRespMsg(respMsg);
@@ -297,7 +295,17 @@ public class PacketUtil {
 		}
 		else if(MthdType.QUERY_LASTVAL.equals(value)){
 			LastValQueryRqtVO lastValQueryRqtVO = gson.fromJson(new String(data), LastValQueryRqtVO.class);
-			LastValQueryRespVO lastValQueryRespVO = gson.fromJson(new String(data), LastValQueryRespVO.class);
+			LastValQueryRespVO lastValQueryRespVO = new LastValQueryRespVO();
+			
+			CmdDataInfoVO cmdDataInfoVO = new CmdDataInfoVO();
+			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();/** 명령데이터리스트(31) */
+			String dataTypeCd = "8002";
+			byte[] cmdData = new byte[0];
+			cmdData = dataTypeCd.getBytes();
+			cmdDataInfoVO.setDataTypeCd(dataTypeCd);
+			cmdDataInfoVO.setCmdData(cmdData);
+			cmdDataInfoVOs.add(cmdDataInfoVO);
+
 			
 			DevColecDataVO devColecDataVO = new DevColecDataVO();
 			List<DevColecDataVO> devColecDataVOs = new ArrayList<DevColecDataVO>();
@@ -307,12 +315,13 @@ public class PacketUtil {
 			
 			colecRowVOs.add(getColecRowVO(colecRowVO));
 			
-			devColecDataVO.setDevId("");
+			devColecDataVO.setDevId("HGD_00112233_KT_IOT_GATEWAY1");
 			devColecDataVO.setColecRowVOs(colecRowVOs);
 			devColecDataVOs.add(devColecDataVO);
 
 			lastValQueryRespVO.setExtrSysId(lastValQueryRqtVO.getExtrSysId());
-			lastValQueryRespVO.setCmdDataInfoVOs(lastValQueryRqtVO.getCmdDataInfoVOs());
+//			lastValQueryRespVO.setCmdDataInfoVOs(lastValQueryRqtVO.getCmdDataInfoVOs());
+			lastValQueryRespVO.setCmdDataInfoVOs(cmdDataInfoVOs);
 			lastValQueryRespVO.setDevColecDataVOs(devColecDataVOs);
 			
 			strBody = gson.toJson(lastValQueryRespVO);
@@ -391,16 +400,8 @@ public class PacketUtil {
 		loDataInfoVO.setLatit(latit);
 		loDataInfoVO.setLngit(lngit);
 		
-		BinDataInfoVO binDataInfoVO = new BinDataInfoVO();
 		List<BinDataInfoVO> binDataInfoVOs = new ArrayList<BinDataInfoVO>();
-		String dataTypeCd_Bin = "40001003";
-		byte[] binData = new byte[3];
-		binData[0] = (byte) 0x50;
-		binData[1] = (byte) 0x51;
-		binData[2] = (byte) 0x52;
-		binDataInfoVO.setDataTypeCd(dataTypeCd_Bin);
-		binDataInfoVO.setBinData(binData);
-		binDataInfoVOs.add(binDataInfoVO);
+		binDataInfoVOs.add(getBinData("8003"));
 		
 		StrDataInfoVO strDataInfoVO = new StrDataInfoVO();
 		List<StrDataInfoVO> strDataInfoVOs = new ArrayList<StrDataInfoVO>();
@@ -460,16 +461,8 @@ public class PacketUtil {
 		sclgSetupDataInfoVO.setSclgDataInfoVOs(sclgDataInfoVOs);
 		sclgSetupDataInfoVOs.add(sclgSetupDataInfoVO);
 		
-		BinSetupDataInfoVO binSetupDataInfoVO = new BinSetupDataInfoVO();
 		List<BinSetupDataInfoVO> binSetupDataInfoVos = new ArrayList<BinSetupDataInfoVO>();
-		String snsnTagCd_Bin = "90000739";
-		byte[] setupVal_Bin = new byte[3];
-		binData[0] = (byte) 0x50;
-		binData[1] = (byte) 0x51;
-		binData[2] = (byte) 0x52;
-		binSetupDataInfoVO.setSnsnTagCd(snsnTagCd_Bin);
-		binSetupDataInfoVO.setSetupVal(setupVal_Bin);
-		binSetupDataInfoVos.add(binSetupDataInfoVO);
+		binSetupDataInfoVos.add(getBinSetupData("6301"));
 		
 		colecRowVO.setSnsnDataInfoVOs(snsnDataInfoVOs);
 		colecRowVO.setSttusDataInfoVOs(sttusDataInfoVOs);
@@ -517,6 +510,40 @@ public class PacketUtil {
 		cnvyRow.setSclgSetupDataInfoVOs(sclgSetupDataInfoVOs);
 		
 		return cnvyRow;
+	}
+	
+	public static BinDataInfoVO getBinData(String cd){
+		BinDataInfoVO binDataInfoVO = new BinDataInfoVO();
+		String dataTypeCd = cd;
+		byte[] binData = new byte[0];
+		binData = dataTypeCd.getBytes();
+		binDataInfoVO.setDataTypeCd(dataTypeCd);
+		binDataInfoVO.setBinData(binData);
+
+		return binDataInfoVO;
+	}
+	
+	public static BinSetupDataInfoVO getBinSetupData(String cd){
+		BinSetupDataInfoVO binSetupDataInfoVO = new BinSetupDataInfoVO();
+		String snsnTagCd = cd;
+		byte[] setupVal = new byte[0];
+		setupVal = snsnTagCd.getBytes();
+		binSetupDataInfoVO.setSetupVal(setupVal);
+		binSetupDataInfoVO.setSnsnTagCd(snsnTagCd);
+
+		return binSetupDataInfoVO;
+	}
+	
+	public static CmdDataInfoVO getCmdData(String cd){
+		CmdDataInfoVO cmdDataInfoVO = new CmdDataInfoVO();
+		List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();/** 명령데이터리스트(31) */
+		String dataTypeCd = cd;
+		byte[] cmdData = new byte[0];
+		cmdData = dataTypeCd.getBytes();
+		cmdDataInfoVO.setDataTypeCd(dataTypeCd);
+		cmdDataInfoVO.setCmdData(cmdData);
+
+		return cmdDataInfoVO;
 	}
 	
 }
