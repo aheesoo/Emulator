@@ -283,7 +283,7 @@ public class PacketUtil {
 			
 			strBody = gson.toJson(comnRespVO);
 		}
-		else if(MthdType.INITA_DEV_UDATERPRT.equals(value)){
+		else if(MthdType.CONTL_ITGCNVY_DATA.equals(value)){
 			ItgCnvyDataVO itgCnvyDataVO = gson.fromJson(new String(data), ItgCnvyDataVO.class);
 			ComnRespVO comnRespVO = new ComnRespVO();
 			
@@ -343,15 +343,15 @@ public class PacketUtil {
 			ItgCnvyRprtRqtVO itgCnvyRprtRqtVO = new ItgCnvyRprtRqtVO(); //report object
 			
 			itgCnvyRprtRqtVO.setExtrSysId(itgCnvyDataVO.getExtrSysId());
-			
+			com.kt.iot.emul.func.vo.ItgCnvyRprtRqtVO.SysCnvyDataVO sysCnvyDataVOrept = new com.kt.iot.emul.func.vo.ItgCnvyRprtRqtVO.SysCnvyDataVO();
 			//system 
-			SysCnvyDataVO sysCnvyDataVO = itgCnvyDataVO.getSysCnvyDataVO();
+			SysCnvyDataVO sysCnvyDataVO = itgCnvyDataVO.getSysCnvyDataVO();			
 			if(sysCnvyDataVO != null){
 				for(CnvyRowVO cnvyRowVO : sysCnvyDataVO.getCnvyRowVOs()){
 					CnvyRow cnvyRow = toCnvyRow(cnvyRowVO);
-					itgCnvyRprtRqtVO.getSysCnvyDataVO().getCnvyRows().add(cnvyRow);
+					sysCnvyDataVOrept.getCnvyRows().add(cnvyRow);
+					itgCnvyRprtRqtVO.setSysCnvyDataVO(sysCnvyDataVOrept);
 				}
-				
 			}
 			
 			for(DevCnvyDataVO devyCnvyDataVO : itgCnvyDataVO.getDevCnvyDataVOs()){

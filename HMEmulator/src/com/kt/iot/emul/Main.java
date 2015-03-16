@@ -134,8 +134,8 @@ public class Main {
 //		textHost = new Combo(groupProxy, SWT.BORDER);
 		textHost = new Text(groupProxy, SWT.BORDER);
 		textHost.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		textHost.setText("192.168.0.117");//192.168.0.63으로 하면 response는 내려와
-//		textHost.setText("192.168.0.63");
+//		textHost.setText("192.168.0.117");//192.168.0.63으로 하면 response는 내려와
+		textHost.setText("127.0.0.1");
 //		textHost.add("127.0.0.1", 0);
 //		textHost.add("121.156.46.132", 1);
 //		textHost.select(0);
@@ -143,7 +143,8 @@ public class Main {
 		new Label(groupProxy, SWT.NULL).setText("Port");
 		textPort = new Text(groupProxy, SWT.SINGLE | SWT.BORDER);
 		textPort.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		textPort.setText("9075");
+//		textPort.setText("9075");
+		textPort.setText("9081");
 		
 		new Label(groupProxy, SWT.NULL).setText("Version");
 		comboVersion = new Combo(groupProxy, SWT.BORDER);
