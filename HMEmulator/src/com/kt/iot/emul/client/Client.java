@@ -222,8 +222,9 @@ public class Client extends Thread {
 				KeepAliveRespVO keepAliveRespVO = gson.fromJson(new String(data), KeepAliveRespVO.class);
 				
 				String respMsg = keepAliveRespVO.getRespMsg();
+				Integer keepAliverCycle = keepAliveRespVO.getKeepAliveCycl();
 				Main.report("RespMsg : " + respMsg, true);
-				
+				Main.report("\n keepAliverCycle : " + keepAliverCycle, true);
 				Main.report(new String(data), true);
 			}
 			else if(MthdType.INITA_DEV_RETV.equals(mthd)){//331
