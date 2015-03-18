@@ -1,6 +1,8 @@
 package com.kt.iot.emul;
 
 import java.awt.color.CMMException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -8,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 
@@ -79,7 +82,7 @@ public class Main {
 	private static Display display;
 	
 	private static Combo comboVersion;
-	private Combo combo;
+	private Combo comboFun;
 	private Combo comboDev;
 	
 	private static Text textName;
@@ -92,8 +95,9 @@ public class Main {
 	private static Text deviceId;
 	private static Text textRes;
 	
-	private static Group groupDevice;
 	private static Group initData;
+	private static Group groupDevice;
+	private static Group groupFunction;
 	private Group groupHeader; 
 	private Group groupBody;
 	
@@ -110,6 +114,20 @@ public class Main {
 	public static PacketUtil packetUtil;
 	
 	public Main() {
+        
+//        String s = System.getProperty("user.dir");
+//        System.out.println("현재 디렉토리는 " + s + " 입니다");
+        
+        Properties properties = new Properties();
+		try {
+		      properties.load(new FileInputStream("C:\\emulator_server.properties"));
+//			properties.load(new FileInputStream(s+"\\emulator_server.properties"));
+		} catch (IOException e) {
+		
+		}
+		String ip = properties.getProperty("ip");
+		String port = properties.getProperty("port");
+		
 		display = Display.getDefault();
 		
 		shell = new Shell(display);
@@ -135,16 +153,14 @@ public class Main {
 		textHost = new Text(groupProxy, SWT.BORDER);
 		textHost.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 //		textHost.setText("192.168.0.117");//192.168.0.63으로 하면 response는 내려와
-		textHost.setText("127.0.0.1");
+		textHost.setText(ip);
 //		textHost.add("127.0.0.1", 0);
-//		textHost.add("121.156.46.132", 1);
 //		textHost.select(0);
 		
 		new Label(groupProxy, SWT.NULL).setText("Port");
 		textPort = new Text(groupProxy, SWT.SINGLE | SWT.BORDER);
 		textPort.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//		textPort.setText("9075");
-		textPort.setText("9081");
+		textPort.setText(port);//9081, 9075, 9077
 		
 		new Label(groupProxy, SWT.NULL).setText("Version");
 		comboVersion = new Combo(groupProxy, SWT.BORDER);
@@ -155,37 +171,9 @@ public class Main {
 		comboVersion.select(1);
 		
 		groupDevice = new Group(shell, SWT.NULL);
-		groupDevice.setText("");
+		groupDevice.setText("장치 정보");
 		groupDevice.setLayout(new GridLayout(2, false));
-		groupDevice.setLayoutData(new GridData(615, 50));
-		
-		
-		initData = new Group(shell, SWT.NULL);
-		initData.setText("");
-		initData.setLayout(new GridLayout(2, false));
-		initData.setLayoutData(new GridData(615, 80));
-		
-		new Label(initData, SWT.NULL).setText("authNum");
-		authNum = new Text(initData, SWT.BORDER);
-		authNum.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		authNum.setText("1001");
-		
-		new Label(initData, SWT.NULL).setText("systemId");
-		extrSysId = new Text(initData, SWT.BORDER);
-		extrSysId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		extrSysId.setText("GiGA_Home_IoT");
-		
-		new Label(initData, SWT.NULL).setText("deviceId");
-		deviceId = new Text(initData, SWT.BORDER);
-		deviceId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		deviceId.setText("HGD_00112233_KT_IOT_GATEWAY1");
-		/*Label initLabel = new Label(groupDevice, SWT.NULL);
-		initLabel.setLayoutData(new GridData(85, 0));
-		initLabel.setVisible(false);
-		
-		Label initInputLabel = new Label(groupDevice, SWT.NULL);
-		initInputLabel.setLayoutData(new GridData(85, 0));
-		initInputLabel.setVisible(false);*/
+		groupDevice.setLayoutData(new GridData(615, 120));
 		
 		Label deviceNameLabel = new Label(groupDevice, SWT.NULL);
 		deviceNameLabel.setLayoutData(new GridData(85, 0));
@@ -194,6 +182,44 @@ public class Main {
 		Label deviceInputLabel = new Label(groupDevice, SWT.NULL);
 		deviceInputLabel.setLayoutData(new GridData(85, 0));
 		deviceInputLabel.setVisible(false);
+		
+		new Label(groupDevice, SWT.NULL).setText("authNum");
+		authNum = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
+		authNum.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		authNum.setText("1001");
+		
+		new Label(groupDevice, SWT.NULL).setText("systemId");
+		extrSysId = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
+		extrSysId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		extrSysId.setText("GiGA_Home_IoT");
+		
+		new Label(groupDevice, SWT.NULL).setText("deviceId");
+		deviceId = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
+		deviceId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		deviceId.setText("HGD_00112233_KT_IOT_GATEWAY1");
+		
+		new Label(groupDevice, SWT.NULL).setText("IoT End Device");
+		comboDev = new Combo(groupDevice, SWT.BORDER);
+		comboDev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		comboDev.add("IoT GW", 0);
+		comboDev.add("Door Lock", 1);
+		comboDev.add("Open/Close sensor", 2);
+		comboDev.add("Gas valve", 3);
+		comboDev.select(0);
+		comboDev.setVisible(false);
+		
+		groupFunction = new Group(shell, SWT.NULL);
+		groupFunction.setText("");
+		groupFunction.setLayout(new GridLayout(2, false));
+		groupFunction.setLayoutData(new GridData(615, 50));
+		
+		Label funcNameLabel = new Label(groupFunction, SWT.NULL);
+		funcNameLabel.setLayoutData(new GridData(85, 0));
+		funcNameLabel.setVisible(false);
+		
+		Label funcInputLabel = new Label(groupFunction, SWT.NULL);
+		funcInputLabel.setLayoutData(new GridData(85, 0));
+		funcInputLabel.setVisible(false);
 		
 		Group groupReport = new Group(shell, SWT.NULL);
 		groupReport.setText("리포트");
@@ -232,23 +258,22 @@ public class Main {
 						client = new Client(textHost.getText(), Integer.parseInt(textPort.getText()));
 						client.start();
 						
-//						initSendData();
-//						setDevice();
+//						setDevice(0);
 //						groupDevice.layout();
 						buttonInit.setText("TCP 채널 인증");
 //						initSetDevice();
-//						buttonSend.setEnabled(true);
 					} else if("TCP 채널 인증".equals(buttonInit.getText())){
 						initSendData();
-						setDevice();
-						groupDevice.layout();
+						setFunction(0);
+						comboDev.setVisible(true);
+						groupFunction.layout();
 						buttonInit.setText("Disconnect");
 						buttonSend.setEnabled(true);
 					} else {
 						buttonInit.setText("Disconnect");
 						buttonSend.setEnabled(false);
-						groupDevice.setVisible(false);
-						
+//						groupDevice.setVisible(false);
+//						groupFunction.setVisible(false);
 						client.closeClient();
 					}
 					
@@ -256,6 +281,27 @@ public class Main {
 				}
 			}
 		});
+		
+		comboDev.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				if(comboDev.getSelectionIndex() == 0) {
+					setFunction(0);
+				}else if(comboDev.getSelectionIndex() == 1) {
+					setFunction(1);
+				}else if(comboDev.getSelectionIndex() == 2) {
+					setFunction(2);
+				}else if(comboDev.getSelectionIndex() == 3) {
+					setFunction(3);
+				}
+				groupFunction.layout();
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+
+		});
+		
 		
 		buttonSend.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
@@ -265,25 +311,115 @@ public class Main {
 						short methType = 0;
 						int isRequest = 0;
 						StdSysTcpCode.MthdType methcode = null;
-						
+//						methType = MthdType.KEEP_ALIVE_COMMCHATHN_TCP.getValue(); //TCP채널 KeepAlive
+//						methcode = MthdType.KEEP_ALIVE_COMMCHATHN_TCP;
+//						methType = MthdType.INITA_DEV_RETV.getValue();//장치정보조회 331
+//	            		methcode = MthdType.INITA_DEV_RETV;
+	            		
 						if(comboDev.getSelectionIndex() == 0) {
-							methType = MthdType.KEEP_ALIVE_COMMCHATHN_TCP.getValue(); //TCP채널 KeepAlive
-							methcode = MthdType.KEEP_ALIVE_COMMCHATHN_TCP;
+							if(comboFun.getSelectionIndex() == 0){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 1){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}
     	            	} else if(comboDev.getSelectionIndex() == 1) {
-    	            		methType = MthdType.INITA_DEV_RETV.getValue();//장치정보조회
-    	            		methcode = MthdType.INITA_DEV_RETV;
+    	            		if(comboFun.getSelectionIndex() == 0){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 1){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 2){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 3){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 4){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 5){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 6){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 7){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 8){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 9){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 10){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 11){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 12){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 13){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}
     	            	} else if(comboDev.getSelectionIndex() == 2) {
-    	            		methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고
-    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+    	            		if(comboFun.getSelectionIndex() == 0){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 1){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 2){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 3){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 4){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 5){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}
     	            	} else if(comboDev.getSelectionIndex() == 3) {
-    	            		methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집
-    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+    	            		if(comboFun.getSelectionIndex() == 0){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 1){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 2){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 3){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}else if(comboFun.getSelectionIndex() == 4){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 5){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 6){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 7){
+								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
+	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
+							}
     	            	}
 						
 						byte[] header = packetUtil.getHeader(methcode, isRequest).toPacket();
 //						byte[] header = getHeader(methcode).getBytes();
 
-						String strBody = packetUtil.getBody(methType);
+						String strBody = packetUtil.getBody(methType, comboDev.getSelectionIndex(),  comboFun.getSelectionIndex());
 						byte[] body = strBody.getBytes();
 						
                 		client.sendData(header, body, methType);
@@ -309,75 +445,92 @@ public class Main {
 		}
 
 		display.dispose();
+		
 	}
 	
-	/*private void initSetDevice(){
+	private void setFunction(int isFunc){
 
-		Control[] controls = initData.getChildren();
+		Control[] controls = groupFunction.getChildren();
 		for(int i = 0; i < controls.length; i++) {
 			if(controls[i].getVisible()) {
 				controls[i].dispose();
 			}
 		}
 		
-		if(initData.getVisible() == false){
-			initData.setVisible(true);
-		}
-		
-		new Label(initData, SWT.NULL).setText("authNum");
-		authNum = new Text(initData, SWT.BORDER);
-		authNum.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		authNum.setText("1001");
-		
-		new Label(initData, SWT.NULL).setText("systemId");
-		extrSysId = new Text(initData, SWT.BORDER);
-		extrSysId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		extrSysId.setText("1001");
-		
-		new Label(initData, SWT.NULL).setText("deviceId");
-		deviceId = new Text(initData, SWT.BORDER);
-		deviceId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		deviceId.setText("1001");
-		
-		authNum.setVisible(true);
-		extrSysId.setVisible(true);
-		deviceId.setVisible(true);
-		
-	}*/
-	
-	private void setDevice(){
-
-		Control[] controls = groupDevice.getChildren();
-		for(int i = 0; i < controls.length; i++) {
-			if(controls[i].getVisible()) {
-				controls[i].dispose();
+		/*Control[] comboCon = comboFun.getChildren();
+		for(int i = 0; i < comboCon.length; i++) {
+			if(comboCon[i].getVisible()) {
+				comboCon[i].dispose();
 			}
+		}*/
+		
+		if(groupFunction.getVisible() == false){
+			groupFunction.setVisible(true);
 		}
 		
-		if(initData.getVisible() == true){
-			initData.setVisible(false);
+		groupFunction.setText("세부 기능");
+		groupFunction.setLayout(new GridLayout(2, false));
+		
+		if(isFunc == 0){
+			new Label(groupFunction, SWT.NULL).setText("Function");
+			comboFun = new Combo(groupFunction, SWT.BORDER);
+			comboFun.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			comboFun.add("repair 진행 후 연결상태 전달", 0);//332
+			comboFun.add("공장초기화", 1);//332
+			comboFun.select(0);
+			comboFun.setVisible(true);
+		}else if(isFunc == 1){
+			new Label(groupFunction, SWT.NULL).setText("Function");
+			comboFun = new Combo(groupFunction, SWT.BORDER);
+			comboFun.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			comboFun.add("도어락 등록", 0);//332
+			comboFun.add("도어락 삭제(추가)", 1);//332
+			comboFun.add("사용자 등록 통보", 2);//332
+			comboFun.add("사용자 삭제 통보", 3);//332
+			comboFun.add("도어 출입 통보(unlock)", 4);//411
+			comboFun.add("도어 출입 통보(lock)", 5);//411
+			comboFun.add("도어락 상태 통보", 6);//411
+			comboFun.add("도어락 비상통보 1", 7);//411
+			comboFun.add("도어락 비상통보 2", 8);//411
+			comboFun.add("도어락 초기화통보", 9);//332
+			comboFun.add("도어락 PW 입력 오류 통보", 10);//411
+			comboFun.add("도어락 장시간 문열림 통보", 11);//411
+			comboFun.add("도어락 방범 모드 설정/해제 통보", 12);//332
+			comboFun.add("Low battery 통보", 13);//411
+			comboFun.select(0);
+			comboFun.setVisible(true);
+		}else if(isFunc == 2){
+			new Label(groupFunction, SWT.NULL).setText("Function");
+			comboFun = new Combo(groupFunction, SWT.BORDER);
+			comboFun.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			comboFun.add("Open/Close sensor 등록", 0);//332
+			comboFun.add("Open/Close sensor 삭제", 1);//332
+			comboFun.add("Open/Close sensor 상태 통보", 2);//411
+			comboFun.add("Open/Close sensor 감지 통보", 3);//411
+			comboFun.add("Low battery 통보", 4);//411
+			comboFun.add("Open/Close sensor 초기화 통보(추가", 5);//332
+			comboFun.select(0);
+			
+			comboFun.setVisible(true);
+		}else if(isFunc == 3){
+			new Label(groupFunction, SWT.NULL).setText("Function");
+			comboFun = new Combo(groupFunction, SWT.BORDER);
+			comboFun.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			comboFun.add("Gas valve 등록", 0);//332
+			comboFun.add("Gas valve 삭제", 1);//332
+			comboFun.add("Gas valve 상태 통보", 2);//411
+			comboFun.add("Gav valve 동작 통보", 3);//411
+			comboFun.add("Gav valve 초기화 통보(추가)", 4);//332
+			comboFun.add("Timeout 보고", 5);//332
+			comboFun.add("Remainning 보고", 6);//332
+			comboFun.add("과열(Overheat) 보고", 7);//411
+			comboFun.select(0);
+			
+			comboFun.setVisible(true);
 		}
-		
-		if(groupDevice.getVisible() == false){
-			groupDevice.setVisible(true);
-		}
-		
-		groupDevice.setText("Detail Function");
-		groupDevice.setLayout(new GridLayout(2, false));
-		
-		new Label(groupDevice, SWT.NULL).setText("Function");
-		comboDev = new Combo(groupDevice, SWT.BORDER);
-		comboDev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		comboDev.add("KeepAlive", 0);
-		comboDev.add("장치정보 조회", 1);
-		comboDev.add("장치정보 갱신보고", 2);
-		comboDev.add("데이터 수집");
-		comboDev.select(0);
-		
-		comboDev.setVisible(true);
 		
 	}
-		
+	
 	public static void initSendData(){
 		StdSysTcpCode.MthdType mthType = MthdType.ATHN_COMMCHATHN_DEV_TCP;
 		
@@ -389,7 +542,7 @@ public class Main {
 			byte[] header = packetUtil.getHeader(MthdType.ATHN_COMMCHATHN_DEV_TCP, 0).toPacket();
 			
 			StdSysTcpCode.MthdType mthdType = MthdType.ATHN_COMMCHATHN_DEV_TCP;
-			String strBody = packetUtil.getBody(mthdType.getValue());
+			String strBody = packetUtil.getBody(mthdType.getValue(), 100,100);
 			byte[] body = strBody.getBytes();
 			
 			System.out.println(" body : "+ new String(body) +" \n header : "+ new String(header));
@@ -423,7 +576,8 @@ public class Main {
 			public void run() {
 				buttonInit.setText("Connect");
 				buttonSend.setEnabled(false);
-				groupDevice.setVisible(false);
+//				groupDevice.setVisible(false);
+				groupFunction.setVisible(false);
 			}
 		});
 	}
@@ -440,7 +594,7 @@ public class Main {
 					byte[] header = packetUtil.getHeader(mthdType, 0).toPacket();
 //					byte[] header = getHeader(mthdType).getBytes();
 					
-					String strBody = packetUtil.getBody(mthdType.getValue());
+					String strBody = packetUtil.getBody(mthdType.getValue(), 200,200);
 					byte[] body = strBody.getBytes();
 					
 		    		client.sendData(header, body, mthdType.getValue());
@@ -452,5 +606,28 @@ public class Main {
 		        } 
 			}
 		});
+	}
+	
+	public static String replace(String src, String oldstr, String newstr)
+	{
+		if (src == null)
+		return null;
+	
+		StringBuffer dest = new StringBuffer("");
+		int len = oldstr.length();
+		int srclen = src.length();
+		int pos = 0;
+		int oldpos = 0;
+	
+		while ((pos = src.indexOf(oldstr, oldpos)) >= 0) {
+		dest.append(src.substring(oldpos, pos));
+		dest.append(newstr);
+		oldpos = pos + len;
+		}
+	
+		if (oldpos < srclen)
+		dest.append(src.substring(oldpos, srclen));
+	
+		return dest.toString();
 	}
 }

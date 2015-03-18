@@ -48,7 +48,6 @@ public class Client extends Thread {
 	private InputStream inputStream;
 	
 	private boolean mRun = false;
-	private int maxRecvLength = 4096;
 	
 	public static final int MSG_HEADER_SIZE = 35;
 	public static final int MSG_PACKLEN_SIZE = 4;
@@ -111,8 +110,6 @@ public class Client extends Thread {
 	
 	public void run(){
 		mRun = true;
-		
-		byte[] buffer = new byte[maxRecvLength];
 		
 		try {
 			socket = new Socket(SERVERIP, SERVERPORT);
@@ -228,7 +225,6 @@ public class Client extends Thread {
 				Main.report(new String(data), true);
 			}
 			else if(MthdType.INITA_DEV_RETV.equals(mthd)){//331
-				System.out.println(" data ----> "+new String(data));
 				DevInfoRetvRespVO devInfoRetvRespVO = gson.fromJson(new String(data), DevInfoRetvRespVO.class);
 				
 				String respMsg = devInfoRetvRespVO.getRespMsg();
