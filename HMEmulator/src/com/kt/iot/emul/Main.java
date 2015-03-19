@@ -94,10 +94,12 @@ public class Main {
 	private static Text extrSysId;
 	private static Text deviceId;
 	private static Text textRes;
+	private static Text textSnsn;
 	
 	private static Group initData;
 	private static Group groupDevice;
 	private static Group groupFunction;
+	private static Group groupSnsn;
 	private Group groupHeader; 
 	private Group groupBody;
 	
@@ -116,12 +118,17 @@ public class Main {
 	public Main() {
         
 //        String s = System.getProperty("user.dir");
-//        System.out.println("현재 디렉토리는 " + s + " 입니다");
-        
+//        System.out.println("현재 디렉토리는 " + s);
+//        String dir = this.getClass().getResource("").getPath();
+//        String reDir = dir.substring(1,dir.length()-31);
+//        System.out.println("reDir : "+reDir);
+//        reDir.replaceAll("/", File.separator);
+//		File path = new File(".");
+//	    System.out.println(path.getAbsolutePath());
         Properties properties = new Properties();
 		try {
 		      properties.load(new FileInputStream("C:\\emulator_server.properties"));
-//			properties.load(new FileInputStream(s+"\\emulator_server.properties"));
+//			properties.load(new FileInputStream(reDir+"emulator_server.properties"));
 		} catch (IOException e) {
 		
 		}
@@ -165,10 +172,10 @@ public class Main {
 		new Label(groupProxy, SWT.NULL).setText("Version");
 		comboVersion = new Combo(groupProxy, SWT.BORDER);
 		comboVersion.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		comboVersion.add("0.73", 0);
-		comboVersion.add("0.76", 1);
-		comboVersion.add("0.79", 2);
-		comboVersion.select(1);
+		comboVersion.add("0.01", 0);
+//		comboVersion.add("0.76", 1);
+//		comboVersion.add("0.79", 2);
+		comboVersion.select(0);
 		
 		groupDevice = new Group(shell, SWT.NULL);
 		groupDevice.setText("장치 정보");
@@ -211,7 +218,7 @@ public class Main {
 		groupFunction = new Group(shell, SWT.NULL);
 		groupFunction.setText("");
 		groupFunction.setLayout(new GridLayout(2, false));
-		groupFunction.setLayoutData(new GridData(615, 50));
+		groupFunction.setLayoutData(new GridData(615, 40));
 		
 		Label funcNameLabel = new Label(groupFunction, SWT.NULL);
 		funcNameLabel.setLayoutData(new GridData(85, 0));
@@ -220,6 +227,14 @@ public class Main {
 		Label funcInputLabel = new Label(groupFunction, SWT.NULL);
 		funcInputLabel.setLayoutData(new GridData(85, 0));
 		funcInputLabel.setVisible(false);
+		
+		groupSnsn = new Group(shell, SWT.NULL);
+		groupSnsn.setText("SnsnTag");
+		groupSnsn.setLayout(new GridLayout(1, false));
+		groupSnsn.setLayoutData(new GridData(615, 80));
+		
+		textSnsn = new Text(groupSnsn, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		textSnsn.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		Group groupReport = new Group(shell, SWT.NULL);
 		groupReport.setText("리포트");
@@ -457,13 +472,6 @@ public class Main {
 			}
 		}
 		
-		/*Control[] comboCon = comboFun.getChildren();
-		for(int i = 0; i < comboCon.length; i++) {
-			if(comboCon[i].getVisible()) {
-				comboCon[i].dispose();
-			}
-		}*/
-		
 		if(groupFunction.getVisible() == false){
 			groupFunction.setVisible(true);
 		}
@@ -629,5 +637,20 @@ public class Main {
 		dest.append(src.substring(oldpos, srclen));
 	
 		return dest.toString();
+	}
+	
+	public static void setTagVal(String tag, byte[] val){
+		Main.report = tag+" : "+Util.byte2Hex(val);
+		Main.isAppend = isAppend;
+		display.syncExec(new Runnable() {
+			public void run() {
+				if(Main.isAppend) {
+					textSnsn.append(new String(report) + "\n");
+				} else {
+					textSnsn.setText(report);
+				}
+			}
+		});
+		
 	}
 }

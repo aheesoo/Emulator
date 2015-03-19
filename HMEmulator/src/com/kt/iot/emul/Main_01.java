@@ -298,7 +298,7 @@ public class Main_01 {
 						byte[] header = packetUtil.getHeader(methcode, isRequest).toPacket();
 //						byte[] header = getHeader(methcode).getBytes();
 
-						String strBody = packetUtil.getBody(methType);
+						String strBody = packetUtil.getBody(methType, 0, 0);
 						byte[] body = strBody.getBytes();
 						
                 		client.sendData(header, body, methType);
@@ -385,7 +385,7 @@ public class Main_01 {
 			byte[] header = packetUtil.getHeader(MthdType.ATHN_COMMCHATHN_DEV_TCP, 0).toPacket();
 			
 			StdSysTcpCode.MthdType mthdType = MthdType.ATHN_COMMCHATHN_DEV_TCP;
-			String strBody = packetUtil.getBody(mthdType.getValue());
+			String strBody = packetUtil.getBody(mthdType.getValue(), 0, 0);
 			byte[] body = strBody.getBytes();
 			
 			System.out.println(" body : "+ new String(body) +" \n header : "+ new String(header));
@@ -436,7 +436,7 @@ public class Main_01 {
 					byte[] header = packetUtil.getHeader(mthdType, 0).toPacket();
 //					byte[] header = getHeader(mthdType).getBytes();
 					
-					String strBody = packetUtil.getBody(mthdType.getValue());
+					String strBody = packetUtil.getBody(mthdType.getValue(), 0,0);
 					byte[] body = strBody.getBytes();
 					
 		    		client.sendData(header, body, mthdType.getValue());
