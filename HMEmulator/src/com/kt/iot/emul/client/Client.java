@@ -61,6 +61,7 @@ public class Client extends Thread {
 	public int modeRec = 1;
 	public int durationRec = 1;
 	public int dayRec = 1;
+	private static long trmTransactionId;
 	
 	public int voiceCnt = 0;
 	
@@ -195,6 +196,7 @@ public class Client extends Thread {
 		tcpHdrVO.setPacket(header);
 		MthdType mthd = tcpHdrVO.getMthdType();
 		MsgType msgType = tcpHdrVO.getMsgType();
+		trmTransactionId = tcpHdrVO.getTrmTransactionId();
 		int dataLength = packLenValue - header.length;
 		byte[] data = new byte[dataLength];
 		System.arraycopy(dataBuffer, header.length, data, 0, packLenValue-header.length); // body data
@@ -279,7 +281,7 @@ public class Client extends Thread {
 				resBody = strBody.getBytes();
 				
 				/** report GW 송신 */
-				processSndReportData(mthd, data);
+				//processSndReportData(mthd, data);
 				
 			}
 			else if(MthdType.QUERY_LASTVAL.equals(mthd)){//711 최종값 쿼리
@@ -291,11 +293,16 @@ public class Client extends Thread {
 			}
 			
 			/** 서버요청에 대한 응답발신 */
-			resHeader = Main.packetUtil.getHeader(mthd, 1).toPacket();
+			resHeader = Main.packetUtil.getResRepHeader(mthd, 1, trmTransactionId).toPacket();
 			try {
 				this.sendData(resHeader, resBody, mthd.getValue());
 			} catch (Exception e) {
 				// TODO: handle exception
+			} finally {
+				if(MthdType.CONTL_ITGCNVY_DATA.equals(mthd)){
+					/** report GW 송신 */
+					processSndReportData(mthd, data);
+				}
 			}
 		}
 	}
@@ -305,7 +312,7 @@ public class Client extends Thread {
 		byte[] reptHeader = null;
 		byte[] reptBody = null; 
 		String strBody = null;
-		reptHeader = Main.packetUtil.getHeader(mthd, 2).toPacket();
+		reptHeader = Main.packetUtil.getResRepHeader(mthd, 2, trmTransactionId).toPacket();
 		strBody = Main.packetUtil.getReptBody(mthd.getValue(), data);
 		reptBody = strBody.getBytes();
 		try {

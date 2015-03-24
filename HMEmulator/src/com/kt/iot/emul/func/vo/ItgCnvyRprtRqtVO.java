@@ -97,18 +97,18 @@ public class ItgCnvyRprtRqtVO
 	public static class SysCnvyDataVO
 	{
 		/** 수집행 리스트 */
-		private List<CnvyRow> cnvyRows = new ArrayList<CnvyRow>();
+		private List<CnvyRowVO> cnvyRowVOs = new ArrayList<CnvyRowVO>();
 		/**
 		 * @return the cnvyRows
 		 */
-		public List<CnvyRow> getCnvyRows() {
-			return cnvyRows;
+		public List<CnvyRowVO> getCnvyRowVOs() {
+			return cnvyRowVOs;
 		}
 		/**
 		 * @param cnvyRows the cnvyRows to set
 		 */
-		public void setCnvyRows(List<CnvyRow> cnvyRows) {
-			this.cnvyRows = cnvyRows;
+		public void setCnvyRowVOs(List<CnvyRowVO> cnvyRowVOs) {
+			this.cnvyRowVOs = cnvyRowVOs;
 		}
 	}
 
@@ -120,7 +120,7 @@ public class ItgCnvyRprtRqtVO
 		private String devId;
 
 		/** 수집행 리스트 */
-		private List<CnvyRow> cnvyRows = new ArrayList<CnvyRow>();
+		private List<CnvyRowVO> cnvyRowVOs = new ArrayList<CnvyRowVO>();
 		/**
 		 * @return the m2mSvcNo
 		 */
@@ -148,18 +148,18 @@ public class ItgCnvyRprtRqtVO
 		/**
 		 * @return the cnvyRows
 		 */
-		public List<CnvyRow> getcnvyRows() {
-			return cnvyRows;
+		public List<CnvyRowVO> getcnvyRowVOs() {
+			return cnvyRowVOs;
 		}
 		/**
 		 * @param cnvyRows the cnvyRows to set
 		 */
-		public void setcnvyRows(List<CnvyRow> cnvyRows) {
-			this.cnvyRows = cnvyRows;
+		public void setcnvyRowVOs(List<CnvyRowVO> cnvyRowVOs) {
+			this.cnvyRowVOs = cnvyRowVOs;
 		}
 	}
 
-	public static class CnvyRow
+	public static class CnvyRowVO
 	{
 		/** 발생일시 */
 		private Date occDt;

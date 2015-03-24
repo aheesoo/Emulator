@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -84,6 +85,8 @@ public class Main {
 	private static Combo comboVersion;
 	private Combo comboFun;
 	private Combo comboDev;
+	private Combo comboLev;
+	private Combo comboLev2;
 	
 	private static Text textName;
 	
@@ -95,11 +98,14 @@ public class Main {
 	private static Text deviceId;
 	private static Text textRes;
 	private static Text textSnsn;
+	private static Text textUserId;
+	private static Text textUserPW;
 	
 	private static Group initData;
 	private static Group groupDevice;
 	private static Group groupFunction;
 	private static Group groupSnsn;
+	private static Group groupSetting;
 	private Group groupHeader; 
 	private Group groupBody;
 	
@@ -113,22 +119,40 @@ public class Main {
 	public static String athnNo;
 	public static String extrSystemId;
 	public static String devId;
+	public static int batteryLev = 0;
+	public static int isDoorLock = 0;
+	public static int isDoorEc1 = 0;
+	public static int isDoorEc2 = 0;
+	public static int isGasSt = 0;
+	public static String userId = "";
+	public static String userPW = "";
 	public static PacketUtil packetUtil;
 	
 	public Main() {
         
-//        String s = System.getProperty("user.dir");
-//        System.out.println("현재 디렉토리는 " + s);
-//        String dir = this.getClass().getResource("").getPath();
-//        String reDir = dir.substring(1,dir.length()-31);
-//        System.out.println("reDir : "+reDir);
-//        reDir.replaceAll("/", File.separator);
-//		File path = new File(".");
-//	    System.out.println(path.getAbsolutePath());
+        /*String s = System.getProperty("user.dir");
+        System.out.println("현재 디렉토리는 " + s);
+        String dir = this.getClass().getResource("").getPath();
+        String reDir = dir.substring(1,dir.length()-31);
+        System.out.println("reDir : "+reDir);*/
+		/*File path = new File(".");
+	    System.out.println(path.getAbsolutePath());
+	    String dirf = "";
+	    try {
+			
+	    	dirf = path.getCanonicalFile().getPath();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	    System.out.println("dir : "+dirf);
+	    String reDirf = dirf.replace("HMEmulator", "emulator_server.properties");
+	    System.out.println("reDirf --> "+reDirf);
+	    reDir.replaceAll(File.separator, "\\");
+	    System.out.println("reDirf == "+reDirf);*/
         Properties properties = new Properties();
 		try {
 		      properties.load(new FileInputStream("C:\\emulator_server.properties"));
-//			properties.load(new FileInputStream(reDir+"emulator_server.properties"));
+//			properties.load(new FileInputStream(realDir+"emulator_server.properties"));
 		} catch (IOException e) {
 		
 		}
@@ -139,7 +163,7 @@ public class Main {
 		
 		shell = new Shell(display);
 		shell.setLayout(new GridLayout(1, true));
-		shell.setSize(650, 700);
+		shell.setSize(650, 800);
 		shell.setText("EC Emulator - v0.01");
 
 		Group groupProxy = new Group(shell, SWT.NULL);
@@ -198,12 +222,12 @@ public class Main {
 		new Label(groupDevice, SWT.NULL).setText("systemId");
 		extrSysId = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
 		extrSysId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		extrSysId.setText("GiGA_Home_IoT");
+		extrSysId.setText("HOME_IOT");
 		
 		new Label(groupDevice, SWT.NULL).setText("deviceId");
 		deviceId = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
 		deviceId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		deviceId.setText("HGD_00112233_KT_IOT_GATEWAY1");
+		deviceId.setText("iotdevice03");
 		
 		new Label(groupDevice, SWT.NULL).setText("IoT End Device");
 		comboDev = new Combo(groupDevice, SWT.BORDER);
@@ -227,6 +251,19 @@ public class Main {
 		Label funcInputLabel = new Label(groupFunction, SWT.NULL);
 		funcInputLabel.setLayoutData(new GridData(85, 0));
 		funcInputLabel.setVisible(false);
+		
+		groupSetting = new Group(shell, SWT.NULL);
+		groupSetting.setText("");
+		groupSetting.setLayout(new GridLayout(2, false));
+		groupSetting.setLayoutData(new GridData(615, 80));
+		
+		Label settingNameLabel = new Label(groupSetting, SWT.NULL);
+		settingNameLabel.setLayoutData(new GridData(85, 0));
+		settingNameLabel.setVisible(false);
+		
+		Label settingInputLabel = new Label(groupSetting, SWT.NULL);
+		settingInputLabel.setLayoutData(new GridData(85, 0));
+		settingInputLabel.setVisible(false);
 		
 		groupSnsn = new Group(shell, SWT.NULL);
 		groupSnsn.setText("SnsnTag");
@@ -311,12 +348,9 @@ public class Main {
 				groupFunction.layout();
 			}
 			
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
+			public void widgetDefaultSelected(SelectionEvent e) {}
 
 		});
-		
 		
 		buttonSend.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
@@ -349,9 +383,13 @@ public class Main {
 							}else if(comboFun.getSelectionIndex() == 2){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+	    	            		userId = textUserId.getText();
+	    	            		userPW = textUserPW.getText(); 
 							}else if(comboFun.getSelectionIndex() == 3){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+	    	            		userId = textUserId.getText();
+	    	            		userPW = textUserPW.getText(); 
 							}else if(comboFun.getSelectionIndex() == 4){
 								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
 	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
@@ -472,6 +510,10 @@ public class Main {
 			}
 		}
 		
+		if(groupSetting.getVisible() == true){
+			groupSetting.setVisible(false);
+		}
+		
 		if(groupFunction.getVisible() == false){
 			groupFunction.setVisible(true);
 		}
@@ -535,8 +577,374 @@ public class Main {
 			comboFun.select(0);
 			
 			comboFun.setVisible(true);
+			
 		}
 		
+		/*new Label(groupFunction, SWT.NULL).setText("Battery Lev");
+		comboLev = new Combo(groupFunction, SWT.BORDER);
+		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		comboLev.add("0%", 0);
+		comboLev.add("10%", 1);
+		comboLev.add("20%", 2);
+		comboLev.add("30%", 3);
+		comboLev.add("40%", 4);
+		comboLev.add("50%", 5);
+		comboLev.add("60%", 6);
+		comboLev.add("70%", 7);
+		comboLev.add("80%", 8);
+		comboLev.add("90%", 9);
+		comboLev.add("100%", 10);
+		
+		if(batteryLev != 0){
+			comboLev.select(batteryLev);
+		}else{
+			comboLev.select(0);
+		}
+		comboLev.setVisible(true);
+		groupFunction.layout();		
+		
+		comboLev.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				batteryLev = comboLev.getSelectionIndex();
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+
+		});*/
+		
+		comboFun.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				if((comboDev.getSelectionIndex() == 1 && comboFun.getSelectionIndex() == 13) 
+						|| (comboDev.getSelectionIndex() == 2 &&comboFun.getSelectionIndex() == 4)) {
+					setBatLevOn();
+				}
+				else if((comboDev.getSelectionIndex() == 1 && comboFun.getSelectionIndex() == 4) 
+						|| (comboDev.getSelectionIndex() == 1 &&comboFun.getSelectionIndex() == 5)
+//						|| (comboDev.getSelectionIndex() == 2 &&comboFun.getSelectionIndex() == 2)
+						|| (comboDev.getSelectionIndex() == 2 &&comboFun.getSelectionIndex() == 3)){
+					setDoorLock();
+				}
+				else if((comboDev.getSelectionIndex() == 1 && comboFun.getSelectionIndex() == 2) 
+						|| (comboDev.getSelectionIndex() == 1 &&comboFun.getSelectionIndex() == 3)){
+					setUser();
+				}
+				else if(comboDev.getSelectionIndex() == 1 && comboFun.getSelectionIndex() == 7){
+					setDoorEm1();
+				}
+				else if(comboDev.getSelectionIndex() == 1 && comboFun.getSelectionIndex() == 8){
+					setDoorEm2();
+				}
+				else if((comboDev.getSelectionIndex() == 3 && comboFun.getSelectionIndex() == 2) ||
+						(comboDev.getSelectionIndex() == 3 && comboFun.getSelectionIndex() == 3)){
+					setGasOnOff();
+				}
+				else if(comboDev.getSelectionIndex() == 2 &&comboFun.getSelectionIndex() == 2){
+					setSensorSt();
+				}
+				else{
+					setBatLevOff();
+				}
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {}
+
+		});
+		
+	}
+	
+	private void setUser(){
+		Control[] controls = groupSetting.getChildren();
+		for(int i = 0; i < controls.length; i++) {
+			if(controls[i].getVisible()) {
+				controls[i].dispose();
+			}
+		}
+		
+		if(groupSetting.getVisible() == false){
+			groupSetting.setVisible(true);
+		}
+		
+		groupSetting.setText("세부 설정");
+		groupSetting.setLayout(new GridLayout(2, false));
+		
+		new Label(groupSetting, SWT.NULL).setText("User ID");
+		textUserId = new Text(groupSetting, SWT.SINGLE | SWT.BORDER);
+		textUserId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		textUserId.setText("1");
+		
+		new Label(groupSetting, SWT.NULL).setText("User PW");
+		textUserPW = new Text(groupSetting, SWT.SINGLE | SWT.BORDER);
+		textUserPW.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		textUserPW.setText("1234");
+		
+		groupSetting.layout();
+		
+	}
+	
+	private void setBatLevOn(){
+		Control[] controls = groupSetting.getChildren();
+		for(int i = 0; i < controls.length; i++) {
+			if(controls[i].getVisible()) {
+				controls[i].dispose();
+			}
+		}
+		
+		if(groupSetting.getVisible() == false){
+			groupSetting.setVisible(true);
+		}
+		
+		groupSetting.setText("세부 설정");
+		groupSetting.setLayout(new GridLayout(2, false));
+		
+		new Label(groupSetting, SWT.NULL).setText("Battery Lev");
+		comboLev = new Combo(groupSetting, SWT.BORDER);
+		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		comboLev.add("0%", 0);
+		comboLev.add("10%", 1);
+		comboLev.add("20%", 2);
+		comboLev.add("30%", 3);
+		comboLev.add("40%", 4);
+		comboLev.add("50%", 5);
+		comboLev.add("60%", 6);
+		comboLev.add("70%", 7);
+		comboLev.add("80%", 8);
+		comboLev.add("90%", 9);
+		comboLev.add("100%", 10);
+		
+		if(batteryLev != 0){
+			comboLev.select(batteryLev);
+		}else{
+			comboLev.select(0);
+		}
+		comboLev.setVisible(true);
+		groupSetting.layout();
+		comboLev.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				batteryLev = comboLev.getSelectionIndex();
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+
+		});
+	}
+	
+	private void setDoorEm1(){
+		Control[] controls = groupSetting.getChildren();
+		for(int i = 0; i < controls.length; i++) {
+			if(controls[i].getVisible()) {
+				controls[i].dispose();
+			}
+		}
+		
+		if(groupSetting.getVisible() == false){
+			groupSetting.setVisible(true);
+		}
+		
+		groupSetting.setText("세부 설정");
+		groupSetting.setLayout(new GridLayout(2, false));
+		
+		new Label(groupSetting, SWT.NULL).setText("Door Status");
+		comboLev = new Combo(groupSetting, SWT.BORDER);
+		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		comboLev.add("Intrusion,Unknown Location", 0);
+		comboLev.add("Tempering,Product covering removed", 1);
+		comboLev.add("Contact FireService", 2);
+		
+		comboLev.select(0);
+		comboLev.setVisible(true);
+		groupSetting.layout();
+		comboLev.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				isDoorEc1 = comboLev.getSelectionIndex();
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+
+		});
+	}
+	
+	private void setDoorEm2(){
+		Control[] controls = groupSetting.getChildren();
+		for(int i = 0; i < controls.length; i++) {
+			if(controls[i].getVisible()) {
+				controls[i].dispose();
+			}
+		}
+		
+		if(groupSetting.getVisible() == false){
+			groupSetting.setVisible(true);
+		}
+		
+		groupSetting.setText("세부 설정");
+		groupSetting.setLayout(new GridLayout(2, false));
+		
+		new Label(groupSetting, SWT.NULL).setText("Door Status");
+		comboLev = new Combo(groupSetting, SWT.BORDER);
+		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		comboLev.add("Intrusion, Unknown Location", 0);
+		comboLev.add("Tampering,Product covering removed", 1);
+		comboLev.add("Tampering,Invalid Code", 2);
+		
+		comboLev.select(0);
+		comboLev.setVisible(true);
+		groupSetting.layout();
+		comboLev.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				isDoorEc2 = comboLev.getSelectionIndex();
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+
+		});
+	}
+	
+	private void setDoorLock(){
+		Control[] controls = groupSetting.getChildren();
+		for(int i = 0; i < controls.length; i++) {
+			if(controls[i].getVisible()) {
+				controls[i].dispose();
+			}
+		}
+		
+		if(groupSetting.getVisible() == false){
+			groupSetting.setVisible(true);
+		}
+		
+		groupSetting.setText("세부 설정");
+		groupSetting.setLayout(new GridLayout(2, false));
+		
+		new Label(groupSetting, SWT.NULL).setText("DoorLock");
+		comboLev = new Combo(groupSetting, SWT.BORDER);
+		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		comboLev.add("Open", 0);
+		comboLev.add("Close", 1);
+		
+		comboLev.select(0);
+		comboLev.setVisible(true);
+		groupSetting.layout();
+		comboLev.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				isDoorLock = comboLev.getSelectionIndex();
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+
+		});
+	}
+	private void setGasOnOff(){
+		Control[] controls = groupSetting.getChildren();
+		for(int i = 0; i < controls.length; i++) {
+			if(controls[i].getVisible()) {
+				controls[i].dispose();
+			}
+		}
+		
+		if(groupSetting.getVisible() == false){
+			groupSetting.setVisible(true);
+		}
+		
+		groupSetting.setText("세부 설정");
+		groupSetting.setLayout(new GridLayout(2, false));
+		
+		new Label(groupSetting, SWT.NULL).setText("GasValve St");
+		comboLev = new Combo(groupSetting, SWT.BORDER);
+		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		comboLev.add("On", 0);
+		comboLev.add("Off", 1);
+		
+		comboLev.select(0);
+		comboLev.setVisible(true);
+		groupSetting.layout();
+		comboLev.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				isGasSt = comboLev.getSelectionIndex();
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+
+		});
+	}
+	
+	private void setSensorSt(){
+		Control[] controls = groupSetting.getChildren();
+		for(int i = 0; i < controls.length; i++) {
+			if(controls[i].getVisible()) {
+				controls[i].dispose();
+			}
+		}
+		
+		if(groupSetting.getVisible() == false){
+			groupSetting.setVisible(true);
+		}
+		
+		groupSetting.setText("세부 설정");
+		groupSetting.setLayout(new GridLayout(2, false));
+		
+		new Label(groupSetting, SWT.NULL).setText("DoorLock");
+		comboLev = new Combo(groupSetting, SWT.BORDER);
+		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		comboLev.add("Open", 0);
+		comboLev.add("Close", 1);
+		
+		comboLev.select(0);
+		comboLev.setVisible(true);
+		
+		new Label(groupSetting, SWT.NULL).setText("Battery Lev");
+		comboLev2 = new Combo(groupSetting, SWT.BORDER);
+		comboLev2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		comboLev2.add("0%", 0);
+		comboLev2.add("10%", 1);
+		comboLev2.add("20%", 2);
+		comboLev2.add("30%", 3);
+		comboLev2.add("40%", 4);
+		comboLev2.add("50%", 5);
+		comboLev2.add("60%", 6);
+		comboLev2.add("70%", 7);
+		comboLev2.add("80%", 8);
+		comboLev2.add("90%", 9);
+		comboLev2.add("100%", 10);
+		
+		comboLev2.select(0);
+		comboLev2.setVisible(true);
+		
+		groupSetting.layout();
+		comboLev.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				isDoorLock = comboLev.getSelectionIndex();
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+
+		});
+		comboLev2.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				batteryLev = comboLev2.getSelectionIndex();
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+
+		});
+	}
+	
+	private void setBatLevOff(){
+		if(groupSetting.getVisible() == true){
+			groupSetting.setVisible(false);
+		}
 	}
 	
 	public static void initSendData(){
