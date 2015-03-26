@@ -1,6 +1,6 @@
 package com.kt.iot.emul;
 
-import io.netty.util.internal.StringUtil;
+//import io.netty.util.internal.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,6 +27,7 @@ import com.kt.iot.emul.func.vo.DevInfoUdateRprtRqtVO;
 import com.kt.iot.emul.func.vo.DevLoginRqtVO;
 import com.kt.iot.emul.func.vo.ExtrSysDtlVO;
 import com.kt.iot.emul.func.vo.ExtrSysUdateRprtRqtVO;
+import com.kt.iot.emul.func.vo.FrmwrUdateSttusTrmRqtVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO.CnvyRowVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO.DevCnvyDataVO;
@@ -39,7 +40,9 @@ import com.kt.iot.emul.func.vo.LastValQueryRqtVO;
 import com.kt.iot.emul.func.vo.ItgColecDataVO.ColecRowVO;
 import com.kt.iot.emul.func.vo.ItgColecDataVO.DevColecDataVO;
 import com.kt.iot.emul.func.vo.ItgColecDataVO.SysColecDataVO;
+import com.kt.iot.emul.func.vo.PkgInfoVO;
 import com.kt.iot.emul.util.ConvertUtil;
+import com.kt.iot.emul.util.StringUtil;
 import com.kt.iot.emul.util.Util;
 import com.kt.iot.emul.vo.BinDataInfoVO;
 import com.kt.iot.emul.vo.BinSetupDataInfoVO;
@@ -181,7 +184,7 @@ public class PacketUtil {
 //		msgHeadVO.setMsgExchPtrn("6");
 //		msgHeadVO.setMsgType("7");
 //		msgHeadVO.setProtVer("8");
-		msgHeadVO.setTrmTransacId("");
+//		msgHeadVO.setTrmTransacId("");
 		
 
 		if(MthdType.ATHN_COMMCHATHN_DEV_TCP.equals(value)){
@@ -212,9 +215,9 @@ public class PacketUtil {
 //			String extrSysId = "GiGA_Home_IoT";/** 외부시스템아이디 */
 			Integer	m2mSvcNo = 0;/** M2M서비스번호 */
 			List<String> inclDevIds = new ArrayList<String>();/** 포함장치아이디목록 */
-			inclDevIds.add("iotdevice03");
+			inclDevIds.add(Main.devId);
 			List<String> excluDevIds = new ArrayList<String>();/** 배타장치아이디목록 */
-			excluDevIds.add("iotdevice03");
+			excluDevIds.add(Main.devId);
 			
 			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();/** 명령데이터리스트(31) */
 			cmdDataInfoVOs.add(getCmdData("2501"));
@@ -248,7 +251,6 @@ public class PacketUtil {
 			/** 장치정보목록 */
 			DevBasVO devBasVO = new DevBasVO();
 			List<DevBasVO> devBasVOs = new ArrayList<DevBasVO>();
-			
 			devBasVO.setAthnRqtNo(athnRqtNo);
 			devBasVO.setDevId(devId);
 			devBasVO.setM2mSvcNo(m2mSvcNo);
@@ -302,6 +304,8 @@ public class PacketUtil {
 //				List<BinSetupDataInfoVO> binSetupDataInfoVOs = new ArrayList<BinSetupDataInfoVO>();
 //				binSetupDataInfoVOs.add(getBinSetupData(snsnParam, snsnTag));
 //				devBasVO.setBinSetupDataInfoVOs(binSetupDataInfoVOs);
+				devBasVOs.add(devBasVO);
+			}else{
 				devBasVOs.add(devBasVO);
 			}
 			
@@ -374,12 +378,32 @@ public class PacketUtil {
 			
 			strBody = gson.toJson(itgColecDataVO);
 		} 
-		
+		else if(MthdType.FRMWR_UDATE_STTUS.equals(value)){//813 펌웨어 업데이트상태 전송
+			FrmwrUdateSttusTrmRqtVO frmwrUdateSttusTrmRqtVO = new FrmwrUdateSttusTrmRqtVO();
+			PkgInfoVO pkgInfoVO = new PkgInfoVO();
+			
+			/*frmwrUdateSttusTrmRqtVO.setExtrSysId(extrSysId);
+			frmwrUdateSttusTrmRqtVO.setDevId(devId);
+			frmwrUdateSttusTrmRqtVO.setFrmwrSeq(frmwrSeq);
+			frmwrUdateSttusTrmRqtVO.setFrmwrFilePathNm(frmwrFilePathNm);
+			frmwrUdateSttusTrmRqtVO.setOccDt(occDt);
+			frmwrUdateSttusTrmRqtVO.setSttusCd(sttusCd);
+			
+			pkgInfoVO.setPkgSeq(pkgSeq);
+			pkgInfoVO.setPkgFilePathNm(pkgFilePathNm);
+			pkgInfoVO.setPkgNm(pkgNm);
+			pkgInfoVO.setPkgVer(pkgVer);
+			pkgInfoVO.setPkgVerNo(pkgVerNo);
+			pkgInfoVO.setPkgSize(pkgSize);*/
+			frmwrUdateSttusTrmRqtVO.getPkgInfoVOs().add(pkgInfoVO);
+			
+			strBody = gson.toJson(frmwrUdateSttusTrmRqtVO);
+		}
 		return strBody;
 	}
 	
 	public static String getResBody(Short value, byte[] data){
-		
+		String snsnTagValue = "";
 		String respCd = "100";
 		String respMsg = "SUCCESS";
 		
@@ -397,12 +421,13 @@ public class PacketUtil {
 			for(CmdDataInfoVO cmdDataInfoVO : devInfoRetvRqtVO.getCmdDataInfoVOs()){
 				String dataTypeCd = cmdDataInfoVO.getDataTypeCd();
 				if("31000008".equals(dataTypeCd)){//Iot 단말 연결 상태 조회
-					binSetupDataInfoVOs.add(getBinSetupData("res05", dataTypeCd));
+					snsnTagValue = Main.tag31000008;
+					binSetupDataInfoVOs.add(getBinSetupData(snsnTagValue, dataTypeCd));
 				}else if("7005".equals(dataTypeCd)){//Timeout 조회, Remainning 조회
-					binSetupDataInfoVOs.add(getBinSetupData("res06", "7006"));
+					snsnTagValue = Main.tag7005;
+					binSetupDataInfoVOs.add(getBinSetupData(dataTypeCd, snsnTagValue));
 				}
 			}
-			
 			devBasVO.setBinSetupDataInfoVOs(binSetupDataInfoVOs);
 			devBasVO.setExtrSysId(devInfoRetvRqtVO.getExtrSysId());
 //			devBasVO.setDevId(devInfoRetvRqtVO.get);
@@ -462,13 +487,19 @@ public class PacketUtil {
 			for(CmdDataInfoVO cmdDataInfoVO : lastValQueryRqtVO.getCmdDataInfoVOs()){
 				String dataTypeCd = cmdDataInfoVO.getDataTypeCd();
 				if("50000008".equals(dataTypeCd)){//wifi 상태 조회
-					colecRowVOs.add(getColecRowVO(colecRowVO, "res01", dataTypeCd));
+					snsnTagValue = Main.tag50000008;
+					colecRowVOs.add(getColecRowVO(colecRowVO, dataTypeCd, snsnTagValue));
 				}else if("6202".equals(dataTypeCd)){//도어락 상태 확인- 장치상태
-					colecRowVOs.add(getColecRowVO(colecRowVO, "res02", "6203"));
+					snsnTagValue = Main.tag6202;
+					colecRowVOs.add(getColecRowVO(colecRowVO, "6203",snsnTagValue));
 				}else if("8002".equals(dataTypeCd)){//도어락 상태 확인 - 배터리 / Gas valve 상태 확인 - 배터리
-					colecRowVOs.add(getColecRowVO(colecRowVO, "res03", "8003"));
+					snsnTagValue = Main.tag8002;
+					colecRowVOs.add(getColecRowVO(colecRowVO, "8003", snsnTagValue));
 				}else if("2502".equals(dataTypeCd)){//Gas valve 상태 확인 - 장치상태
-					colecRowVOs.add(getColecRowVO(colecRowVO, "res04", "2503"));
+					snsnTagValue = Main.tag2502;
+					colecRowVOs.add(getColecRowVO(colecRowVO, "2503", snsnTagValue));
+				}else{
+					
 				}
 			}
 			
@@ -531,10 +562,10 @@ public class PacketUtil {
 		return strBody;
 	}
 	
-	private static ColecRowVO getColecRowVO(ColecRowVO colecRowVO, String snsnTag, String snsnParam){
+	private static ColecRowVO getColecRowVO(ColecRowVO colecRowVO, String snsnTagValue, String snsnParam){
 		
 		List<BinDataInfoVO> binDataInfoVOs = new ArrayList<BinDataInfoVO>();
-		binDataInfoVOs.add(getBinData(snsnTag, snsnParam));
+		binDataInfoVOs.add(getBinData(snsnTagValue, snsnParam));
 		
 		colecRowVO.setBinDataInfoVOs(binDataInfoVOs);
 		
@@ -543,29 +574,29 @@ public class PacketUtil {
 	
 private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag, String snsnParam){
 		
-		SnsnDataInfoVO snsnDataInfoVO = new SnsnDataInfoVO();
+	/*SnsnDataInfoVO snsnDataInfoVO = new SnsnDataInfoVO();
 		List<SnsnDataInfoVO> snsnDataInfoVOs =  new ArrayList<SnsnDataInfoVO>();
 		String dataTypeCd_Snsn = "10001003";
 		Double snsnVal = 0.7;
 		snsnDataInfoVO.setDataTypeCd(dataTypeCd_Snsn);
 		snsnDataInfoVO.setSnsnVal(snsnVal);
-		snsnDataInfoVOs.add(snsnDataInfoVO);
+		snsnDataInfoVOs.add(snsnDataInfoVO);*/
 		
-		SttusDataInfoVO sttusDataInfoVO = new SttusDataInfoVO();
+		/*SttusDataInfoVO sttusDataInfoVO = new SttusDataInfoVO();
 		List<SttusDataInfoVO> sttusDataInfoVOs = new ArrayList<SttusDataInfoVO>();
 		String dataTypeCd_sttus = "20001003";
 		Double sttusVal = 1.0;
 		sttusDataInfoVO.setDataTypeCd(dataTypeCd_sttus);
-		sttusDataInfoVO.setSttusVal(snsnVal);
-		sttusDataInfoVOs.add(sttusDataInfoVO);
+		sttusDataInfoVO.setSttusVal(sttusVal);
+		sttusDataInfoVOs.add(sttusDataInfoVO);*/
 		
-		LoDataInfoVO loDataInfoVO = new LoDataInfoVO();
+		/*LoDataInfoVO loDataInfoVO = new LoDataInfoVO();
 		String dataTypeCd_Lo = "30001003";
 		Double latit = 1.0;
 		Double lngit = 1.0;
 		loDataInfoVO.setDataTypeCd(dataTypeCd_Lo);
 		loDataInfoVO.setLatit(latit);
-		loDataInfoVO.setLngit(lngit);
+		loDataInfoVO.setLngit(lngit);*/
 		
 		List<BinDataInfoVO> binDataInfoVOs = new ArrayList<BinDataInfoVO>();
 //		binDataInfoVOs.add(getBinData(snsnTag, snsnParam));
@@ -577,15 +608,15 @@ private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag
 			binDataInfoVOs.add(getBinData(snsnTag, snsnParam));
 		}
 		
-		StrDataInfoVO strDataInfoVO = new StrDataInfoVO();
+		/*StrDataInfoVO strDataInfoVO = new StrDataInfoVO();
 		List<StrDataInfoVO> strDataInfoVOs = new ArrayList<StrDataInfoVO>();
 		String snsnTagCd = "60001003";
 		String strVal = "";
 		strDataInfoVO.setSnsnTagCd(snsnTagCd);
 		strDataInfoVO.setStrVal(strVal);
-		strDataInfoVOs.add(strDataInfoVO);
+		strDataInfoVOs.add(strDataInfoVO);*/
 		
-		DtDataInfoVO dtDataInfoVO = new DtDataInfoVO();
+		/*DtDataInfoVO dtDataInfoVO = new DtDataInfoVO();
 		List<DtDataInfoVO> dtDataInfoVOs = new ArrayList<DtDataInfoVO>();
 		String snsnTagCd_Dt = "61000837";
 		Date dtVal = new Date();
@@ -633,20 +664,20 @@ private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag
 		String snsnTagCd_Scl = "";
 		sclgSetupDataInfoVO.setSnsnTagCd(snsnTagCd_Scl);
 		sclgSetupDataInfoVO.setSclgDataInfoVOs(sclgDataInfoVOs);
-		sclgSetupDataInfoVOs.add(sclgSetupDataInfoVO);
+		sclgSetupDataInfoVOs.add(sclgSetupDataInfoVO);*/
 		
 		List<BinSetupDataInfoVO> binSetupDataInfoVos = new ArrayList<BinSetupDataInfoVO>();
 		binSetupDataInfoVos.add(getBinSetupData("", ""));
 		
-		colecRowVO.setSnsnDataInfoVOs(snsnDataInfoVOs);
-		colecRowVO.setSttusDataInfoVOs(sttusDataInfoVOs);
-		colecRowVO.setLoDataInfoVO(loDataInfoVO);
+//		colecRowVO.setSnsnDataInfoVOs(snsnDataInfoVOs);
+//		colecRowVO.setSttusDataInfoVOs(sttusDataInfoVOs);
+//		colecRowVO.setLoDataInfoVO(loDataInfoVO);
 		colecRowVO.setBinDataInfoVOs(binDataInfoVOs);
-		colecRowVO.setStrDataInfoVOs(strDataInfoVOs);
-		colecRowVO.setDtDataInfoVOs(dtDataInfoVOs);
-		colecRowVO.setEvDataInfoVO(evDataInfoVO);
-		colecRowVO.setGenlSetupDataInfoVOs(genlSetupDataInfoVOs);
-		colecRowVO.setSclgSetupDataInfoVOs(sclgSetupDataInfoVOs);
+//		colecRowVO.setStrDataInfoVOs(strDataInfoVOs);
+//		colecRowVO.setDtDataInfoVOs(dtDataInfoVOs);
+//		colecRowVO.setEvDataInfoVO(evDataInfoVO);
+//		colecRowVO.setGenlSetupDataInfoVOs(genlSetupDataInfoVOs);
+//		colecRowVO.setSclgSetupDataInfoVOs(sclgSetupDataInfoVOs);
 		colecRowVO.setBinSetupDataInfoVOs(binSetupDataInfoVos);
 		
 		return colecRowVO;
@@ -687,142 +718,152 @@ private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag
 	}
 	
 	public static BinDataInfoVO getBinData(String cd, String snsnParam){
+		StringUtil stringUtil = new StringUtil();
 		BinDataInfoVO binDataInfoVO = new BinDataInfoVO();
 		byte[] binData;
 		
 		if("14".equals(snsnParam)){ //도어 출입 통보(unlock)
-			binData = new byte[8];
-			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-			binData[2] = 0x00;//V1 Alarm Type
-			binData[3] = 0x00;//V1 Alarm Level
-			binData[4] = 0x00;//Reserved 
-			binData[5] = 0x00;//Notification Status
-			binData[6] = 0x06;//Notification Type -> Access Control
-			binData[7] = getHextoByteDoor(Main.isDoorLock);//0x16;//Event -> Window/Door is open
+			binData = new byte[1];
+//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
+//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
+//			binData[2] = 0x00;//V1 Alarm Type
+//			binData[3] = 0x00;//V1 Alarm Level
+//			binData[4] = 0x00;//Reserved 
+//			binData[5] = 0x00;//Notification Status
+//			binData[6] = 0x06;//Notification Type -> Access Control
+			binData[0] = getHextoByteDoor(Main.isDoorLock);//0x16;//Event -> Window/Door is open
 			
 			binDataInfoVO.setBinData(binData);
 		}else if("15".equals(snsnParam)){ //도어 출입 통보(lock)
-			binData = new byte[8];
-			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-			binData[2] = 0x00;//V1 Alarm Type
-			binData[3] = 0x00;//V1 Alarm Level
-			binData[4] = 0x00;//Reserved 
-			binData[5] = 0x00;//Notification Status
-			binData[6] = 0x06;//Notification Type -> Access Control
-			binData[7] = getHextoByteDoor(Main.isDoorLock);//0x17;//Event -> Window/Door is open
+			binData = new byte[1];
+//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
+//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
+//			binData[2] = 0x00;//V1 Alarm Type
+//			binData[3] = 0x00;//V1 Alarm Level
+//			binData[4] = 0x00;//Reserved 
+//			binData[5] = 0x00;//Notification Status
+//			binData[6] = 0x06;//Notification Type -> Access Control
+			binData[0] = getHextoByteDoor(Main.isDoorLock);//0x17;//Event -> Window/Door is open
 			
 			binDataInfoVO.setBinData(binData);
 		}else if("17".equals(snsnParam)){ // 도어락 비상통보1
-			binData = new byte[8];
-			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-			binData[2] = 0x00;//V1 Alarm Type
-			binData[3] = 0x00;//V1 Alarm Level
-			binData[4] = 0x00;//Reserved 
-			binData[5] = 0x00;//Notification Status
-			if(Main.isDoorEc1 == 2){
-				binData[6] = 0x0A;
-			}else{
-				binData[6] = 0x07;
-			}
-			binData[7] = getEc2HexByte(Main.isDoorEc1);//Event -> Tampering, Product covering removed
+			binData = new byte[1];
+//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
+//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
+//			binData[2] = 0x00;//V1 Alarm Type
+//			binData[3] = 0x00;//V1 Alarm Level
+//			binData[4] = 0x00;//Reserved 
+//			binData[5] = 0x00;//Notification Status
+//			if(Main.isDoorEc1 == 2){
+//				binData[6] = 0x0A;
+//			}else{
+//				binData[6] = 0x07;
+//			}
+			binData[0] = getEc2HexByte(Main.isDoorEc1);//Event -> Tampering, Product covering removed
 			
 			binDataInfoVO.setBinData(binData);
 		}else if("18".equals(snsnParam)){ // 도어락 비상통보2
-			binData = new byte[8];
-			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-			binData[2] = 0x00;//V1 Alarm Type
-			binData[3] = 0x00;//V1 Alarm Level
-			binData[4] = 0x00;//Reserved 
-			binData[5] = 0x00;//Notification Status
-			binData[6] = 0x07;//Notification Type -> Home Security
-			binData[7] = getEc2HexByte(Main.isDoorEc2);//Event -> Unknow Location
+			binData = new byte[1];
+//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
+//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
+//			binData[2] = 0x00;//V1 Alarm Type
+//			binData[3] = 0x00;//V1 Alarm Level
+//			binData[4] = 0x00;//Reserved 
+//			binData[5] = 0x00;//Notification Status
+//			binData[6] = 0x07;//Notification Type -> Home Security
+			binData[0] = getEc2HexByte(Main.isDoorEc2);//Event -> Unknow Location
 			
 			binDataInfoVO.setBinData(binData);
 		}else if("110".equals(snsnParam)){ // 도어락 PW 입력 오류 통보
-			binData = new byte[8];
-			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-			binData[2] = 0x00;//V1 Alarm Type
-			binData[3] = 0x00;//V1 Alarm Level
-			binData[4] = 0x00;//Reserved 
-			binData[5] = 0x00;//Notification Status
-			binData[6] = 0x07;//Notification Type -> Home Security
-			binData[7] = 0x04;//Event -> Invalid Code
+			binData = new byte[1];
+//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
+//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
+//			binData[2] = 0x00;//V1 Alarm Type
+//			binData[3] = 0x00;//V1 Alarm Level
+//			binData[4] = 0x00;//Reserved 
+//			binData[5] = 0x00;//Notification Status
+//			binData[6] = 0x07;//Notification Type -> Home Security
+			binData[0] = 0x04;//Event -> Invalid Code
 			
 			binDataInfoVO.setBinData(binData);
 		}else if("113".equals(snsnParam)){ // row battery 통보
-			binData = new byte[3];
-			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_BATTERY
-			binData[1] = 0x03;//Command = BATTERY_REPORT
-			binData[2] = getHexByte(Main.batteryLev);//0x64;//battery level
+			binData = new byte[1];
+//			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_BATTERY
+//			binData[1] = 0x03;//Command = BATTERY_REPORT
+			binData[0] = getHexByte(Main.batteryLev);//0x64;//battery level
 			
 			binDataInfoVO.setBinData(binData);
 		}else if("22".equals(snsnParam)){ // open/close sensor 상태 통보
-			binData = new byte[8];
-			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-			binData[2] = 0x00;//V1 Alarm Type
-			binData[3] = 0x00;//V1 Alarm Level
-			binData[4] = 0x00;//Reserved 
-			binData[5] = 0x00;//Notification Status
-			binData[6] = 0x06;//Notification Type -> Home Security
-			binData[7] = getHextoByteDoor(Main.isDoorLock);//0x17;//Event -> closed
+			binData = new byte[1];
+//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
+//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
+//			binData[2] = 0x00;//V1 Alarm Type
+//			binData[3] = 0x00;//V1 Alarm Level
+//			binData[4] = 0x00;//Reserved 
+//			binData[5] = 0x00;//Notification Status
+//			binData[6] = 0x06;//Notification Type -> Home Security
+			binData[0] = getHextoByteDoor(Main.isDoorLock);//0x17;//Event -> closed
 			
 			binDataInfoVO.setBinData(binData);
 		}else if("23".equals(snsnParam)){ // open/close sensor 감지 통보
-			binData = new byte[8];
-			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-			binData[2] = 0x00;//V1 Alarm Type
-			binData[3] = 0x00;//V1 Alarm Level
-			binData[4] = 0x00;//Reserved 
-			binData[5] = 0x00;//Notification Status
-			binData[6] = 0x08;//Notification Type -> Power Namangement
-			binData[7] = getHextoByteDoor(Main.isDoorLock);//0x16;//Event -> open
+			binData = new byte[1];
+//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
+//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
+//			binData[2] = 0x00;//V1 Alarm Type
+//			binData[3] = 0x00;//V1 Alarm Level
+//			binData[4] = 0x00;//Reserved 
+//			binData[5] = 0x00;//Notification Status
+//			binData[6] = 0x08;//Notification Type -> Power Namangement
+			binData[0] = getHextoByteDoor(Main.isDoorLock);//0x16;//Event -> open
 			
 			binDataInfoVO.setBinData(binData);
 		}else if("24".equals(snsnParam)){ // row battery 통보
-			binData = new byte[3];
-			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_BATTERY
-			binData[1] = 0x03;//Command = BATTERY_REPORT
-			binData[2] = getHexByte(Main.batteryLev);//betLev;//battery level
+			binData = new byte[1];
+//			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_BATTERY
+//			binData[1] = 0x03;//Command = BATTERY_REPORT
+			binData[0] = getHexByte(Main.batteryLev);//betLev;//battery level
 			
 			binDataInfoVO.setBinData(binData);
 		}else if("32".equals(snsnParam)){ // gas valve 상태 통보
-			binData = new byte[3];
-			binData[0] = 0x25;//Command Class = COMMAND_CLASS_SWITCH_BINARY
-			binData[1] = 0x03;//Command = SWITCH_BINARY_SET
-			binData[2] = getHextoByteGas(Main.isGasSt);//value
+			binData = new byte[1];
+//			binData[0] = 0x25;//Command Class = COMMAND_CLASS_SWITCH_BINARY
+//			binData[1] = 0x03;//Command = SWITCH_BINARY_SET
+			binData[0] = getHextoByteGas(Main.isGasSt);//value
 			
 			binDataInfoVO.setBinData(binData);
 		}else if("33".equals(snsnParam)){ // gas valve 동작 통보
-			binData = new byte[3];
-			binData[0] = 0x25;//Command Class = COMMAND_CLASS_SWITCH_BINARY
-			binData[1] = 0x03;//Command = SWITCH_BINARY_SET
-			binData[2] = getHextoByteGas(Main.isGasSt);//0x00;//value
+			binData = new byte[1];
+//			binData[0] = 0x25;//Command Class = COMMAND_CLASS_SWITCH_BINARY
+//			binData[1] = 0x03;//Command = SWITCH_BINARY_SET
+			binData[0] = getHextoByteGas(Main.isGasSt);//0x00;//value
 			binDataInfoVO.setBinData(binData);
-		}else if("res02".equals(snsnParam)){ // 요청에 대한 응답 - 도어락상태 확인 : 장치상태
-			binData = new byte[3];
-			binData[0] = 0x62;//Command Class = COMMAND_CLASS_DOOR_LOCK
-			binData[1] = 0x03;//Command = DOOR_LOCK_OPERATION_SET
-			binData[2] = 0x00;//Door Lock Mode
+		}else if("50000008".equals(cd)){ //요청에 대한 응답-  wifi 상태 조회
+//			binData = new byte[1];aaa
+//			binData[0] = 0x62;//Command Class = COMMAND_CLASS_DOOR_LOCK
+//			binData[1] = 0x03;//Command = DOOR_LOCK_OPERATION_SET
+//			binData[0] = stringUtil.hexToByteArray(cd);//Door Lock Mode
+			binData = stringUtil.hexToByteArray(snsnParam);
 			binDataInfoVO.setBinData(binData);
-		}else if("res03".equals(snsnParam)){ // 요청에 대한 응답 - 도어락상태 확인 : 배터리 잔량
-			binData = new byte[3];
-			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_DOOR_LOCK
-			binData[1] = 0x03;//Command = DOOR_LOCK_OPERATION_SET
-			binData[2] = getHexByte(Main.batteryLev);
+		}else if("6203".equals(cd)){ // 요청에 대한 응답 - 도어락 상태 확인- 장치상태
+//			binData = new byte[1];
+//			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_DOOR_LOCK
+//			binData[1] = 0x03;//Command = DOOR_LOCK_OPERATION_SET
+//			binData[0] = getHexByte(Main.batteryLev);
+			binData = stringUtil.hexToByteArray(snsnParam);
 			binDataInfoVO.setBinData(binData);
-		}else if("res04".equals(snsnParam)){ // 요청에 대한 응답 - gas valve 상태 통보 - 장치상태
-			binData = new byte[3];
-			binData[0] = 0x25;//Command Class = COMMAND_CLASS_SWITCH_BINARY
-			binData[1] = 0x03;//Command = SWITCH_BINARY_SET
-			binData[2] = 0x00;//value
-			
+		}else if("8003".equals(cd)){ // 도어락 상태 확인 - 배터리 / Gas valve 상태 확인 - 배터리
+//			binData = new byte[1];
+//			binData[0] = 0x25;//Command Class = COMMAND_CLASS_SWITCH_BINARY
+//			binData[1] = 0x03;//Command = SWITCH_BINARY_SET
+//			binData[0] = 0x00;//value
+			binData = stringUtil.hexToByteArray(snsnParam);
+			binDataInfoVO.setBinData(binData);
+		}else if("2503".equals(cd)){ // 요청에 대한 응답 - Gas valve 상태 확인 - 장치상태
+//			binData = new byte[1];
+//			binData[0] = 0x25;//Command Class = COMMAND_CLASS_SWITCH_BINARY
+//			binData[1] = 0x03;//Command = SWITCH_BINARY_SET
+//			binData[0] = 0x00;//value
+			binData = stringUtil.hexToByteArray(snsnParam);
 			binDataInfoVO.setBinData(binData);
 		}else{//16, 111, 37, res01
 			binData = new byte[0];
@@ -841,22 +882,22 @@ private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag
 		
 		if("0".equals(snsnParam)){ // open/close sensor 상태 통보
 			cd = "7105";
-			binData = new byte[8];
-			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-			binData[2] = 0x00;//V1 Alarm Type
-			binData[3] = 0x00;//V1 Alarm Level
-			binData[4] = 0x00;//Reserved 
-			binData[5] = 0x00;//Notification Status
-			binData[6] = 0x06;//Notification Type -> Home Security
-			binData[7] = getHextoByteDoor(Main.isDoorLock);//0x17;//Event -> closed
+			binData = new byte[1];
+//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
+//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
+//			binData[2] = 0x00;//V1 Alarm Type
+//			binData[3] = 0x00;//V1 Alarm Level
+//			binData[4] = 0x00;//Reserved 
+//			binData[5] = 0x00;//Notification Status
+//			binData[6] = 0x06;//Notification Type -> Home Security
+			binData[0] = getHextoByteDoor(Main.isDoorLock);//0x17;//Event -> closed
 			
 			binDataInfoVO.setBinData(binData);
 		}else if("1".equals(snsnParam)){ // row battery 통보
-			binData = new byte[3];
-			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_BATTERY
-			binData[1] = 0x03;//Command = BATTERY_REPORT
-			binData[2] = getHexByte(Main.batteryLev);//betLev;//battery level
+			binData = new byte[1];
+//			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_BATTERY
+//			binData[1] = 0x03;//Command = BATTERY_REPORT
+			binData[0] = getHexByte(Main.batteryLev);//betLev;//battery level
 			
 			binDataInfoVO.setBinData(binData);
 		}else{
@@ -902,13 +943,13 @@ private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag
 			setupVal = new byte[4+userPwLen];
 			setupVal = setUserByte(userId, userPW, userPwLen);
 			binSetupDataInfoVO.setSetupVal(setupVal);
-		}else if("res06".equals(snsnParam)){ // Timeout 조회 
-			setupVal = new byte[8];
-//			setupVal[0] = (byte)((1 >>> 56) & 0x71);
-			setupVal[0] = 0x70;//Command Class = COMMAND_CLASS_CONFIGURATION
-			setupVal[1] = 0x06;//Command = CONFIGURATION_REPORT
-			setupVal[2] = 0x01;//Parameter Number
-			
+		}else if("31000008".equals(snsnTag)){ // Iot단말 연결상태 조회
+			binSetupDataInfoVO.setSnsnTagCd(snsnTag);
+			setupVal = StringUtil.hexToByteArray(snsnParam);
+			binSetupDataInfoVO.setSetupVal(setupVal);
+		}else if("7005".equals(snsnTag)){ // Timeout 조회
+			binSetupDataInfoVO.setSnsnTagCd(snsnTag);
+			setupVal = StringUtil.hexToByteArray(snsnParam);
 			binSetupDataInfoVO.setSetupVal(setupVal);
 		}else{		//00, 01, 10, 11, 19, 112, 20, 21, 25, 30, 31, 34, 35, 36, res05 -> parameter 없음
 			setupVal = new byte[0];
@@ -974,14 +1015,14 @@ private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag
 	}
 	public static byte[] setUserByte(String userId, String userPW, int byteArrayLen){
 		
-		byte[] setVal = new byte[4+byteArrayLen];
+		byte[] setVal = new byte[2+byteArrayLen];
 		
-		setVal[0] = 0x63;//Command Class = COMMAND_CLASS_USER_CODE
-		setVal[1] = 0x03;//Command = USER_CODE_SET
+//		setVal[0] = 0x63;//Command Class = COMMAND_CLASS_USER_CODE
+//		setVal[1] = 0x03;//Command = USER_CODE_SET
 //		setVal[2] = stringToHex0x(Main.userId).getBytes();//0x01;//User Identifier
-		System.arraycopy(stringToHex0x(Main.userId).getBytes(), 0, setVal, 2, 1);
-		setVal[3] = 0x00;//User ID Status	
-		System.arraycopy(stringToHex0x(Main.userPW).getBytes(), 0, setVal, 4, byteArrayLen);
+		System.arraycopy(stringToHex0x(Main.userId).getBytes(), 0, setVal, 0, 1);
+		setVal[1] = 0x00;//User ID Status	
+		System.arraycopy(stringToHex0x(Main.userPW).getBytes(), 0, setVal, 2, byteArrayLen);
 		
 		return setVal;
 		

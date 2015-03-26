@@ -31,6 +31,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+//import org.eclipse.swt.widgets.TabFolder;
+//import org.eclipse.swt.widgets.TabItem;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -84,7 +86,9 @@ public class Main {
 	
 	private static Combo comboVersion;
 	private Combo comboFun;
+	private Combo comboFun2;
 	private Combo comboDev;
+	private Combo comboReqRes;
 	private Combo comboLev;
 	private Combo comboLev2;
 	
@@ -100,6 +104,8 @@ public class Main {
 	private static Text textSnsn;
 	private static Text textUserId;
 	private static Text textUserPW;
+	private static Text textTagSeq;
+	private static Text textTagVal;
 	
 	private static Group initData;
 	private static Group groupDevice;
@@ -111,6 +117,7 @@ public class Main {
 	
 	private static Button buttonInit;
 	private static Button buttonSend;
+	private static Button buttonTagVal;
 	
 	private static String report;
 	private static boolean isAppend;
@@ -127,6 +134,16 @@ public class Main {
 	public static String userId = "";
 	public static String userPW = "";
 	public static PacketUtil packetUtil;
+	
+	/**************************************************************************/
+	public static String tag50000008 = "";
+	public static String tag31000008 = "";
+	public static String tag6202 = "";
+	public static String tag8002 = "";
+	public static String tag2502 = "";
+	public static String tag7005 = "";
+	public static String tag7006 = "";
+	/**************************************************************************/
 	
 	public Main() {
         
@@ -163,7 +180,7 @@ public class Main {
 		
 		shell = new Shell(display);
 		shell.setLayout(new GridLayout(1, true));
-		shell.setSize(650, 800);
+		shell.setSize(650, 900);
 		shell.setText("EC Emulator - v0.01");
 
 		Group groupProxy = new Group(shell, SWT.NULL);
@@ -204,7 +221,7 @@ public class Main {
 		groupDevice = new Group(shell, SWT.NULL);
 		groupDevice.setText("장치 정보");
 		groupDevice.setLayout(new GridLayout(2, false));
-		groupDevice.setLayoutData(new GridData(615, 120));
+		groupDevice.setLayoutData(new GridData(615, 140));
 		
 		Label deviceNameLabel = new Label(groupDevice, SWT.NULL);
 		deviceNameLabel.setLayoutData(new GridData(85, 0));
@@ -229,6 +246,14 @@ public class Main {
 		deviceId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		deviceId.setText("iotdevice03");
 		
+		new Label(groupDevice, SWT.NULL).setText("Request/Response");
+		comboReqRes = new Combo(groupDevice, SWT.BORDER);
+		comboReqRes.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		comboReqRes.add("Request", 0);
+		comboReqRes.add("Response(333/711)", 1);
+		comboReqRes.select(0);
+		comboReqRes.setVisible(false);
+
 		new Label(groupDevice, SWT.NULL).setText("IoT End Device");
 		comboDev = new Combo(groupDevice, SWT.BORDER);
 		comboDev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -238,6 +263,7 @@ public class Main {
 		comboDev.add("Gas valve", 3);
 		comboDev.select(0);
 		comboDev.setVisible(false);
+		
 		
 		groupFunction = new Group(shell, SWT.NULL);
 		groupFunction.setText("");
@@ -255,7 +281,7 @@ public class Main {
 		groupSetting = new Group(shell, SWT.NULL);
 		groupSetting.setText("");
 		groupSetting.setLayout(new GridLayout(2, false));
-		groupSetting.setLayoutData(new GridData(615, 80));
+		groupSetting.setLayoutData(new GridData(615, 100));
 		
 		Label settingNameLabel = new Label(groupSetting, SWT.NULL);
 		settingNameLabel.setLayoutData(new GridData(85, 0));
@@ -318,6 +344,7 @@ public class Main {
 						initSendData();
 						setFunction(0);
 						comboDev.setVisible(true);
+						comboReqRes.setVisible(true);
 						groupFunction.layout();
 						buttonInit.setText("Disconnect");
 						buttonSend.setEnabled(true);
@@ -334,16 +361,47 @@ public class Main {
 			}
 		});
 		
+		comboReqRes.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				comboDev.select(0);
+				if(comboReqRes.getSelectionIndex() == 0) {
+					setFunction(0);
+					if(buttonSend.getEnabled()== false){
+						buttonSend.setEnabled(true);
+					}
+				}else if(comboReqRes.getSelectionIndex() == 1) {
+					setFunction2(0);
+				}
+				groupFunction.layout();
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent event) {
+				if(comboReqRes.getSelectionIndex() == 1) {
+					setTagSeqVal("50000008","");
+				}
+			}
+
+		});
+		
 		comboDev.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent event) {
-				if(comboDev.getSelectionIndex() == 0) {
+				if(comboDev.getSelectionIndex() == 0 && comboReqRes.getSelectionIndex() == 0) {
 					setFunction(0);
-				}else if(comboDev.getSelectionIndex() == 1) {
+				}else if(comboDev.getSelectionIndex() == 1 && comboReqRes.getSelectionIndex() == 0) {
 					setFunction(1);
-				}else if(comboDev.getSelectionIndex() == 2) {
+				}else if(comboDev.getSelectionIndex() == 2 && comboReqRes.getSelectionIndex() == 0) {
 					setFunction(2);
-				}else if(comboDev.getSelectionIndex() == 3) {
+				}else if(comboDev.getSelectionIndex() == 3 && comboReqRes.getSelectionIndex() == 0) {
 					setFunction(3);
+				}
+				else if(comboDev.getSelectionIndex() == 0 && comboReqRes.getSelectionIndex() == 1) {
+					setFunction2(0);
+				}else if(comboDev.getSelectionIndex() == 1 && comboReqRes.getSelectionIndex() == 1) {
+					setFunction2(1);
+				}else if(comboDev.getSelectionIndex() == 2 && comboReqRes.getSelectionIndex() == 1) {
+					setFunction2(2);
+				}else if(comboDev.getSelectionIndex() == 3 && comboReqRes.getSelectionIndex() == 1) {
+					setFunction2(3);
 				}
 				groupFunction.layout();
 			}
@@ -366,104 +424,48 @@ public class Main {
 //	            		methcode = MthdType.INITA_DEV_RETV;
 	            		
 						if(comboDev.getSelectionIndex() == 0) {
-							if(comboFun.getSelectionIndex() == 0){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 1){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}
-    	            	} else if(comboDev.getSelectionIndex() == 1) {
-    	            		if(comboFun.getSelectionIndex() == 0){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 1){
+							if(comboFun.getSelectionIndex() == 0 || comboFun.getSelectionIndex() == 1){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
 							}else if(comboFun.getSelectionIndex() == 2){
+								methType = MthdType.FRMWR_UDATE_STTUS.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.FRMWR_UDATE_STTUS;
+							}
+    	            	} else if(comboDev.getSelectionIndex() == 1) {
+    	            		if(comboFun.getSelectionIndex() == 0 || comboFun.getSelectionIndex() == 1){
+								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
+	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
+							}else if(comboFun.getSelectionIndex() == 2 || comboFun.getSelectionIndex() == 3){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
 	    	            		userId = textUserId.getText();
 	    	            		userPW = textUserPW.getText(); 
-							}else if(comboFun.getSelectionIndex() == 3){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-	    	            		userId = textUserId.getText();
-	    	            		userPW = textUserPW.getText(); 
-							}else if(comboFun.getSelectionIndex() == 4){
-								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
-	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-							}else if(comboFun.getSelectionIndex() == 5){
-								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
-	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-							}else if(comboFun.getSelectionIndex() == 6){
-								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
-	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-							}else if(comboFun.getSelectionIndex() == 7){
-								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
-	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-							}else if(comboFun.getSelectionIndex() == 8){
+							}else if(comboFun.getSelectionIndex() == 4 || comboFun.getSelectionIndex() == 5 || comboFun.getSelectionIndex() == 6
+									|| comboFun.getSelectionIndex() == 7 || comboFun.getSelectionIndex() == 8 || comboFun.getSelectionIndex() == 10
+									|| comboFun.getSelectionIndex() == 11 || comboFun.getSelectionIndex() == 13){
 								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
 	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
 							}else if(comboFun.getSelectionIndex() == 9){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 10){
-								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
-	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-							}else if(comboFun.getSelectionIndex() == 11){
-								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
-	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
 							}else if(comboFun.getSelectionIndex() == 12){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 13){
-								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
-	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
 							}
     	            	} else if(comboDev.getSelectionIndex() == 2) {
-    	            		if(comboFun.getSelectionIndex() == 0){
+    	            		if(comboFun.getSelectionIndex() == 0 || comboFun.getSelectionIndex() == 1 || comboFun.getSelectionIndex() == 5){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 1){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 2){
+							}else if(comboFun.getSelectionIndex() == 2 || comboFun.getSelectionIndex() == 3 || comboFun.getSelectionIndex() == 4){
 								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
 	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-							}else if(comboFun.getSelectionIndex() == 3){
-								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
-	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-							}else if(comboFun.getSelectionIndex() == 4){
-								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
-	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-							}else if(comboFun.getSelectionIndex() == 5){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
 							}
     	            	} else if(comboDev.getSelectionIndex() == 3) {
-    	            		if(comboFun.getSelectionIndex() == 0){
+    	            		if(comboFun.getSelectionIndex() == 0 || comboFun.getSelectionIndex() == 1 ||
+    	            				comboFun.getSelectionIndex() == 4 || comboFun.getSelectionIndex() == 5 ||comboFun.getSelectionIndex() == 6){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 1){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 2){
-								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
-	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-							}else if(comboFun.getSelectionIndex() == 3){
-								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
-	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-							}else if(comboFun.getSelectionIndex() == 4){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 5){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 6){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 7){
+							}else if(comboFun.getSelectionIndex() == 2 || comboFun.getSelectionIndex() == 3 || comboFun.getSelectionIndex() == 7){
 								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
 	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
 							}
@@ -580,40 +582,6 @@ public class Main {
 			
 		}
 		
-		/*new Label(groupFunction, SWT.NULL).setText("Battery Lev");
-		comboLev = new Combo(groupFunction, SWT.BORDER);
-		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		comboLev.add("0%", 0);
-		comboLev.add("10%", 1);
-		comboLev.add("20%", 2);
-		comboLev.add("30%", 3);
-		comboLev.add("40%", 4);
-		comboLev.add("50%", 5);
-		comboLev.add("60%", 6);
-		comboLev.add("70%", 7);
-		comboLev.add("80%", 8);
-		comboLev.add("90%", 9);
-		comboLev.add("100%", 10);
-		
-		if(batteryLev != 0){
-			comboLev.select(batteryLev);
-		}else{
-			comboLev.select(0);
-		}
-		comboLev.setVisible(true);
-		groupFunction.layout();		
-		
-		comboLev.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent event) {
-				batteryLev = comboLev.getSelectionIndex();
-			}
-			
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-
-		});*/
-		
 		comboFun.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent event) {
 				if((comboDev.getSelectionIndex() == 1 && comboFun.getSelectionIndex() == 13) 
@@ -650,6 +618,174 @@ public class Main {
 			public void widgetDefaultSelected(SelectionEvent e) {}
 
 		});
+
+	}
+	
+	private void setFunction2(int isFunc){
+		if(buttonSend.getEnabled() == true){
+			buttonSend.setEnabled(false);
+		}
+		
+		Control[] controls = groupFunction.getChildren();
+		for(int i = 0; i < controls.length; i++) {
+			if(controls[i].getVisible()) {
+				controls[i].dispose();
+			}
+		}
+		
+		if(groupSetting.getVisible() == true){
+			groupSetting.setVisible(false);
+		}
+		
+		if(groupFunction.getVisible() == false){
+			groupFunction.setVisible(true);
+		}
+		
+		groupFunction.setText("세부 기능");
+		groupFunction.setLayout(new GridLayout(2, false));
+		
+		if(isFunc == 0){
+			new Label(groupFunction, SWT.NULL).setText("Function");
+			comboFun2 = new Combo(groupFunction, SWT.BORDER);
+			comboFun2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			comboFun2.add("WiFI 상태 조회", 0);//711
+			comboFun2.add("IoT 단말 연결상태 조회", 1);//333
+			comboFun2.select(0);
+			comboFun2.setVisible(true);
+		}else if(isFunc == 1){
+			new Label(groupFunction, SWT.NULL).setText("Function");
+			comboFun2 = new Combo(groupFunction, SWT.BORDER);
+			comboFun2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			comboFun2.add("도어상태 확인/장치상태", 0);//711
+			comboFun2.add("도어상태 확인/베터리", 1);//711
+			comboFun2.select(0);
+			comboFun2.setVisible(true);
+		}else if(isFunc == 2){
+			new Label(groupFunction, SWT.NULL).setText("Function");
+			comboFun2 = new Combo(groupFunction, SWT.BORDER);
+			comboFun2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			
+			comboFun2.setVisible(true);
+		}else if(isFunc == 3){
+			new Label(groupFunction, SWT.NULL).setText("Function");
+			comboFun2 = new Combo(groupFunction, SWT.BORDER);
+			comboFun2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			comboFun2.add("Gas valve 상태확인/장치상태", 0);//711
+			comboFun2.add("Gas valve 상태확인/베터리", 1);//711
+			comboFun2.add("TimeOut 조회", 2);//333
+			comboFun2.add("Remainning 조회", 3);//333
+			comboFun2.select(0);
+			
+			comboFun2.setVisible(true);
+			
+		}
+		
+		comboFun2.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent event) {
+				if(comboDev.getSelectionIndex() == 0 && comboFun2.getSelectionIndex() == 0){
+					setTagSeqVal("50000008",tag50000008);
+				}else if(comboDev.getSelectionIndex() == 0 && comboFun2.getSelectionIndex() == 1){
+					setTagSeqVal("31000008",tag31000008);
+				}else if(comboDev.getSelectionIndex() == 1 && comboFun2.getSelectionIndex() == 0){
+					setTagSeqVal("6202",tag6202);
+				}else if(comboDev.getSelectionIndex() == 1 && comboFun2.getSelectionIndex() == 1){
+					setTagSeqVal("8002",tag8002);
+				}else if(comboDev.getSelectionIndex() == 3 && comboFun2.getSelectionIndex() == 0){
+					setTagSeqVal("2502",tag2502);
+				}else if(comboDev.getSelectionIndex() == 3 && comboFun2.getSelectionIndex() == 1){
+					setTagSeqVal("8002",tag8002);
+				}else if(comboDev.getSelectionIndex() == 3 && comboFun2.getSelectionIndex() == 2){
+					setTagSeqVal("7005",tag7005);
+				}else if(comboDev.getSelectionIndex() == 3 && comboFun2.getSelectionIndex() == 3){
+					setTagSeqVal("7006",tag7006);
+				}
+			}
+			public void widgetDefaultSelected(SelectionEvent event) {
+				
+			}
+
+		});
+
+	}
+	
+	private void setTagSeqVal(String seq, String val){
+		Control[] controls = groupSetting.getChildren();
+		for(int i = 0; i < controls.length; i++) {
+			if(controls[i].getVisible()) {
+				controls[i].dispose();
+			}
+		}
+		
+		if(groupSetting.getVisible() == false){
+			groupSetting.setVisible(true);
+		}
+		
+		groupSetting.setText("세부 설정");
+		groupSetting.setLayout(new GridLayout(2, false));
+		
+		new Label(groupSetting, SWT.NULL).setText("Tag Seq");
+		textTagSeq = new Text(groupSetting, SWT.SINGLE | SWT.BORDER);
+		textTagSeq.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		textTagSeq.setText(seq);
+		
+		new Label(groupSetting, SWT.NULL).setText("Tag Value(Hex)");
+		textTagVal = new Text(groupSetting, SWT.SINGLE | SWT.BORDER);
+		textTagVal.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		textTagVal.setText(val);
+		
+		new Label(groupSetting, SWT.NULL).setText("");
+		buttonTagVal = new Button(groupSetting, SWT.PUSH);
+		buttonTagVal.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		buttonTagVal.setText("Save TagValue");
+		buttonTagVal.setEnabled(true);
+		
+		buttonTagVal.addSelectionListener(new SelectionListener() {
+		
+		  public void widgetSelected(SelectionEvent event) {
+			  if(textTagSeq != null){
+					if(textTagSeq.getText() != null){
+						if("50000008".equals(textTagSeq.getText())){
+							tag50000008 = textTagVal.getText();
+						}else if("31000008".equals(textTagSeq.getText())){
+							tag31000008 = textTagVal.getText();
+						}else if("6202".equals(textTagSeq.getText())){
+							tag6202 = textTagVal.getText();
+						}else if("8002".equals(textTagSeq.getText())){
+							tag8002 = textTagVal.getText();
+						}else if("2502".equals(textTagSeq.getText())){
+							tag2502 = textTagVal.getText();
+						}else if("7005".equals(textTagSeq.getText())){
+							tag7005 = textTagVal.getText();
+						}else if("7006".equals(textTagSeq.getText())){
+							tag7006 = textTagVal.getText();
+						}
+					}
+				}  
+		  }
+		  public void widgetDefaultSelected(SelectionEvent event) {
+			if(textTagSeq != null){
+				if(textTagSeq.getText() != null){
+					if("50000008".equals(textTagSeq.getText())){
+						tag50000008 = textTagVal.getText();
+					}else if("31000008".equals(textTagSeq.getText())){
+						tag31000008 = textTagVal.getText();
+					}else if("6202".equals(textTagSeq.getText())){
+						tag6202 = textTagVal.getText();
+					}else if("8002".equals(textTagSeq.getText())){
+						tag8002 = textTagVal.getText();
+					}else if("2502".equals(textTagSeq.getText())){
+						tag2502 = textTagVal.getText();
+					}else if("7005".equals(textTagSeq.getText())){
+						tag7005 = textTagVal.getText();
+					}else if("7006".equals(textTagSeq.getText())){
+						tag7006 = textTagVal.getText();
+					}
+				}
+			}   
+		  }
+		});
+		
+		groupSetting.layout();
 		
 	}
 	
