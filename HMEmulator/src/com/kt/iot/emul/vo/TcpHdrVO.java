@@ -180,6 +180,9 @@ public class TcpHdrVO implements Serializable, Cloneable
 		arrMethodType[0] = (byte)(arrMethodType[0]  & byte0x0F);
 		arrMethodType[1] = packet[5];
 		Short methodType = ConvertUtil.bytesToshort(arrMethodType);
+		if(methodType == 712){
+			methodType = 711;
+		}
 		this.mthdType = MthdType.fromShort(methodType);
 
 		//4. 전송트랜잭션ID입력(6~13)

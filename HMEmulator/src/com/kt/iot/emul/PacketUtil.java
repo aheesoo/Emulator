@@ -173,18 +173,8 @@ public class PacketUtil {
 		String snsnParam = String.valueOf(devNum)+String.valueOf(funNum); //parameter to set snsnValue
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		MsgHeadVO msgHeadVO = new MsgHeadVO();
-//		msgHeadVO.setCmpreType("1");
 		msgHeadVO.setCommChAthnNo(athnRqtNo);
-//		msgHeadVO.setEcodType("3");
-//		msgHeadVO.setEncdngType("4");
-//		msgHeadVO.setHdrLen((short)0);
-//		msgHeadVO.setHdrType("5");
-//		msgHeadVO.setMapHeaderExtension(null);
 		msgHeadVO.setMethodType("Request");
-//		msgHeadVO.setMsgExchPtrn("6");
-//		msgHeadVO.setMsgType("7");
-//		msgHeadVO.setProtVer("8");
-//		msgHeadVO.setTrmTransacId("");
 		
 
 		if(MthdType.ATHN_COMMCHATHN_DEV_TCP.equals(value)){
@@ -409,17 +399,17 @@ public class PacketUtil {
 		
 		String strBody = "";
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
-		
 		if(value == 333){
 			DevInfoRetvRqtVO devInfoRetvRqtVO = gson.fromJson(new String(data), DevInfoRetvRqtVO.class);
 			DevInfoRetvRespVO devInfoRetvRespVO = new DevInfoRetvRespVO();
 			
 			//** 장치정보목록 */
-			DevBasVO devBasVO = new DevBasVO();
+			
 			
 			List<BinSetupDataInfoVO> binSetupDataInfoVOs = new ArrayList<BinSetupDataInfoVO>();
 			for(CmdDataInfoVO cmdDataInfoVO : devInfoRetvRqtVO.getCmdDataInfoVOs()){
 				String dataTypeCd = cmdDataInfoVO.getDataTypeCd();
+				
 				if("31000008".equals(dataTypeCd)){//Iot 단말 연결 상태 조회
 					snsnTagValue = Main.tag31000008;
 					binSetupDataInfoVOs.add(getBinSetupData(snsnTagValue, dataTypeCd));
@@ -428,20 +418,22 @@ public class PacketUtil {
 					binSetupDataInfoVOs.add(getBinSetupData(dataTypeCd, snsnTagValue));
 				}
 			}
-			devBasVO.setBinSetupDataInfoVOs(binSetupDataInfoVOs);
-			devBasVO.setExtrSysId(devInfoRetvRqtVO.getExtrSysId());
-//			devBasVO.setDevId(devInfoRetvRqtVO.get);
-			devBasVO.setM2mSvcNo(devInfoRetvRqtVO.getM2mSvcNo());
+			
 			List<DevBasVO> devBasVOs = new ArrayList<DevBasVO>();
-			devBasVOs.add(devBasVO);
+			for(String devId : devInfoRetvRqtVO.getInclDevIds()){
+				DevBasVO devBasVO = new DevBasVO();
+				devBasVO.setDevId(devId);
+				devBasVO.setBinSetupDataInfoVOs(binSetupDataInfoVOs);
+				devBasVO.setExtrSysId(devInfoRetvRqtVO.getExtrSysId());
+				devBasVO.setM2mSvcNo(devInfoRetvRqtVO.getM2mSvcNo());
+				devBasVOs.add(devBasVO);
+			}
 			
 			devInfoRetvRespVO.setMsgHeadVO(devInfoRetvRqtVO.getMsgHeadVO());
 			devInfoRetvRespVO.setRespCd(respCd);
 			devInfoRetvRespVO.setRespMsg(respMsg);
 			devInfoRetvRespVO.setDevBasVOs(devBasVOs);
-//			devInfoRetvRespVO.setDevBasVOs(devInfoRetvRqtVO.get);
 			devInfoRetvRespVO.setCmdDataInfoVOs(devInfoRetvRqtVO.getCmdDataInfoVOs());
-			
 			strBody = gson.toJson(devInfoRetvRespVO);
 		} 
 		else if(value == 334){
@@ -481,18 +473,19 @@ public class PacketUtil {
 			DevColecDataVO devColecDataVO = new DevColecDataVO();
 			List<DevColecDataVO> devColecDataVOs = new ArrayList<DevColecDataVO>();
 			
-			ColecRowVO colecRowVO = new ColecRowVO();
 			List<ColecRowVO> colecRowVOs = new ArrayList<ColecRowVO>();
 
 			for(CmdDataInfoVO cmdDataInfoVO : lastValQueryRqtVO.getCmdDataInfoVOs()){
 				String dataTypeCd = cmdDataInfoVO.getDataTypeCd();
+				ColecRowVO colecRowVO = new ColecRowVO();
+				System.out.println("dataTypeCd -----> "+dataTypeCd);
 				if("50000008".equals(dataTypeCd)){//wifi 상태 조회
 					snsnTagValue = Main.tag50000008;
 					colecRowVOs.add(getColecRowVO(colecRowVO, dataTypeCd, snsnTagValue));
-				}else if("6202".equals(dataTypeCd)){//도어락 상태 확인- 장치상태
+				}else if("31996202".equals(dataTypeCd) ||"6202".equals(dataTypeCd)){//도어락 상태 확인- 장치상태
 					snsnTagValue = Main.tag6202;
 					colecRowVOs.add(getColecRowVO(colecRowVO, "6203",snsnTagValue));
-				}else if("8002".equals(dataTypeCd)){//도어락 상태 확인 - 배터리 / Gas valve 상태 확인 - 배터리
+				}else if("31998002".equals(dataTypeCd) || "8002".equals(dataTypeCd)){//도어락 상태 확인 - 배터리 / Gas valve 상태 확인 - 배터리
 					snsnTagValue = Main.tag8002;
 					colecRowVOs.add(getColecRowVO(colecRowVO, "8003", snsnTagValue));
 				}else if("2502".equals(dataTypeCd)){//Gas valve 상태 확인 - 장치상태
@@ -538,8 +531,8 @@ public class PacketUtil {
 				for(CnvyRowVO cnvyRowVO : sysCnvyDataVO.getCnvyRowVOs()){
 					ItgCnvyRprtRqtVO.CnvyRowVO cnvyRow = toCnvyRow(cnvyRowVO);
 					sysCnvyDataVOrept.getCnvyRowVOs().add(cnvyRow);
-					itgCnvyRprtRqtVO.setSysCnvyDataVO(sysCnvyDataVOrept);
 				}
+				itgCnvyRprtRqtVO.setSysCnvyDataVO(sysCnvyDataVOrept);
 			}
 			
 			for(DevCnvyDataVO devyCnvyDataVO : itgCnvyDataVO.getDevCnvyDataVOs()){

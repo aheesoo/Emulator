@@ -244,7 +244,7 @@ public class Main {
 		new Label(groupDevice, SWT.NULL).setText("deviceId");
 		deviceId = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
 		deviceId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		deviceId.setText("iotdevice03");
+		deviceId.setText("iothub");
 		
 		new Label(groupDevice, SWT.NULL).setText("Request/Response");
 		comboReqRes = new Combo(groupDevice, SWT.BORDER);
@@ -371,14 +371,13 @@ public class Main {
 					}
 				}else if(comboReqRes.getSelectionIndex() == 1) {
 					setFunction2(0);
+					setTagSeqVal("50000008",tag50000008);
 				}
 				groupFunction.layout();
 			}
 			
 			public void widgetDefaultSelected(SelectionEvent event) {
-				if(comboReqRes.getSelectionIndex() == 1) {
-					setTagSeqVal("50000008","");
-				}
+				
 			}
 
 		});
@@ -396,12 +395,15 @@ public class Main {
 				}
 				else if(comboDev.getSelectionIndex() == 0 && comboReqRes.getSelectionIndex() == 1) {
 					setFunction2(0);
+					setTagSeqVal("50000008",tag50000008);
 				}else if(comboDev.getSelectionIndex() == 1 && comboReqRes.getSelectionIndex() == 1) {
 					setFunction2(1);
+					setTagSeqVal("6202",tag6202);
 				}else if(comboDev.getSelectionIndex() == 2 && comboReqRes.getSelectionIndex() == 1) {
 					setFunction2(2);
 				}else if(comboDev.getSelectionIndex() == 3 && comboReqRes.getSelectionIndex() == 1) {
 					setFunction2(3);
+					setTagSeqVal("2502",tag2502);
 				}
 				groupFunction.layout();
 			}
@@ -709,6 +711,7 @@ public class Main {
 	}
 	
 	private void setTagSeqVal(String seq, String val){
+
 		Control[] controls = groupSetting.getChildren();
 		for(int i = 0; i < controls.length; i++) {
 			if(controls[i].getVisible()) {
@@ -1148,7 +1151,7 @@ public class Main {
 					
 					String strBody = packetUtil.getBody(mthdType.getValue(), 200,200);
 					byte[] body = strBody.getBytes();
-					
+					System.out.println("=====================keep alive=====================");
 		    		client.sendData(header, body, mthdType.getValue());
 					Main.report("init voiceCnt", true);
 					client.voiceCnt = 0;

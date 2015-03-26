@@ -200,19 +200,21 @@ public class Client extends Thread {
 		int dataLength = packLenValue - header.length;
 		byte[] data = new byte[dataLength];
 		System.arraycopy(dataBuffer, header.length, data, 0, packLenValue-header.length); // body data
-		
+System.out.println("msgType -> "+msgType +"  /  mthd -> "+mthd);
 		if(MsgType.RESPONSE.equals(msgType)){ // 요청(Request)에 대한 수신
-			if(MthdType.ATHN_COMMCHATHN_EXTRSYS_TCP.equals(mthd)){
+			if(MthdType.ATHN_COMMCHATHN_DEV_TCP.equals(mthd)){
 				CommChAthnRespVO commChAthnRespVO = gson.fromJson(new String(data), CommChAthnRespVO.class);
 				
 				String respMsg = commChAthnRespVO.getRespMsg();
 				Main.report("RespMsg : " + respMsg, true);
 				Main.report(new String(data), true);
-				
+
 				/** 통신채널 인증 토큰 */
-				String commChAthnNo = commChAthnRespVO.getMsgHeadVO().getCommChAthnNo();
-				Main.athnNo = commChAthnNo;
+				commChAthnRespVO.getAthnNo();
+				String commChAthnNo = commChAthnRespVO.getAthnNo();//commChAthnRespVO.getMsgHeadVO().getCommChAthnNo();
 				
+				Main.athnNo = commChAthnNo;
+
 				/** 통신채널 인증 후 keepalive 주기적 요청 */
 				jobScheduler.scheduleAtFixedRate(job, 30000, 30000);
 				
@@ -285,6 +287,7 @@ public class Client extends Thread {
 				
 			}
 			else if(MthdType.QUERY_LASTVAL.equals(mthd)){//711 최종값 쿼리
+				System.out.println("QUERY_LASTVALQUERY_LASTVALQUERY_LASTVALQUERY_LASTVALQUERY_LASTVAL");
 				LastValQueryRqtVO lastValQueryRqtVO = gson.fromJson(new String(data), LastValQueryRqtVO.class);
 				
 				Main.report(new String(data), true);
