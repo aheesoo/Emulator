@@ -165,7 +165,8 @@ public class PacketUtil {
 		String snsnTag = "";
 		String strBody = "";
 
-		String athnRqtNo = Main.athnNo;
+		String athnRqtNo = Main.athnRqtNo;
+		String athnNo = Main.athnNo;
 		String extrSysId = Main.extrSystemId;
 		String devId = Main.devId;
 		String commChId = "GiGA_Home_IoT_TCP";
@@ -173,7 +174,7 @@ public class PacketUtil {
 		String snsnParam = String.valueOf(devNum)+String.valueOf(funNum); //parameter to set snsnValue
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		MsgHeadVO msgHeadVO = new MsgHeadVO();
-		msgHeadVO.setCommChAthnNo(athnRqtNo);
+		msgHeadVO.setCommChAthnNo(athnNo);
 		msgHeadVO.setMethodType("Request");
 		
 
@@ -242,6 +243,7 @@ public class PacketUtil {
 			DevBasVO devBasVO = new DevBasVO();
 			List<DevBasVO> devBasVOs = new ArrayList<DevBasVO>();
 			devBasVO.setAthnRqtNo(athnRqtNo);
+			devBasVO.setAthnNo(athnNo);
 			devBasVO.setDevId(devId);
 			devBasVO.setM2mSvcNo(m2mSvcNo);
 			devBasVO.setExtrSysId(extrSysId); 
@@ -298,7 +300,7 @@ public class PacketUtil {
 			}else{
 				devBasVOs.add(devBasVO);
 			}
-			
+
 			devInfoUpdateRprtRqtVO.setExtrSysId(extrSysId);
 			devInfoUpdateRprtRqtVO.setInfoUpdTypeCd(infoUpdTypeCd);
 			devInfoUpdateRprtRqtVO.setDevBasVOs(devBasVOs);

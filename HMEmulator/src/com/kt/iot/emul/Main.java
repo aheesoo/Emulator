@@ -124,6 +124,7 @@ public class Main {
 	private static Shell shell;
 	
 	public static String athnNo;
+	public static String athnRqtNo;
 	public static String extrSystemId;
 	public static String devId;
 	public static int batteryLev = 0;
@@ -1089,7 +1090,7 @@ public class Main {
 	public static void initSendData(){
 		StdSysTcpCode.MthdType mthType = MthdType.ATHN_COMMCHATHN_DEV_TCP;
 		
-		athnNo = authNum.getText();
+		athnRqtNo = authNum.getText();
 		extrSystemId = extrSysId.getText();
 		devId = deviceId.getText();
 		
