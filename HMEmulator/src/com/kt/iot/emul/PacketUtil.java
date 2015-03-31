@@ -411,13 +411,15 @@ public class PacketUtil {
 		else if(MthdType.FRMWR_UDATE_STTUS.equals(value)){//813 펌웨어 업데이트상태 전송
 			FrmwrUdateSttusTrmRqtVO frmwrUdateSttusTrmRqtVO = new FrmwrUdateSttusTrmRqtVO();
 			PkgInfoVO pkgInfoVO = new PkgInfoVO();
-			
+			String sttusCd = "";
+			String sttusVal = "1";
 			frmwrUdateSttusTrmRqtVO.setExtrSysId(extrSysId);
 			frmwrUdateSttusTrmRqtVO.setDevId(devId);
+			frmwrUdateSttusTrmRqtVO.setSttusCd(sttusCd);
+			frmwrUdateSttusTrmRqtVO.setSttusVal(sttusVal);
 			/*frmwrUdateSttusTrmRqtVO.setFrmwrSeq(frmwrSeq);
 			frmwrUdateSttusTrmRqtVO.setFrmwrFilePathNm(frmwrFilePathNm);
 			frmwrUdateSttusTrmRqtVO.setOccDt(occDt);
-			frmwrUdateSttusTrmRqtVO.setSttusCd(sttusCd);
 			
 			pkgInfoVO.setPkgSeq(pkgSeq);
 			pkgInfoVO.setPkgFilePathNm(pkgFilePathNm);

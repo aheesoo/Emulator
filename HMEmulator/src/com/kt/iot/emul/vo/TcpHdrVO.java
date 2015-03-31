@@ -180,8 +180,11 @@ public class TcpHdrVO implements Serializable, Cloneable
 		arrMethodType[0] = (byte)(arrMethodType[0]  & byte0x0F);
 		arrMethodType[1] = packet[5];
 		Short methodType = ConvertUtil.bytesToshort(arrMethodType);
+		System.out.println("methodType ---> "+methodType);
 		if(methodType == 712){
 			methodType = 711;
+		}else if(methodType == 812){
+			methodType = 813;
 		}
 		this.mthdType = MthdType.fromShort(methodType);
 

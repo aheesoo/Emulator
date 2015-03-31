@@ -301,15 +301,13 @@ System.out.println("msgType -> "+msgType +"  /  mthd -> "+mthd);
 				
 			}
 			else if(MthdType.QUERY_LASTVAL.equals(mthd)){//711 최종값 쿼리
-				LastValQueryRqtVO lastValQueryRqtVO = gson.fromJson(new String(data), LastValQueryRqtVO.class);
+//				LastValQueryRqtVO lastValQueryRqtVO = gson.fromJson(new String(data), LastValQueryRqtVO.class);
 				
 				Main.report(new String(data), true);
 				strBody = Main.packetUtil.getResBody(mthd.getValue(), data);
 				resBody = strBody.getBytes();
 			}
-			else if(812 == mthd.getValue()){//812 GW 펌웨어 업그레이드 통보
-				FrmwrUdateNtfyRqtVO frmwrUdateNtfyRqtVO = gson.fromJson(new String(data), FrmwrUdateNtfyRqtVO.class);
-				
+			else if(813 == mthd.getValue()){//812 GW 펌웨어 업그레이드 통보 812code -> 813 대체(TcpHdrVO.java)
 				Main.report(new String(data), true);
 				strBody = Main.packetUtil.getResBody(mthd.getValue(), data);
 				resBody = strBody.getBytes();
