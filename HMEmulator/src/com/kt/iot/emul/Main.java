@@ -451,30 +451,20 @@ public class Main {
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
 							}else if(comboFun.getSelectionIndex() == 2){
-								methType = MthdType.FRMWR_UDATE_STTUS.getValue();// 장치정보 갱신보고 332
+								methType = MthdType.FRMWR_UDATE_STTUS.getValue();// 펌웨어 업데이트상태 전송 813
 	    	            		methcode = MthdType.FRMWR_UDATE_STTUS;
 							}
     	            	} else if(comboDev.getSelectionIndex() == 1) {
-    	            		if(comboFun.getSelectionIndex() == 0 || comboFun.getSelectionIndex() == 1){
+    	            		if(comboFun.getSelectionIndex() == 0 || comboFun.getSelectionIndex() == 1 || comboFun.getSelectionIndex() == 9){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 2 || comboFun.getSelectionIndex() == 3){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 4 || comboFun.getSelectionIndex() == 5 || comboFun.getSelectionIndex() == 6
-									|| comboFun.getSelectionIndex() == 7 || comboFun.getSelectionIndex() == 8 || comboFun.getSelectionIndex() == 10
-									|| comboFun.getSelectionIndex() == 11 || comboFun.getSelectionIndex() == 13){
+							}else if(comboFun.getSelectionIndex() == 2 || comboFun.getSelectionIndex() == 3 ||comboFun.getSelectionIndex() == 4 || comboFun.getSelectionIndex() == 5 || comboFun.getSelectionIndex() == 6
+									|| comboFun.getSelectionIndex() == 7 || comboFun.getSelectionIndex() == 8 || comboFun.getSelectionIndex() == 10){
 								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
 	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
-							}else if(comboFun.getSelectionIndex() == 9){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 12){
-								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
-	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
 							}
     	            	} else if(comboDev.getSelectionIndex() == 2) {
-    	            		if(comboFun.getSelectionIndex() == 0 || comboFun.getSelectionIndex() == 1 || comboFun.getSelectionIndex() == 5){
+    	            		if(comboFun.getSelectionIndex() == 0 || comboFun.getSelectionIndex() == 1){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
 							}else if(comboFun.getSelectionIndex() == 2 || comboFun.getSelectionIndex() == 3 || comboFun.getSelectionIndex() == 4){
@@ -482,11 +472,10 @@ public class Main {
 	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
 							}
     	            	} else if(comboDev.getSelectionIndex() == 3) {
-    	            		if(comboFun.getSelectionIndex() == 0 || comboFun.getSelectionIndex() == 1 ||
-    	            				comboFun.getSelectionIndex() == 4 || comboFun.getSelectionIndex() == 5 ||comboFun.getSelectionIndex() == 6){
+    	            		if(comboFun.getSelectionIndex() == 0 || comboFun.getSelectionIndex() == 1){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-							}else if(comboFun.getSelectionIndex() == 2 || comboFun.getSelectionIndex() == 3 || comboFun.getSelectionIndex() == 7){
+							}else if(comboFun.getSelectionIndex() == 2 || comboFun.getSelectionIndex() == 3 || comboFun.getSelectionIndex() == 4){
 								methType = MthdType.COLEC_ITGDATA_RECV.getValue();// 데이터 수집 411
 	    	            		methcode = MthdType.COLEC_ITGDATA_RECV;
 							}
@@ -559,7 +548,7 @@ public class Main {
 			comboFun.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			comboFun.add("repair 진행 후 연결상태 전달", 0);//332
 			comboFun.add("공장초기화", 1);//332
-			comboFun.add("펌웨어 업그레이드 결과 전송", 1);//813
+			comboFun.add("펌웨어 업그레이드 결과 전송", 2);//813
 			comboFun.select(0);
 			comboFun.setVisible(true);
 		}else if(isFunc == 1){

@@ -30,6 +30,7 @@ import com.kt.iot.emul.func.vo.DevInfoUdateRprtRqtVO;
 import com.kt.iot.emul.func.vo.DevLoginRqtVO;
 import com.kt.iot.emul.func.vo.ExtrSysDtlVO;
 import com.kt.iot.emul.func.vo.ExtrSysUdateRprtRqtVO;
+import com.kt.iot.emul.func.vo.FrmwrUdateNtfyRqtVO;
 import com.kt.iot.emul.func.vo.FrmwrUdateSttusTrmRqtVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO.CnvyRowVO;
@@ -411,9 +412,9 @@ public class PacketUtil {
 			FrmwrUdateSttusTrmRqtVO frmwrUdateSttusTrmRqtVO = new FrmwrUdateSttusTrmRqtVO();
 			PkgInfoVO pkgInfoVO = new PkgInfoVO();
 			
-			/*frmwrUdateSttusTrmRqtVO.setExtrSysId(extrSysId);
+			frmwrUdateSttusTrmRqtVO.setExtrSysId(extrSysId);
 			frmwrUdateSttusTrmRqtVO.setDevId(devId);
-			frmwrUdateSttusTrmRqtVO.setFrmwrSeq(frmwrSeq);
+			/*frmwrUdateSttusTrmRqtVO.setFrmwrSeq(frmwrSeq);
 			frmwrUdateSttusTrmRqtVO.setFrmwrFilePathNm(frmwrFilePathNm);
 			frmwrUdateSttusTrmRqtVO.setOccDt(occDt);
 			frmwrUdateSttusTrmRqtVO.setSttusCd(sttusCd);
@@ -542,6 +543,16 @@ public class PacketUtil {
 			lastValQueryRespVO.setDevColecDataVOs(devColecDataVOs);
 			
 			strBody = gson.toJson(lastValQueryRespVO);
+		}
+		else if(812 == value){
+			FrmwrUdateNtfyRqtVO frmwrUdateNtfyRqtVO = gson.fromJson(new String(data), FrmwrUdateNtfyRqtVO.class);
+			ComnRespVO comnRespVO = new ComnRespVO();
+			
+			comnRespVO.setRespCd(respCd);
+			comnRespVO.setRespMsg(respMsg);
+			comnRespVO.setMsgHeadVO(frmwrUdateNtfyRqtVO.getMsgHeadVO());
+			
+			strBody = gson.toJson(comnRespVO);
 		}
 		
 		return strBody;

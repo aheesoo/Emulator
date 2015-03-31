@@ -27,6 +27,7 @@ import com.kt.iot.emul.vo.DevCommChDtlVO;
 import com.kt.iot.emul.vo.DevDtlVO;
 import com.kt.iot.emul.func.vo.DevInfoRetvRespVO;
 import com.kt.iot.emul.func.vo.DevInfoRetvRqtVO;
+import com.kt.iot.emul.func.vo.FrmwrUdateNtfyRqtVO;
 import com.kt.iot.emul.func.vo.KeepAliveRespVO;
 import com.kt.iot.emul.func.vo.LastValQueryRqtVO;
 import com.kt.iot.emul.vo.MsgHeadVO;
@@ -262,6 +263,19 @@ System.out.println("msgType -> "+msgType +"  /  mthd -> "+mthd);
 				Main.report("RespMsg : " +respMsg , true);
 				Main.report(new String(data), true);
 			}
+			else if(MthdType.FRMWR_UDATE_STTUS.equals(mthd)){ //813
+				ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
+				
+				/** 메세지헤더 */
+				MsgHeadVO msgHeadVO = comnRespVO.getMsgHeadVO();
+				/** 응답코드 */
+				String respCd = comnRespVO.getRespCd();
+				/** 응답메시지 */
+				String respMsg = comnRespVO.getRespMsg();
+				
+				Main.report("RespMsg : " +respMsg , true);
+				Main.report(new String(data), true);
+			}
 		}else{ // 서버 수신
 			byte[] resHeader = null;
 			byte[] resBody = null; 
@@ -287,8 +301,14 @@ System.out.println("msgType -> "+msgType +"  /  mthd -> "+mthd);
 				
 			}
 			else if(MthdType.QUERY_LASTVAL.equals(mthd)){//711 최종값 쿼리
-				System.out.println("QUERY_LASTVALQUERY_LASTVALQUERY_LASTVALQUERY_LASTVALQUERY_LASTVAL");
 				LastValQueryRqtVO lastValQueryRqtVO = gson.fromJson(new String(data), LastValQueryRqtVO.class);
+				
+				Main.report(new String(data), true);
+				strBody = Main.packetUtil.getResBody(mthd.getValue(), data);
+				resBody = strBody.getBytes();
+			}
+			else if(812 == mthd.getValue()){//812 GW 펌웨어 업그레이드 통보
+				FrmwrUdateNtfyRqtVO frmwrUdateNtfyRqtVO = gson.fromJson(new String(data), FrmwrUdateNtfyRqtVO.class);
 				
 				Main.report(new String(data), true);
 				strBody = Main.packetUtil.getResBody(mthd.getValue(), data);
