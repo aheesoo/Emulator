@@ -5,7 +5,10 @@ package com.kt.iot.emul;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.google.gson.Gson;
@@ -48,6 +51,7 @@ import com.kt.iot.emul.vo.BinDataInfoVO;
 import com.kt.iot.emul.vo.BinSetupDataInfoVO;
 import com.kt.iot.emul.vo.CmdDataInfoVO;
 import com.kt.iot.emul.vo.DevBasVO;
+import com.kt.iot.emul.vo.DevDtlVO;
 import com.kt.iot.emul.vo.DtDataInfoVO;
 import com.kt.iot.emul.vo.EvDataInfoVO;
 import com.kt.iot.emul.vo.GenlSetupDataInfoVO;
@@ -159,18 +163,26 @@ public class PacketUtil {
 		return tcpHdrVO;
 		
 	}
-	
-	public static String getBody(Short value, int devNum, int funNum){
+	public String getTest(){
+		System.out.println("123456");
+		return "test";
+	}
+	public static String getBody(Short value, int devNum, int funNum, String snsnTag, String snsnValue){
+		
+		if(snsnTag == null || snsnValue ==  null){
+			snsnTag = "";
+			snsnValue = "";
+		}
+		
 		String	infoUpdTypeCd = "";
-		String snsnTag = "";
+//		String snsnTag = "";
 		String strBody = "";
-
 		String athnRqtNo = Main.athnRqtNo;
 		String athnNo = Main.athnNo;
 		String extrSysId = Main.extrSystemId;
 		String devId = Main.devId;
 		String commChId = "GiGA_Home_IoT_TCP";
-		
+		System.out.println(" devnum / funnum : "+devNum+ " / "+funNum);
 		String snsnParam = String.valueOf(devNum)+String.valueOf(funNum); //parameter to set snsnValue
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		MsgHeadVO msgHeadVO = new MsgHeadVO();
@@ -211,7 +223,7 @@ public class PacketUtil {
 			excluDevIds.add(Main.devId);
 			
 			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();/** 명령데이터리스트(31) */
-			cmdDataInfoVOs.add(getCmdData("2501"));
+			cmdDataInfoVOs.add(getCmdData(snsnTag, snsnValue));
 			
 			String modelNm = "ZWAVE002";/** 모델명 */
 			String useYn = "Y";/** 사용여부 */
@@ -250,52 +262,107 @@ public class PacketUtil {
 			System.out.println(" devNum -> "+devNum+ " / funNum -> "+funNum);
 			if(devNum == 0 && funNum == 0){//IoT GW repair 진행 후 연결상태 전달
 				infoUpdTypeCd = "13";
-				snsnTag = "82000001";
 			}else if(devNum == 0 && funNum == 1){//IoT GW 공장초기화
 				infoUpdTypeCd = "11";
 			}else if(devNum == 1 && funNum == 0){//도어락 등록
 				infoUpdTypeCd = "02";
+				devBasVO.setDevId("B479A717108702");
+				devBasVO.setDevNm("Door Lock - Keypad");
+				devBasVO.setModelNm("KTH00002");
+				devBasVO.setFrmwrVerNo("0304");
+				
+				Map<String, String> map = new HashMap<String,String>();
+				map.put("HW_VER", "ff");
+				map.put("GEN_DEV_CLASS", "40");
+				map.put("SPCF_DEV_CLASS", "03");
+				map.put("IST_ICON_TY", "0300");
+				map.put("USER_ICON_TY", "0300");
+				
+				Iterator<String> iterator = map.keySet().iterator();
+				while(iterator.hasNext()){
+					String key = (String)iterator.next();
+					String val = map.get(key);
+					DevDtlVO devDtlVO = new DevDtlVO();
+					devDtlVO.setAtribNm(key);
+					devDtlVO.setAtribVal(val);
+					devBasVO.getDevDtlVOs().add(devDtlVO);
+				}
 			}else if(devNum == 1 && funNum == 1){//도어락 삭제(추가)
 				infoUpdTypeCd = "21";
-			}else if(devNum == 1 && funNum == 2){//사용자 등록 통보 
+			}/*else if(devNum == 1 && funNum == 2){//사용자 등록 통보 
 				infoUpdTypeCd = "13";
-				snsnTag = "6303";
 			}else if(devNum == 1 && funNum == 3){//사용자 삭제 통보
 				infoUpdTypeCd = "13";
-				snsnTag = "6303";
 			}else if(devNum == 1 && funNum == 9){//도어락 초기화 통보
 				infoUpdTypeCd = "11";
-				snsnTag = "5A01";
-			}else if(devNum == 1 && funNum == 12){//도어락 방범 보드 설정 / 해제 통보
+			}*/else if(devNum == 1 && funNum == 9){//도어락 방범 보드 설정 / 해제 통보
 				infoUpdTypeCd = "13";
-				snsnTag = "7100";
 			}else if(devNum == 2 && funNum == 0){//open/close sensor 등록
 				infoUpdTypeCd = "02";
+				
+				devBasVO.setDevId("B479A717108704");
+				devBasVO.setDevNm("Sensor - Notification");
+				devBasVO.setModelNm("000000030008");
+				devBasVO.setFrmwrVerNo("0304");
+				
+				Map<String, String> map = new HashMap<String,String>();
+				map.put("HW_VER", "ff");
+				map.put("GEN_DEV_CLASS", "07");
+				map.put("SPCF_DEV_CLASS", "01");
+				map.put("IST_ICON_TY", "0c06");
+				map.put("USER_ICON_TY", "0c06");
+				
+				Iterator<String> iterator = map.keySet().iterator();
+				while(iterator.hasNext()){
+					String key = (String)iterator.next();
+					String val = map.get(key);
+					DevDtlVO devDtlVO = new DevDtlVO();
+					devDtlVO.setAtribNm(key);
+					devDtlVO.setAtribVal(val);
+					devBasVO.getDevDtlVOs().add(devDtlVO);
+				}
+				
 			}else if(devNum == 2 && funNum == 1){//open/close sensor 삭제
 				infoUpdTypeCd = "21";
-			}else if(devNum == 2 && funNum == 5){//open/close sensor 초기화 통보(추가)
+			}/*else if(devNum == 2 && funNum == 5){//open/close sensor 초기화 통보(추가)
 				infoUpdTypeCd = "11";
-				snsnTag = "5A01";
-			}else if(devNum == 3 && funNum == 0){// gas valve 등록
+			}*/else if(devNum == 3 && funNum == 0){// gas valve 등록
 				infoUpdTypeCd = "02";
+				
+				devBasVO.setDevId("B479A717108703");
+				devBasVO.setDevNm("Valve - open/close");
+				devBasVO.setModelNm("022a01000100");
+				devBasVO.setFrmwrVerNo("0304");
+				
+				Map<String, String> map = new HashMap<String,String>();
+				map.put("HW_VER", "ff");
+				map.put("GEN_DEV_CLASS", "10");
+				map.put("SPCF_DEV_CLASS", "06");
+				map.put("IST_ICON_TY", "1500");
+				map.put("USER_ICON_TY", "1500");
+				
+				Iterator<String> iterator = map.keySet().iterator();
+				while(iterator.hasNext()){
+					String key = (String)iterator.next();
+					String val = map.get(key);
+					DevDtlVO devDtlVO = new DevDtlVO();
+					devDtlVO.setAtribNm(key);
+					devDtlVO.setAtribVal(val);
+					devBasVO.getDevDtlVOs().add(devDtlVO);
+				}
+				
 			}else if(devNum == 3 && funNum == 1){// gas valve 삭제
 				infoUpdTypeCd = "21";
-			}else if(devNum == 3 && funNum == 4){//Gav valve 초기화 통보(추가)
+			}/*else if(devNum == 3 && funNum == 4){//Gav valve 초기화 통보(추가)
 				infoUpdTypeCd = "11";
-				snsnTag = "5A01";
 			}else if(devNum == 3 && funNum == 5){//Timeout 보고
 				infoUpdTypeCd = "13";
-				snsnTag = "7006";
 			}else if(devNum == 3 && funNum == 6){//Remainning 보고
 				infoUpdTypeCd = "13";
-				snsnTag = "7006";
-			}
+			}*/
 			
-			if(snsnTag != ""){
-				devBasVO.getBinSetupDataInfoVOs().add(getBinSetupData(snsnParam, snsnTag));
-//				List<BinSetupDataInfoVO> binSetupDataInfoVOs = new ArrayList<BinSetupDataInfoVO>();
-//				binSetupDataInfoVOs.add(getBinSetupData(snsnParam, snsnTag));
-//				devBasVO.setBinSetupDataInfoVOs(binSetupDataInfoVOs);
+			if(!"".equals(snsnTag) && snsnTag != null){
+				devBasVO.getBinSetupDataInfoVOs().add(getBinSetupData(snsnTag, snsnValue));
 				devBasVOs.add(devBasVO);
 			}else{
 				devBasVOs.add(devBasVO);
@@ -319,37 +386,7 @@ public class PacketUtil {
 			ColecRowVO colecRowVO = new ColecRowVO();
 			List<ColecRowVO> colecRowVOs = new ArrayList<ColecRowVO>();
 			
-			if(devNum == 1 && funNum == 4){//도어출입 통보(unlock)
-				snsnTag = "7105";
-			}else if(devNum == 1 && funNum == 5){//도어 출입 통보(lock)
-				snsnTag = "7105";
-			}else if(devNum == 1 && funNum == 6){//도어락 상태 통보
-				snsnTag = "6203";
-			}else if(devNum == 1 && funNum == 7){//도어락 비상 통보1
-				snsnTag = "7105";
-			}else if(devNum == 1 && funNum == 8){//도어락 비상 통보2
-				snsnTag = "7105";
-			}else if(devNum == 1 && funNum == 10){//도어락 PW 입력 오류 통보
-				snsnTag = "7105";
-			}else if(devNum == 1 && funNum == 11){//도어락 장시간 문열림 통보
-				snsnTag = "7100";
-			}else if(devNum == 1 && funNum == 13){// row battery 통보
-				snsnTag = "8003";
-			}else if(devNum == 2 && funNum == 2){// open/close sensor 상태 통보
-				snsnTag = "8003";
-			}else if(devNum == 2 && funNum == 3){// open/close sensor 감지 통보
-				snsnTag = "7105";
-			}else if(devNum == 2 && funNum == 4){// row battery 통보
-				snsnTag = "8003";
-			}else if(devNum == 3 && funNum == 2){// gas valve 상태 통보
-				snsnTag = "2503";
-			}else if(devNum == 3 && funNum == 3){// gas valuve 동작 통보
-				snsnTag = "2503";
-			}else if(devNum == 3 && funNum == 7){// 과열(overheat) 보고
-				snsnTag = "7105";
-			}
-			
-			colecRowVOs.add(getReqColecRowVO(colecRowVO, snsnTag, snsnParam));
+			colecRowVOs.add(getReqColecRowVO(colecRowVO, snsnTag, snsnValue));
 			
 			/** 시스템수집데이터 **/
 			SysColecDataVO sysColecDataVO = new SysColecDataVO();
@@ -414,11 +451,11 @@ public class PacketUtil {
 				
 				if("31000008".equals(dataTypeCd)){//Iot 단말 연결 상태 조회
 					snsnTagValue = Main.tag31000008;
-					binSetupDataInfoVOs.add(getBinSetupData(snsnTagValue, dataTypeCd));
-				}else if("7005".equals(dataTypeCd)){//Timeout 조회, Remainning 조회
+					binSetupDataInfoVOs.add(getBinSetupData(dataTypeCd, snsnTagValue));
+				}/*else if("7005".equals(dataTypeCd)){//Timeout 조회, Remainning 조회
 					snsnTagValue = Main.tag7005;
 					binSetupDataInfoVOs.add(getBinSetupData(dataTypeCd, snsnTagValue));
-				}
+				}*/
 			}
 			
 			List<DevBasVO> devBasVOs = new ArrayList<DevBasVO>();
@@ -481,10 +518,7 @@ public class PacketUtil {
 				String dataTypeCd = cmdDataInfoVO.getDataTypeCd();
 				ColecRowVO colecRowVO = new ColecRowVO();
 				System.out.println("dataTypeCd -----> "+dataTypeCd);
-				if("50000008".equals(dataTypeCd)){//wifi 상태 조회
-					snsnTagValue = Main.tag50000008;
-					colecRowVOs.add(getColecRowVO(colecRowVO, dataTypeCd, snsnTagValue));
-				}else if("31996202".equals(dataTypeCd) ||"6202".equals(dataTypeCd)){//도어락 상태 확인- 장치상태
+				if("31996202".equals(dataTypeCd) ||"6202".equals(dataTypeCd)){//도어락 상태 확인- 장치상태
 					snsnTagValue = Main.tag6202;
 					colecRowVOs.add(getColecRowVO(colecRowVO, "6203",snsnTagValue));
 				}else if("31998002".equals(dataTypeCd) || "8002".equals(dataTypeCd)){//도어락 상태 확인 - 배터리 / Gas valve 상태 확인 - 배터리
@@ -557,122 +591,65 @@ public class PacketUtil {
 		return strBody;
 	}
 	
-	private static ColecRowVO getColecRowVO(ColecRowVO colecRowVO, String snsnTagValue, String snsnParam){
+	private static ColecRowVO getColecRowVO(ColecRowVO colecRowVO, String snsnTag, String snsnValue){
 		
 		List<BinDataInfoVO> binDataInfoVOs = new ArrayList<BinDataInfoVO>();
-		binDataInfoVOs.add(getBinData(snsnTagValue, snsnParam));
-		
+		if(snsnTag != null && !"".equals(snsnTag)){
+			if(snsnTag.indexOf("/") > -1){
+				String[] snsnTagArray = snsnTag.split("/");
+				for(int i=0; i< snsnTagArray.length; i++){
+					if(snsnValue.indexOf("/") > -1){
+						String[] snsnValueArray = snsnValue.split("/");
+						for(int j=0; j<snsnValueArray.length; j++){
+							if(i == j){
+								binDataInfoVOs.add(getBinData(snsnTagArray[i], snsnValueArray[j]));
+							}
+						}
+					}else{
+						binDataInfoVOs.add(getBinData(snsnTagArray[i], snsnValue));
+					}
+				}
+			}
+			else{
+				binDataInfoVOs.add(getBinData(snsnTag, snsnValue));
+			}
+		}
+//		binDataInfoVOs.add(getBinData(snsnTag, snsnValue));
 		colecRowVO.setBinDataInfoVOs(binDataInfoVOs);
 		
 		return colecRowVO;
 	}
 	
-private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag, String snsnParam){
-		
-	/*SnsnDataInfoVO snsnDataInfoVO = new SnsnDataInfoVO();
-		List<SnsnDataInfoVO> snsnDataInfoVOs =  new ArrayList<SnsnDataInfoVO>();
-		String dataTypeCd_Snsn = "10001003";
-		Double snsnVal = 0.7;
-		snsnDataInfoVO.setDataTypeCd(dataTypeCd_Snsn);
-		snsnDataInfoVO.setSnsnVal(snsnVal);
-		snsnDataInfoVOs.add(snsnDataInfoVO);*/
-		
-		/*SttusDataInfoVO sttusDataInfoVO = new SttusDataInfoVO();
-		List<SttusDataInfoVO> sttusDataInfoVOs = new ArrayList<SttusDataInfoVO>();
-		String dataTypeCd_sttus = "20001003";
-		Double sttusVal = 1.0;
-		sttusDataInfoVO.setDataTypeCd(dataTypeCd_sttus);
-		sttusDataInfoVO.setSttusVal(sttusVal);
-		sttusDataInfoVOs.add(sttusDataInfoVO);*/
-		
-		/*LoDataInfoVO loDataInfoVO = new LoDataInfoVO();
-		String dataTypeCd_Lo = "30001003";
-		Double latit = 1.0;
-		Double lngit = 1.0;
-		loDataInfoVO.setDataTypeCd(dataTypeCd_Lo);
-		loDataInfoVO.setLatit(latit);
-		loDataInfoVO.setLngit(lngit);*/
+private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag, String snsnValue){
 		
 		List<BinDataInfoVO> binDataInfoVOs = new ArrayList<BinDataInfoVO>();
 //		binDataInfoVOs.add(getBinData(snsnTag, snsnParam));
-		if(snsnParam.equals("22")){
-			for(int i=0; i<2; i++){
-				binDataInfoVOs.add(getBinData22(snsnTag, String.valueOf(i)));
+		if(snsnTag != null && !"".equals(snsnTag)){
+			if(snsnTag.indexOf("/") > -1){
+				String[] snsnTagArray = snsnTag.split("/");
+				for(int i=0; i< snsnTagArray.length; i++){
+					if(snsnValue.indexOf("/") > -1){
+						String[] snsnValueArray = snsnValue.split("/");
+						for(int j=0; j<snsnValueArray.length; j++){
+							if(i == j){
+								binDataInfoVOs.add(getBinData(snsnTagArray[i], snsnValueArray[j]));
+							}
+						}
+					}else{
+						binDataInfoVOs.add(getBinData(snsnTagArray[i], snsnValue));
+					}
+//					binDataInfoVOs.add(getBinData(snsnTagArray[i], snsnValue));
+				}
 			}
-		}else{
-			binDataInfoVOs.add(getBinData(snsnTag, snsnParam));
+			else{
+				binDataInfoVOs.add(getBinData(snsnTag, snsnValue));
+			}
 		}
-		
-		/*StrDataInfoVO strDataInfoVO = new StrDataInfoVO();
-		List<StrDataInfoVO> strDataInfoVOs = new ArrayList<StrDataInfoVO>();
-		String snsnTagCd = "60001003";
-		String strVal = "";
-		strDataInfoVO.setSnsnTagCd(snsnTagCd);
-		strDataInfoVO.setStrVal(strVal);
-		strDataInfoVOs.add(strDataInfoVO);*/
-		
-		/*DtDataInfoVO dtDataInfoVO = new DtDataInfoVO();
-		List<DtDataInfoVO> dtDataInfoVOs = new ArrayList<DtDataInfoVO>();
-		String snsnTagCd_Dt = "61000837";
-		Date dtVal = new Date();
-		dtDataInfoVO.setSnsnTagCd(snsnTagCd_Dt);
-		dtDataInfoVO.setDtVal(dtVal);
-		dtDataInfoVOs.add(dtDataInfoVO);
-		
-		EvDataInfoVO evDataInfoVO = new EvDataInfoVO();
-		String evOccSysId = "GiGA_Home_IoT";
-		String evTyepCd = "0001";
-		String evDivId = "1234";
-		String evClasCd = "";
-		String evOccId = "EXAM_EV_0001";
-		String evTrtSttus = "0002";
-		evDataInfoVO.setEvOccSysId(evOccSysId);
-		evDataInfoVO.setEvTypeCd(evTyepCd);
-		evDataInfoVO.setEvDivId(evDivId);
-		evDataInfoVO.setEvClasCd(evClasCd);
-		evDataInfoVO.setEvOccId(evOccId);
-		evDataInfoVO.setEvTrtSttus(evTrtSttus);
-		
-		GenlSetupDataInfoVO genlSetupDataInfoVO = new GenlSetupDataInfoVO();
-		List<GenlSetupDataInfoVO> genlSetupDataInfoVOs = new ArrayList<GenlSetupDataInfoVO>();
-		String snsnTagCd_Gen = "80000739";
-		String setupVal = "ON";
-		genlSetupDataInfoVO.setSetupVal(setupVal);
-		genlSetupDataInfoVO.setSnsnTagCd(snsnTagCd_Gen);
-		genlSetupDataInfoVOs.add(genlSetupDataInfoVO);
-		
-		SclgSetupDataInfoVO sclgSetupDataInfoVO = new SclgSetupDataInfoVO();
-		SclgDataInfoVO sclgDataInfoVO = new SclgDataInfoVO();
-		SclgTimeDataInfoVO sclgTimeDataInfoVO = new SclgTimeDataInfoVO();
-		List<SclgSetupDataInfoVO> sclgSetupDataInfoVOs = new ArrayList<SclgSetupDataInfoVO>();
-		List<SclgDataInfoVO> sclgDataInfoVOs = new ArrayList<SclgDataInfoVO>();
-		List<SclgTimeDataInfoVO> sclgTimeDataInfoVOs = new ArrayList<SclgTimeDataInfoVO>();
-		String stTime = "120000";
-		String fnsTime = "165959";
-		sclgTimeDataInfoVO.setFnsTime(fnsTime);
-		sclgTimeDataInfoVO.setStTime(stTime);
-		sclgTimeDataInfoVOs.add(sclgTimeDataInfoVO);
-		String dowCd = "";
-		sclgDataInfoVO.setDowCd(dowCd);
-		sclgDataInfoVO.setSclgTimeDataInfoVOs(sclgTimeDataInfoVOs);
-		sclgDataInfoVOs.add(sclgDataInfoVO);
-		String snsnTagCd_Scl = "";
-		sclgSetupDataInfoVO.setSnsnTagCd(snsnTagCd_Scl);
-		sclgSetupDataInfoVO.setSclgDataInfoVOs(sclgDataInfoVOs);
-		sclgSetupDataInfoVOs.add(sclgSetupDataInfoVO);*/
 		
 		List<BinSetupDataInfoVO> binSetupDataInfoVos = new ArrayList<BinSetupDataInfoVO>();
 		binSetupDataInfoVos.add(getBinSetupData("", ""));
 		
-//		colecRowVO.setSnsnDataInfoVOs(snsnDataInfoVOs);
-//		colecRowVO.setSttusDataInfoVOs(sttusDataInfoVOs);
-//		colecRowVO.setLoDataInfoVO(loDataInfoVO);
 		colecRowVO.setBinDataInfoVOs(binDataInfoVOs);
-//		colecRowVO.setStrDataInfoVOs(strDataInfoVOs);
-//		colecRowVO.setDtDataInfoVOs(dtDataInfoVOs);
-//		colecRowVO.setEvDataInfoVO(evDataInfoVO);
-//		colecRowVO.setGenlSetupDataInfoVOs(genlSetupDataInfoVOs);
-//		colecRowVO.setSclgSetupDataInfoVOs(sclgSetupDataInfoVOs);
 		colecRowVO.setBinSetupDataInfoVOs(binSetupDataInfoVos);
 		
 		return colecRowVO;
@@ -712,239 +689,41 @@ private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag
 		return cnvyRow;
 	}
 	
-	public static BinDataInfoVO getBinData(String cd, String snsnParam){
+	public static BinDataInfoVO getBinData(String snsnTag, String snsnValue){
 		StringUtil stringUtil = new StringUtil();
 		BinDataInfoVO binDataInfoVO = new BinDataInfoVO();
 		byte[] binData;
 		
-		if("14".equals(snsnParam)){ //도어 출입 통보(unlock)
-			binData = new byte[1];
-//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-//			binData[2] = 0x00;//V1 Alarm Type
-//			binData[3] = 0x00;//V1 Alarm Level
-//			binData[4] = 0x00;//Reserved 
-//			binData[5] = 0x00;//Notification Status
-//			binData[6] = 0x06;//Notification Type -> Access Control
-			binData[0] = getHextoByteDoor(Main.isDoorLock);//0x16;//Event -> Window/Door is open
-			
-			binDataInfoVO.setBinData(binData);
-		}else if("15".equals(snsnParam)){ //도어 출입 통보(lock)
-			binData = new byte[1];
-//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-//			binData[2] = 0x00;//V1 Alarm Type
-//			binData[3] = 0x00;//V1 Alarm Level
-//			binData[4] = 0x00;//Reserved 
-//			binData[5] = 0x00;//Notification Status
-//			binData[6] = 0x06;//Notification Type -> Access Control
-			binData[0] = getHextoByteDoor(Main.isDoorLock);//0x17;//Event -> Window/Door is open
-			
-			binDataInfoVO.setBinData(binData);
-		}else if("17".equals(snsnParam)){ // 도어락 비상통보1
-			binData = new byte[1];
-//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-//			binData[2] = 0x00;//V1 Alarm Type
-//			binData[3] = 0x00;//V1 Alarm Level
-//			binData[4] = 0x00;//Reserved 
-//			binData[5] = 0x00;//Notification Status
-//			if(Main.isDoorEc1 == 2){
-//				binData[6] = 0x0A;
-//			}else{
-//				binData[6] = 0x07;
-//			}
-			binData[0] = getEc2HexByte(Main.isDoorEc1);//Event -> Tampering, Product covering removed
-			
-			binDataInfoVO.setBinData(binData);
-		}else if("18".equals(snsnParam)){ // 도어락 비상통보2
-			binData = new byte[1];
-//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-//			binData[2] = 0x00;//V1 Alarm Type
-//			binData[3] = 0x00;//V1 Alarm Level
-//			binData[4] = 0x00;//Reserved 
-//			binData[5] = 0x00;//Notification Status
-//			binData[6] = 0x07;//Notification Type -> Home Security
-			binData[0] = getEc2HexByte(Main.isDoorEc2);//Event -> Unknow Location
-			
-			binDataInfoVO.setBinData(binData);
-		}else if("110".equals(snsnParam)){ // 도어락 PW 입력 오류 통보
-			binData = new byte[1];
-//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-//			binData[2] = 0x00;//V1 Alarm Type
-//			binData[3] = 0x00;//V1 Alarm Level
-//			binData[4] = 0x00;//Reserved 
-//			binData[5] = 0x00;//Notification Status
-//			binData[6] = 0x07;//Notification Type -> Home Security
-			binData[0] = 0x04;//Event -> Invalid Code
-			
-			binDataInfoVO.setBinData(binData);
-		}else if("113".equals(snsnParam)){ // row battery 통보
-			binData = new byte[1];
-//			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_BATTERY
-//			binData[1] = 0x03;//Command = BATTERY_REPORT
-			binData[0] = getHexByte(Main.batteryLev);//0x64;//battery level
-			
-			binDataInfoVO.setBinData(binData);
-		}else if("22".equals(snsnParam)){ // open/close sensor 상태 통보
-			binData = new byte[1];
-//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-//			binData[2] = 0x00;//V1 Alarm Type
-//			binData[3] = 0x00;//V1 Alarm Level
-//			binData[4] = 0x00;//Reserved 
-//			binData[5] = 0x00;//Notification Status
-//			binData[6] = 0x06;//Notification Type -> Home Security
-			binData[0] = getHextoByteDoor(Main.isDoorLock);//0x17;//Event -> closed
-			
-			binDataInfoVO.setBinData(binData);
-		}else if("23".equals(snsnParam)){ // open/close sensor 감지 통보
-			binData = new byte[1];
-//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-//			binData[2] = 0x00;//V1 Alarm Type
-//			binData[3] = 0x00;//V1 Alarm Level
-//			binData[4] = 0x00;//Reserved 
-//			binData[5] = 0x00;//Notification Status
-//			binData[6] = 0x08;//Notification Type -> Power Namangement
-			binData[0] = getHextoByteDoor(Main.isDoorLock);//0x16;//Event -> open
-			
-			binDataInfoVO.setBinData(binData);
-		}else if("24".equals(snsnParam)){ // row battery 통보
-			binData = new byte[1];
-//			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_BATTERY
-//			binData[1] = 0x03;//Command = BATTERY_REPORT
-			binData[0] = getHexByte(Main.batteryLev);//betLev;//battery level
-			
-			binDataInfoVO.setBinData(binData);
-		}else if("32".equals(snsnParam)){ // gas valve 상태 통보
-			binData = new byte[1];
-//			binData[0] = 0x25;//Command Class = COMMAND_CLASS_SWITCH_BINARY
-//			binData[1] = 0x03;//Command = SWITCH_BINARY_SET
-			binData[0] = getHextoByteGas(Main.isGasSt);//value
-			
-			binDataInfoVO.setBinData(binData);
-		}else if("33".equals(snsnParam)){ // gas valve 동작 통보
-			binData = new byte[1];
-//			binData[0] = 0x25;//Command Class = COMMAND_CLASS_SWITCH_BINARY
-//			binData[1] = 0x03;//Command = SWITCH_BINARY_SET
-			binData[0] = getHextoByteGas(Main.isGasSt);//0x00;//value
-			binDataInfoVO.setBinData(binData);
-		}else if("50000008".equals(cd)){ //요청에 대한 응답-  wifi 상태 조회
-//			binData = new byte[1];aaa
-//			binData[0] = 0x62;//Command Class = COMMAND_CLASS_DOOR_LOCK
-//			binData[1] = 0x03;//Command = DOOR_LOCK_OPERATION_SET
-//			binData[0] = stringUtil.hexToByteArray(cd);//Door Lock Mode
-			binData = stringUtil.hexToByteArray(snsnParam);
-			binDataInfoVO.setBinData(binData);
-		}else if("6203".equals(cd)){ // 요청에 대한 응답 - 도어락 상태 확인- 장치상태
-//			binData = new byte[1];
-//			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_DOOR_LOCK
-//			binData[1] = 0x03;//Command = DOOR_LOCK_OPERATION_SET
-//			binData[0] = getHexByte(Main.batteryLev);
-			binData = stringUtil.hexToByteArray(snsnParam);
-			binDataInfoVO.setBinData(binData);
-		}else if("8003".equals(cd)){ // 도어락 상태 확인 - 배터리 / Gas valve 상태 확인 - 배터리
-//			binData = new byte[1];
-//			binData[0] = 0x25;//Command Class = COMMAND_CLASS_SWITCH_BINARY
-//			binData[1] = 0x03;//Command = SWITCH_BINARY_SET
-//			binData[0] = 0x00;//value
-			binData = stringUtil.hexToByteArray(snsnParam);
-			binDataInfoVO.setBinData(binData);
-		}else if("2503".equals(cd)){ // 요청에 대한 응답 - Gas valve 상태 확인 - 장치상태
-//			binData = new byte[1];
-//			binData[0] = 0x25;//Command Class = COMMAND_CLASS_SWITCH_BINARY
-//			binData[1] = 0x03;//Command = SWITCH_BINARY_SET
-//			binData[0] = 0x00;//value
-			binData = stringUtil.hexToByteArray(snsnParam);
+		if(snsnValue != null && !"".equals(snsnValue)){
+			binData = stringUtil.hexToByteArray(snsnValue);
 			binDataInfoVO.setBinData(binData);
 		}else{//16, 111, 37, res01
 			binData = new byte[0];
 		}
 
-		binDataInfoVO.setDataTypeCd(cd);
-
-		getMainTagVal(cd, binData);
-		
-		return binDataInfoVO;
-	}
-	
-	public static BinDataInfoVO getBinData22(String cd, String snsnParam){
-		BinDataInfoVO binDataInfoVO = new BinDataInfoVO();
-		byte[] binData;
-		
-		if("0".equals(snsnParam)){ // open/close sensor 상태 통보
-			cd = "7105";
-			binData = new byte[1];
-//			binData[0] = 0x71;//Command Class = COMMAND_CLASS_NOTIFICATION
-//			binData[1] = 0x05;//Command = NOTIFICATION_REPORT
-//			binData[2] = 0x00;//V1 Alarm Type
-//			binData[3] = 0x00;//V1 Alarm Level
-//			binData[4] = 0x00;//Reserved 
-//			binData[5] = 0x00;//Notification Status
-//			binData[6] = 0x06;//Notification Type -> Home Security
-			binData[0] = getHextoByteDoor(Main.isDoorLock);//0x17;//Event -> closed
-			
-			binDataInfoVO.setBinData(binData);
-		}else if("1".equals(snsnParam)){ // row battery 통보
-			binData = new byte[1];
-//			binData[0] = (byte)((1 >>> 16) & 0x80);//Command Class = COMMAND_CLASS_BATTERY
-//			binData[1] = 0x03;//Command = BATTERY_REPORT
-			binData[0] = getHexByte(Main.batteryLev);//betLev;//battery level
-			
-			binDataInfoVO.setBinData(binData);
-		}else{
-			binData = new byte[0];
+		if(snsnTag == null){
+			snsnTag = "";
 		}
+		binDataInfoVO.setDataTypeCd(snsnTag);
 
-		binDataInfoVO.setDataTypeCd(cd);
-
-		getMainTagVal(cd, binData);
+		getMainTagVal(snsnTag, binData);
 		
 		return binDataInfoVO;
 	}
 	
-	public static BinSetupDataInfoVO getBinSetupData(String snsnParam, String snsnTag){
+	
+	public static BinSetupDataInfoVO getBinSetupData(String snsnTag, String snsnValue){
 		BinSetupDataInfoVO binSetupDataInfoVO = new BinSetupDataInfoVO();
 
-		if(snsnTag != ""){
-			binSetupDataInfoVO.setSnsnTagCd(snsnTag);
-		}
 		byte[] setupVal;
 		
-		if("12".equals(snsnParam)){ // set parameter : userId, userCode, userStatus 사용자 등록 통보
-			String userId = Main.userId;
-			String userPW = Main.userPW;
-			int userPwLen = userPW.length();
-			
-			setupVal = new byte[4+userPwLen];
-			/*setupVal[0] = 0x63;//Command Class = COMMAND_CLASS_USER_CODE
-			setupVal[1] = 0x03;//Command = USER_CODE_SET
-			setupVal[2] = 0x01;//User Identifier
-			setupVal[3] = 0x00;//User ID Status
-			setupVal[4] = 0x30;//USER_CODE1 0
-			setupVal[5] = 0x31;//USER_CODE2 1
-			setupVal[6] = 0x32;//USER_CODE3 2
-			setupVal[7] = 0x33;//USER_CODE4 3
-*/
-			setupVal = setUserByte(userId, userPW, userPwLen);
-			binSetupDataInfoVO.setSetupVal(setupVal);
-		}else if("13".equals(snsnParam)){ // set parameter : userId, userCode, userStatus 사용자 삭제 통보
-			String userId = Main.userId;
-			String userPW = Main.userPW;
-			int userPwLen = userPW.length();
-			setupVal = new byte[4+userPwLen];
-			setupVal = setUserByte(userId, userPW, userPwLen);
-			binSetupDataInfoVO.setSetupVal(setupVal);
-		}else if("31000008".equals(snsnTag)){ // Iot단말 연결상태 조회
+		if(snsnTag == null){
+			snsnTag = "";
+		}
+		
+		if(!"".equals(snsnValue) && snsnValue != null){
 			binSetupDataInfoVO.setSnsnTagCd(snsnTag);
-			setupVal = StringUtil.hexToByteArray(snsnParam);
-			binSetupDataInfoVO.setSetupVal(setupVal);
-		}else if("7005".equals(snsnTag)){ // Timeout 조회
-			binSetupDataInfoVO.setSnsnTagCd(snsnTag);
-			setupVal = StringUtil.hexToByteArray(snsnParam);
+			setupVal = StringUtil.hexToByteArray(snsnValue);
 			binSetupDataInfoVO.setSetupVal(setupVal);
 		}else{		//00, 01, 10, 11, 19, 112, 20, 21, 25, 30, 31, 34, 35, 36, res05 -> parameter 없음
 			setupVal = new byte[0];
@@ -955,12 +734,16 @@ private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag
 		return binSetupDataInfoVO;
 	}
 	
-	public static CmdDataInfoVO getCmdData(String cd){
+	public static CmdDataInfoVO getCmdData(String snsnTag, String snsnValue){
 		CmdDataInfoVO cmdDataInfoVO = new CmdDataInfoVO();
 		List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();/** 명령데이터리스트(31) */
-		String dataTypeCd = cd;
-		byte[] cmdData = new byte[0];
-		cmdData = dataTypeCd.getBytes();
+		String dataTypeCd = snsnTag;
+		byte[] cmdData;
+		if(snsnValue != null && !"".equals(snsnValue)){
+			cmdData = StringUtil.hexToByteArray(snsnValue);
+		}else{
+			cmdData = new byte[0];
+		}
 		cmdDataInfoVO.setDataTypeCd(dataTypeCd);
 		cmdDataInfoVO.setCmdData(cmdData);
 
@@ -999,68 +782,4 @@ private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag
 		return result;
 	}
 	
-	public static byte getHextoByteDoor(int code){
-		byte result = 0;
-		if(code == 0){
-			result = 0x16;
-		}else if(code == 1){
-			result = 0x17;
-		}
-		return result;
-	}
-	public static byte[] setUserByte(String userId, String userPW, int byteArrayLen){
-		
-		byte[] setVal = new byte[2+byteArrayLen];
-		
-//		setVal[0] = 0x63;//Command Class = COMMAND_CLASS_USER_CODE
-//		setVal[1] = 0x03;//Command = USER_CODE_SET
-//		setVal[2] = stringToHex0x(Main.userId).getBytes();//0x01;//User Identifier
-		System.arraycopy(stringToHex0x(Main.userId).getBytes(), 0, setVal, 0, 1);
-		setVal[1] = 0x00;//User ID Status	
-		System.arraycopy(stringToHex0x(Main.userPW).getBytes(), 0, setVal, 2, byteArrayLen);
-		
-		return setVal;
-		
-	}
-	public static String stringToHex0x(String s) {
-	    String result = "";
-
-	    for (int i = 0; i < s.length(); i++) {
-	      result += String.format("0x%02X ", (int) s.charAt(i));
-	    }
-
-	    return result;
-	  }
-	
-	public static byte getEc1HexByte(int code){
-		byte result = 0;
-		if(code == 0){
-			result = 0x02;
-		}else if(code == 1){
-			result = 0x03;
-		}else if(code == 2){
-			result = 0x02;
-		}
-		return result;
-	}
-	public static byte getEc2HexByte(int code){
-		byte result = 0;
-		if(code == 0){
-			result = 0x02;
-		}else if(code == 1){
-			result = 0x03;
-		}else if(code == 2){
-			result = 0x04;
-		}
-		return result;
-	}
-	public static byte getHextoByteGas(int code){
-		byte result = 0;
-		if(code == 0){
-			result = 0x00;
-		}else if(code == 1){
-			result = (byte)((1 >>> 0) & 0xFF);
-		}
-		return result;
-	}
 }

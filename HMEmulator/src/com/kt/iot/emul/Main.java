@@ -3,14 +3,18 @@ package com.kt.iot.emul;
 import java.awt.color.CMMException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
@@ -33,6 +37,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 //import org.eclipse.swt.widgets.TabFolder;
 //import org.eclipse.swt.widgets.TabItem;
+
+
+
+
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -137,40 +145,33 @@ public class Main {
 	public static PacketUtil packetUtil;
 	
 	/**************************************************************************/
-	public static String tag50000008 = "";
+//	public static String tag50000008 = "";
 	public static String tag31000008 = "";
 	public static String tag6202 = "";
 	public static String tag8002 = "";
 	public static String tag2502 = "";
-	public static String tag7005 = "";
-	public static String tag7006 = "";
+//	public static String tag7005 = "";
+//	public static String tag7006 = "";
 	/**************************************************************************/
+	
+	String athnRqtNoHub = "";
+	String athnRqtNoDev01 = "";
+	String athnRqtNoDev02 = "";
+	String athnRqtNoDev03 = "";
+	                       
+	String deviceIdHub = "";
+	String deviceIdDev01 = "";
+	String deviceIdDev02 = "";
+	String deviceIdDev03 = "";
 	
 	public Main() {
         
-        /*String s = System.getProperty("user.dir");
-        System.out.println("현재 디렉토리는 " + s);
-        String dir = this.getClass().getResource("").getPath();
-        String reDir = dir.substring(1,dir.length()-31);
-        System.out.println("reDir : "+reDir);*/
-		/*File path = new File(".");
-	    System.out.println(path.getAbsolutePath());
-	    String dirf = "";
-	    try {
-			
-	    	dirf = path.getCanonicalFile().getPath();
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-	    System.out.println("dir : "+dirf);
-	    String reDirf = dirf.replace("HMEmulator", "emulator_server.properties");
-	    System.out.println("reDirf --> "+reDirf);
-	    reDir.replaceAll(File.separator, "\\");
-	    System.out.println("reDirf == "+reDirf);*/
         Properties properties = new Properties();
+//        Properties devInfoProps = new Properties();
 		try {
-		      properties.load(new FileInputStream("C:\\emulator_server.properties"));
-//			properties.load(new FileInputStream(realDir+"emulator_server.properties"));
+//		      properties.load(new FileInputStream("C:\\emulator_server.properties"));
+			properties.load(new FileInputStream(".\\emulator_server.properties"));//이클립스에서는 루트 경로 / jar에서는 같은 프로젝트 디렉토리
+//		      devInfoProps.load(new FileInputStream(reDir+"deviceInfo.properties"));
 		} catch (IOException e) {
 		
 		}
@@ -235,12 +236,13 @@ public class Main {
 		new Label(groupDevice, SWT.NULL).setText("authNum");
 		authNum = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
 		authNum.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		authNum.setText("1001");
+		authNum.setText("F02641FD-C9A7-4F34-96F7-85C0DF65E551");
 		
 		new Label(groupDevice, SWT.NULL).setText("systemId");
 		extrSysId = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
 		extrSysId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		extrSysId.setText("HOME_IOT");
+//		extrSysId.setText("500101");
 		
 		new Label(groupDevice, SWT.NULL).setText("deviceId");
 		deviceId = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
@@ -344,6 +346,7 @@ public class Main {
 					} else if("TCP 채널 인증".equals(buttonInit.getText())){
 						initSendData();
 						setFunction(0);
+						setTag(true, 0,0);
 						comboDev.setVisible(true);
 						comboReqRes.setVisible(true);
 						groupFunction.layout();
@@ -367,12 +370,13 @@ public class Main {
 				comboDev.select(0);
 				if(comboReqRes.getSelectionIndex() == 0) {
 					setFunction(0);
+					setTag(true, 0,0);
 					if(buttonSend.getEnabled()== false){
 						buttonSend.setEnabled(true);
 					}
 				}else if(comboReqRes.getSelectionIndex() == 1) {
 					setFunction2(0);
-					setTagSeqVal("50000008",tag50000008);
+					setTag(false, 0,0);
 				}
 				groupFunction.layout();
 			}
@@ -386,26 +390,46 @@ public class Main {
 		comboDev.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent event) {
 				if(comboDev.getSelectionIndex() == 0 && comboReqRes.getSelectionIndex() == 0) {
+					deviceId.setText("iothub");
+					authNum.setText("F02641FD-C9A7-4F34-96F7-85C0DF65E551");
 					setFunction(0);
+					setTag(true, 0, 0);
 				}else if(comboDev.getSelectionIndex() == 1 && comboReqRes.getSelectionIndex() == 0) {
+//					deviceId.setText("iotdevice01");
+					authNum.setText("1001");
+					deviceId.setText("C_B479A7171CAD");
 					setFunction(1);
+					setTag(true, 1, 0);
 				}else if(comboDev.getSelectionIndex() == 2 && comboReqRes.getSelectionIndex() == 0) {
+					deviceId.setText("iotdevice02");
 					setFunction(2);
+					setTag(true, 2, 0);
 				}else if(comboDev.getSelectionIndex() == 3 && comboReqRes.getSelectionIndex() == 0) {
+					deviceId.setText("iotdevice03");
 					setFunction(3);
+					setTag(true, 3, 0);
 				}
 				else if(comboDev.getSelectionIndex() == 0 && comboReqRes.getSelectionIndex() == 1) {
+					deviceId.setText("iothub");
 					setFunction2(0);
-					setTagSeqVal("50000008",tag50000008);
+					setTag(false, 0, 0);
+//					setTagSeqVal("50000008",tag50000008);
 				}else if(comboDev.getSelectionIndex() == 1 && comboReqRes.getSelectionIndex() == 1) {
+					deviceId.setText("C_B479A7171CAD");
 					setFunction2(1);
-					setTagSeqVal("6202",tag6202);
+					setTag(false, 1, 0);
+//					setTagSeqVal("6202",tag6202);
 				}else if(comboDev.getSelectionIndex() == 2 && comboReqRes.getSelectionIndex() == 1) {
+					deviceId.setText("iotdevice02");
 					setFunction2(2);
+					setTag(false, 2, 0);
 				}else if(comboDev.getSelectionIndex() == 3 && comboReqRes.getSelectionIndex() == 1) {
+					deviceId.setText("iotdevice03");
 					setFunction2(3);
-					setTagSeqVal("2502",tag2502);
+					setTag(false, 3, 0);
+//					setTagSeqVal("2502",tag2502);
 				}
+				
 				groupFunction.layout();
 			}
 			
@@ -421,10 +445,6 @@ public class Main {
 						short methType = 0;
 						int isRequest = 0;
 						StdSysTcpCode.MthdType methcode = null;
-//						methType = MthdType.KEEP_ALIVE_COMMCHATHN_TCP.getValue(); //TCP채널 KeepAlive
-//						methcode = MthdType.KEEP_ALIVE_COMMCHATHN_TCP;
-//						methType = MthdType.INITA_DEV_RETV.getValue();//장치정보조회 331
-//	            		methcode = MthdType.INITA_DEV_RETV;
 	            		
 						if(comboDev.getSelectionIndex() == 0) {
 							if(comboFun.getSelectionIndex() == 0 || comboFun.getSelectionIndex() == 1){
@@ -441,8 +461,6 @@ public class Main {
 							}else if(comboFun.getSelectionIndex() == 2 || comboFun.getSelectionIndex() == 3){
 								methType = MthdType.INITA_DEV_UDATERPRT.getValue();// 장치정보 갱신보고 332
 	    	            		methcode = MthdType.INITA_DEV_UDATERPRT;
-	    	            		userId = textUserId.getText();
-	    	            		userPW = textUserPW.getText(); 
 							}else if(comboFun.getSelectionIndex() == 4 || comboFun.getSelectionIndex() == 5 || comboFun.getSelectionIndex() == 6
 									|| comboFun.getSelectionIndex() == 7 || comboFun.getSelectionIndex() == 8 || comboFun.getSelectionIndex() == 10
 									|| comboFun.getSelectionIndex() == 11 || comboFun.getSelectionIndex() == 13){
@@ -477,7 +495,16 @@ public class Main {
 						byte[] header = packetUtil.getHeader(methcode, isRequest).toPacket();
 //						byte[] header = getHeader(methcode).getBytes();
 
-						String strBody = packetUtil.getBody(methType, comboDev.getSelectionIndex(),  comboFun.getSelectionIndex());
+						String tagSeq = "";
+						String tagVal = "";
+						if(textTagSeq.getText() != null){
+							tagSeq = textTagSeq.getText();
+							tagVal = textTagVal.getText();
+						}
+						athnRqtNo = authNum.getText();
+						devId = deviceId.getText();
+						extrSystemId = extrSysId.getText();
+						String strBody = packetUtil.getBody(methType, comboDev.getSelectionIndex(),  comboFun.getSelectionIndex(), tagSeq, tagVal);
 						byte[] body = strBody.getBytes();
 						
                 		client.sendData(header, body, methType);
@@ -532,6 +559,7 @@ public class Main {
 			comboFun.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			comboFun.add("repair 진행 후 연결상태 전달", 0);//332
 			comboFun.add("공장초기화", 1);//332
+			comboFun.add("펌웨어 업그레이드 결과 전송", 1);//813
 			comboFun.select(0);
 			comboFun.setVisible(true);
 		}else if(isFunc == 1){
@@ -540,18 +568,18 @@ public class Main {
 			comboFun.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			comboFun.add("도어락 등록", 0);//332
 			comboFun.add("도어락 삭제(추가)", 1);//332
-			comboFun.add("사용자 등록 통보", 2);//332
-			comboFun.add("사용자 삭제 통보", 3);//332
-			comboFun.add("도어 출입 통보(unlock)", 4);//411
-			comboFun.add("도어 출입 통보(lock)", 5);//411
-			comboFun.add("도어락 상태 통보", 6);//411
-			comboFun.add("도어락 비상통보 1", 7);//411
-			comboFun.add("도어락 비상통보 2", 8);//411
-			comboFun.add("도어락 초기화통보", 9);//332
-			comboFun.add("도어락 PW 입력 오류 통보", 10);//411
-			comboFun.add("도어락 장시간 문열림 통보", 11);//411
-			comboFun.add("도어락 방범 모드 설정/해제 통보", 12);//332
-			comboFun.add("Low battery 통보", 13);//411
+//			comboFun.add("사용자 등록 통보", 2);//332
+//			comboFun.add("사용자 삭제 통보", 3);//332
+			comboFun.add("도어 출입 통보(unlock)", 2);//411
+			comboFun.add("도어 출입 통보(lock)", 3);//411
+			comboFun.add("도어락 상태 통보", 4);//411
+			comboFun.add("도어락 비상통보 1", 5);//411
+			comboFun.add("도어락 비상통보 2", 6);//411
+//			comboFun.add("도어락 초기화통보", 9);//332
+			comboFun.add("도어락 PW 입력 오류 통보", 7);//411
+			comboFun.add("도어락 장시간 문열림 통보", 8);//411
+			comboFun.add("도어락 방범 모드 설정/해제 통보", 9);//332
+			comboFun.add("Low battery 통보", 10);//411
 			comboFun.select(0);
 			comboFun.setVisible(true);
 		}else if(isFunc == 2){
@@ -563,7 +591,7 @@ public class Main {
 			comboFun.add("Open/Close sensor 상태 통보", 2);//411
 			comboFun.add("Open/Close sensor 감지 통보", 3);//411
 			comboFun.add("Low battery 통보", 4);//411
-			comboFun.add("Open/Close sensor 초기화 통보(추가", 5);//332
+//			comboFun.add("Open/Close sensor 초기화 통보(추가", 5);//332
 			comboFun.select(0);
 			
 			comboFun.setVisible(true);
@@ -575,10 +603,10 @@ public class Main {
 			comboFun.add("Gas valve 삭제", 1);//332
 			comboFun.add("Gas valve 상태 통보", 2);//411
 			comboFun.add("Gav valve 동작 통보", 3);//411
-			comboFun.add("Gav valve 초기화 통보(추가)", 4);//332
-			comboFun.add("Timeout 보고", 5);//332
-			comboFun.add("Remainning 보고", 6);//332
-			comboFun.add("과열(Overheat) 보고", 7);//411
+//			comboFun.add("Gav valve 초기화 통보(추가)", 4);//332
+//			comboFun.add("Timeout 보고", 5);//332
+//			comboFun.add("Remainning 보고", 6);//332
+			comboFun.add("과열(Overheat) 보고", 4);//411
 			comboFun.select(0);
 			
 			comboFun.setVisible(true);
@@ -587,38 +615,12 @@ public class Main {
 		
 		comboFun.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent event) {
-				if((comboDev.getSelectionIndex() == 1 && comboFun.getSelectionIndex() == 13) 
-						|| (comboDev.getSelectionIndex() == 2 &&comboFun.getSelectionIndex() == 4)) {
-					setBatLevOn();
-				}
-				else if((comboDev.getSelectionIndex() == 1 && comboFun.getSelectionIndex() == 4) 
-						|| (comboDev.getSelectionIndex() == 1 &&comboFun.getSelectionIndex() == 5)
-//						|| (comboDev.getSelectionIndex() == 2 &&comboFun.getSelectionIndex() == 2)
-						|| (comboDev.getSelectionIndex() == 2 &&comboFun.getSelectionIndex() == 3)){
-					setDoorLock();
-				}
-				else if((comboDev.getSelectionIndex() == 1 && comboFun.getSelectionIndex() == 2) 
-						|| (comboDev.getSelectionIndex() == 1 &&comboFun.getSelectionIndex() == 3)){
-					setUser();
-				}
-				else if(comboDev.getSelectionIndex() == 1 && comboFun.getSelectionIndex() == 7){
-					setDoorEm1();
-				}
-				else if(comboDev.getSelectionIndex() == 1 && comboFun.getSelectionIndex() == 8){
-					setDoorEm2();
-				}
-				else if((comboDev.getSelectionIndex() == 3 && comboFun.getSelectionIndex() == 2) ||
-						(comboDev.getSelectionIndex() == 3 && comboFun.getSelectionIndex() == 3)){
-					setGasOnOff();
-				}
-				else if(comboDev.getSelectionIndex() == 2 &&comboFun.getSelectionIndex() == 2){
-					setSensorSt();
-				}
-				else{
-					setBatLevOff();
-				}
+				setTag(true, comboDev.getSelectionIndex(), comboFun.getSelectionIndex());
 			}
-			public void widgetDefaultSelected(SelectionEvent e) {}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				setTag(true, 0, 0);
+			}
 
 		});
 
@@ -651,16 +653,16 @@ public class Main {
 			new Label(groupFunction, SWT.NULL).setText("Function");
 			comboFun2 = new Combo(groupFunction, SWT.BORDER);
 			comboFun2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			comboFun2.add("WiFI 상태 조회", 0);//711
-			comboFun2.add("IoT 단말 연결상태 조회", 1);//333
+//			comboFun2.add("WiFI 상태 조회", 0);//711
+			comboFun2.add("IoT 단말 연결상태 조회", 0);//333
 			comboFun2.select(0);
 			comboFun2.setVisible(true);
 		}else if(isFunc == 1){
 			new Label(groupFunction, SWT.NULL).setText("Function");
 			comboFun2 = new Combo(groupFunction, SWT.BORDER);
 			comboFun2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			comboFun2.add("도어상태 확인/장치상태", 0);//711
-			comboFun2.add("도어상태 확인/베터리", 1);//711
+			comboFun2.add("도어상태 확인", 0);//711
+//			comboFun2.add("도어상태 확인", 1);//711
 			comboFun2.select(0);
 			comboFun2.setVisible(true);
 		}else if(isFunc == 2){
@@ -673,10 +675,10 @@ public class Main {
 			new Label(groupFunction, SWT.NULL).setText("Function");
 			comboFun2 = new Combo(groupFunction, SWT.BORDER);
 			comboFun2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			comboFun2.add("Gas valve 상태확인/장치상태", 0);//711
-			comboFun2.add("Gas valve 상태확인/베터리", 1);//711
-			comboFun2.add("TimeOut 조회", 2);//333
-			comboFun2.add("Remainning 조회", 3);//333
+			comboFun2.add("Gas valve 상태확인", 0);//711
+//			comboFun2.add("Gas valve 상태확인", 1);//711
+//			comboFun2.add("TimeOut 조회", 2);//333
+//			comboFun2.add("Remainning 조회", 3);//333
 			comboFun2.select(0);
 			
 			comboFun2.setVisible(true);
@@ -685,34 +687,17 @@ public class Main {
 		
 		comboFun2.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent event) {
-				if(comboDev.getSelectionIndex() == 0 && comboFun2.getSelectionIndex() == 0){
-					setTagSeqVal("50000008",tag50000008);
-				}else if(comboDev.getSelectionIndex() == 0 && comboFun2.getSelectionIndex() == 1){
-					setTagSeqVal("31000008",tag31000008);
-				}else if(comboDev.getSelectionIndex() == 1 && comboFun2.getSelectionIndex() == 0){
-					setTagSeqVal("6202",tag6202);
-				}else if(comboDev.getSelectionIndex() == 1 && comboFun2.getSelectionIndex() == 1){
-					setTagSeqVal("8002",tag8002);
-				}else if(comboDev.getSelectionIndex() == 3 && comboFun2.getSelectionIndex() == 0){
-					setTagSeqVal("2502",tag2502);
-				}else if(comboDev.getSelectionIndex() == 3 && comboFun2.getSelectionIndex() == 1){
-					setTagSeqVal("8002",tag8002);
-				}else if(comboDev.getSelectionIndex() == 3 && comboFun2.getSelectionIndex() == 2){
-					setTagSeqVal("7005",tag7005);
-				}else if(comboDev.getSelectionIndex() == 3 && comboFun2.getSelectionIndex() == 3){
-					setTagSeqVal("7006",tag7006);
-				}
+				setTag(false, comboDev.getSelectionIndex(), comboFun2.getSelectionIndex());
 			}
 			public void widgetDefaultSelected(SelectionEvent event) {
-				
+				setTag(false, comboDev.getSelectionIndex(), comboFun2.getSelectionIndex());
 			}
 
 		});
 
 	}
 	
-	private void setTagSeqVal(String seq, String val){
-
+	private void setTag(boolean isReq, int comDevSt, int comFunSt){
 		Control[] controls = groupSetting.getChildren();
 		for(int i = 0; i < controls.length; i++) {
 			if(controls[i].getVisible()) {
@@ -726,365 +711,89 @@ public class Main {
 		
 		groupSetting.setText("세부 설정");
 		groupSetting.setLayout(new GridLayout(2, false));
+	
+		String tagSeq = "";
+		String tagVal = "";
+	    if(isReq){
+	    	tagSeq = "reqTagSeq"+Integer.toString(comDevSt)+Integer.toString(comFunSt);
+	    	tagVal = "reqTagVal"+Integer.toString(comDevSt)+Integer.toString(comFunSt);
+	    	
+	    }else{
+	    	tagSeq = "resTagSeq"+Integer.toString(comDevSt)+Integer.toString(comFunSt);
+	    	tagVal = "resTagVal"+Integer.toString(comDevSt)+Integer.toString(comFunSt);
+	    }
 		
 		new Label(groupSetting, SWT.NULL).setText("Tag Seq");
 		textTagSeq = new Text(groupSetting, SWT.SINGLE | SWT.BORDER);
 		textTagSeq.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		textTagSeq.setText(seq);
+		if(isReq){
+			textTagSeq.setText(getPropValue(tagSeq));
+		}else{
+			if("resTagSeq20".equals(tagSeq)){
+				textTagSeq.setText("");
+			}else{
+				textTagSeq.setText(getSavePropValue(tagSeq));
+			}
+		}
 		
 		new Label(groupSetting, SWT.NULL).setText("Tag Value(Hex)");
 		textTagVal = new Text(groupSetting, SWT.SINGLE | SWT.BORDER);
 		textTagVal.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		textTagVal.setText(val);
-		
-		new Label(groupSetting, SWT.NULL).setText("");
-		buttonTagVal = new Button(groupSetting, SWT.PUSH);
-		buttonTagVal.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		buttonTagVal.setText("Save TagValue");
-		buttonTagVal.setEnabled(true);
-		
-		buttonTagVal.addSelectionListener(new SelectionListener() {
-		
-		  public void widgetSelected(SelectionEvent event) {
-			  if(textTagSeq != null){
-					if(textTagSeq.getText() != null){
-						if("50000008".equals(textTagSeq.getText())){
-							tag50000008 = textTagVal.getText();
-						}else if("31000008".equals(textTagSeq.getText())){
-							tag31000008 = textTagVal.getText();
-						}else if("6202".equals(textTagSeq.getText())){
-							tag6202 = textTagVal.getText();
-						}else if("8002".equals(textTagSeq.getText())){
-							tag8002 = textTagVal.getText();
-						}else if("2502".equals(textTagSeq.getText())){
-							tag2502 = textTagVal.getText();
-						}else if("7005".equals(textTagSeq.getText())){
-							tag7005 = textTagVal.getText();
-						}else if("7006".equals(textTagSeq.getText())){
-							tag7006 = textTagVal.getText();
-						}
-					}
-				}  
-		  }
-		  public void widgetDefaultSelected(SelectionEvent event) {
-			if(textTagSeq != null){
-				if(textTagSeq.getText() != null){
-					if("50000008".equals(textTagSeq.getText())){
-						tag50000008 = textTagVal.getText();
-					}else if("31000008".equals(textTagSeq.getText())){
-						tag31000008 = textTagVal.getText();
-					}else if("6202".equals(textTagSeq.getText())){
-						tag6202 = textTagVal.getText();
-					}else if("8002".equals(textTagSeq.getText())){
-						tag8002 = textTagVal.getText();
-					}else if("2502".equals(textTagSeq.getText())){
-						tag2502 = textTagVal.getText();
-					}else if("7005".equals(textTagSeq.getText())){
-						tag7005 = textTagVal.getText();
-					}else if("7006".equals(textTagSeq.getText())){
-						tag7006 = textTagVal.getText();
-					}
-				}
-			}   
-		  }
-		});
-		
-		groupSetting.layout();
-		
-	}
-	
-	private void setUser(){
-		Control[] controls = groupSetting.getChildren();
-		for(int i = 0; i < controls.length; i++) {
-			if(controls[i].getVisible()) {
-				controls[i].dispose();
-			}
-		}
-		
-		if(groupSetting.getVisible() == false){
-			groupSetting.setVisible(true);
-		}
-		
-		groupSetting.setText("세부 설정");
-		groupSetting.setLayout(new GridLayout(2, false));
-		
-		new Label(groupSetting, SWT.NULL).setText("User ID");
-		textUserId = new Text(groupSetting, SWT.SINGLE | SWT.BORDER);
-		textUserId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		textUserId.setText("1");
-		
-		new Label(groupSetting, SWT.NULL).setText("User PW");
-		textUserPW = new Text(groupSetting, SWT.SINGLE | SWT.BORDER);
-		textUserPW.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		textUserPW.setText("1234");
-		
-		groupSetting.layout();
-		
-	}
-	
-	private void setBatLevOn(){
-		Control[] controls = groupSetting.getChildren();
-		for(int i = 0; i < controls.length; i++) {
-			if(controls[i].getVisible()) {
-				controls[i].dispose();
-			}
-		}
-		
-		if(groupSetting.getVisible() == false){
-			groupSetting.setVisible(true);
-		}
-		
-		groupSetting.setText("세부 설정");
-		groupSetting.setLayout(new GridLayout(2, false));
-		
-		new Label(groupSetting, SWT.NULL).setText("Battery Lev");
-		comboLev = new Combo(groupSetting, SWT.BORDER);
-		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		comboLev.add("0%", 0);
-		comboLev.add("10%", 1);
-		comboLev.add("20%", 2);
-		comboLev.add("30%", 3);
-		comboLev.add("40%", 4);
-		comboLev.add("50%", 5);
-		comboLev.add("60%", 6);
-		comboLev.add("70%", 7);
-		comboLev.add("80%", 8);
-		comboLev.add("90%", 9);
-		comboLev.add("100%", 10);
-		
-		if(batteryLev != 0){
-			comboLev.select(batteryLev);
+		if(isReq){
+			textTagVal.setText(getPropValue(tagVal));//save the tagSeq and tagVal in properties at send data
 		}else{
-			comboLev.select(0);
-		}
-		comboLev.setVisible(true);
-		groupSetting.layout();
-		comboLev.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent event) {
-				batteryLev = comboLev.getSelectionIndex();
+			if("resTagSeq20".equals(tagSeq)){
+				textTagVal.setText("");
+			}else{
+				textTagVal.setText(getSavePropValue(tagVal));
 			}
+		}
+		
+		
+		if(!isReq){
+			new Label(groupSetting, SWT.NULL).setText("");
+			buttonTagVal = new Button(groupSetting, SWT.PUSH);
+			buttonTagVal.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			buttonTagVal.setText("Save TagValue");
+			buttonTagVal.setEnabled(true);
 			
-			public void widgetDefaultSelected(SelectionEvent e) {
+			buttonTagVal.addSelectionListener(new SelectionListener() {
 				
-			}
-
-		});
-	}
-	
-	private void setDoorEm1(){
-		Control[] controls = groupSetting.getChildren();
-		for(int i = 0; i < controls.length; i++) {
-			if(controls[i].getVisible()) {
-				controls[i].dispose();
-			}
+				  public void widgetSelected(SelectionEvent event) {
+					  if(textTagSeq != null){
+							if(textTagSeq.getText() != null){
+								try {
+									if("31000008".equals(textTagSeq.getText())){
+										tag31000008 = textTagVal.getText();
+									}else if("6202/8002".equals(textTagSeq.getText())){
+										if(!"".equals(textTagVal.getText()) && textTagVal.getText().indexOf("/") > -1 ){
+											String[] values = textTagVal.getText().split("/");
+											tag6202 = values[0];
+											tag8002 = values[1];
+										}else{
+											tag6202 = textTagVal.getText();
+										}
+									}else if("2502/8002".equals(textTagSeq.getText())){
+										if(!"".equals(textTagVal.getText()) && textTagVal.getText().indexOf("/") > -1 ){
+											String[] values = textTagVal.getText().split("/");
+											tag2502 = values[0];
+											tag8002 = values[1];
+										}else{
+											tag2502 = textTagVal.getText();
+										}
+									}
+									saveTag();
+								} catch (Exception e) {
+									// TODO: handle exception
+								}
+							}
+						}  
+				  }
+				  public void widgetDefaultSelected(SelectionEvent event) {}
+				});
 		}
-		
-		if(groupSetting.getVisible() == false){
-			groupSetting.setVisible(true);
-		}
-		
-		groupSetting.setText("세부 설정");
-		groupSetting.setLayout(new GridLayout(2, false));
-		
-		new Label(groupSetting, SWT.NULL).setText("Door Status");
-		comboLev = new Combo(groupSetting, SWT.BORDER);
-		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		comboLev.add("Intrusion,Unknown Location", 0);
-		comboLev.add("Tempering,Product covering removed", 1);
-		comboLev.add("Contact FireService", 2);
-		
-		comboLev.select(0);
-		comboLev.setVisible(true);
-		groupSetting.layout();
-		comboLev.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent event) {
-				isDoorEc1 = comboLev.getSelectionIndex();
-			}
-			
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-
-		});
-	}
-	
-	private void setDoorEm2(){
-		Control[] controls = groupSetting.getChildren();
-		for(int i = 0; i < controls.length; i++) {
-			if(controls[i].getVisible()) {
-				controls[i].dispose();
-			}
-		}
-		
-		if(groupSetting.getVisible() == false){
-			groupSetting.setVisible(true);
-		}
-		
-		groupSetting.setText("세부 설정");
-		groupSetting.setLayout(new GridLayout(2, false));
-		
-		new Label(groupSetting, SWT.NULL).setText("Door Status");
-		comboLev = new Combo(groupSetting, SWT.BORDER);
-		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		comboLev.add("Intrusion, Unknown Location", 0);
-		comboLev.add("Tampering,Product covering removed", 1);
-		comboLev.add("Tampering,Invalid Code", 2);
-		
-		comboLev.select(0);
-		comboLev.setVisible(true);
-		groupSetting.layout();
-		comboLev.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent event) {
-				isDoorEc2 = comboLev.getSelectionIndex();
-			}
-			
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-
-		});
-	}
-	
-	private void setDoorLock(){
-		Control[] controls = groupSetting.getChildren();
-		for(int i = 0; i < controls.length; i++) {
-			if(controls[i].getVisible()) {
-				controls[i].dispose();
-			}
-		}
-		
-		if(groupSetting.getVisible() == false){
-			groupSetting.setVisible(true);
-		}
-		
-		groupSetting.setText("세부 설정");
-		groupSetting.setLayout(new GridLayout(2, false));
-		
-		new Label(groupSetting, SWT.NULL).setText("DoorLock");
-		comboLev = new Combo(groupSetting, SWT.BORDER);
-		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		comboLev.add("Open", 0);
-		comboLev.add("Close", 1);
-		
-		comboLev.select(0);
-		comboLev.setVisible(true);
-		groupSetting.layout();
-		comboLev.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent event) {
-				isDoorLock = comboLev.getSelectionIndex();
-			}
-			
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-
-		});
-	}
-	private void setGasOnOff(){
-		Control[] controls = groupSetting.getChildren();
-		for(int i = 0; i < controls.length; i++) {
-			if(controls[i].getVisible()) {
-				controls[i].dispose();
-			}
-		}
-		
-		if(groupSetting.getVisible() == false){
-			groupSetting.setVisible(true);
-		}
-		
-		groupSetting.setText("세부 설정");
-		groupSetting.setLayout(new GridLayout(2, false));
-		
-		new Label(groupSetting, SWT.NULL).setText("GasValve St");
-		comboLev = new Combo(groupSetting, SWT.BORDER);
-		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		comboLev.add("On", 0);
-		comboLev.add("Off", 1);
-		
-		comboLev.select(0);
-		comboLev.setVisible(true);
-		groupSetting.layout();
-		comboLev.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent event) {
-				isGasSt = comboLev.getSelectionIndex();
-			}
-			
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-
-		});
-	}
-	
-	private void setSensorSt(){
-		Control[] controls = groupSetting.getChildren();
-		for(int i = 0; i < controls.length; i++) {
-			if(controls[i].getVisible()) {
-				controls[i].dispose();
-			}
-		}
-		
-		if(groupSetting.getVisible() == false){
-			groupSetting.setVisible(true);
-		}
-		
-		groupSetting.setText("세부 설정");
-		groupSetting.setLayout(new GridLayout(2, false));
-		
-		new Label(groupSetting, SWT.NULL).setText("DoorLock");
-		comboLev = new Combo(groupSetting, SWT.BORDER);
-		comboLev.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		comboLev.add("Open", 0);
-		comboLev.add("Close", 1);
-		
-		comboLev.select(0);
-		comboLev.setVisible(true);
-		
-		new Label(groupSetting, SWT.NULL).setText("Battery Lev");
-		comboLev2 = new Combo(groupSetting, SWT.BORDER);
-		comboLev2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		comboLev2.add("0%", 0);
-		comboLev2.add("10%", 1);
-		comboLev2.add("20%", 2);
-		comboLev2.add("30%", 3);
-		comboLev2.add("40%", 4);
-		comboLev2.add("50%", 5);
-		comboLev2.add("60%", 6);
-		comboLev2.add("70%", 7);
-		comboLev2.add("80%", 8);
-		comboLev2.add("90%", 9);
-		comboLev2.add("100%", 10);
-		
-		comboLev2.select(0);
-		comboLev2.setVisible(true);
 		
 		groupSetting.layout();
-		comboLev.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent event) {
-				isDoorLock = comboLev.getSelectionIndex();
-			}
-			
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-
-		});
-		comboLev2.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent event) {
-				batteryLev = comboLev2.getSelectionIndex();
-			}
-			
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-
-		});
-	}
-	
-	private void setBatLevOff(){
-		if(groupSetting.getVisible() == true){
-			groupSetting.setVisible(false);
-		}
 	}
 	
 	public static void initSendData(){
@@ -1098,7 +807,7 @@ public class Main {
 			byte[] header = packetUtil.getHeader(MthdType.ATHN_COMMCHATHN_DEV_TCP, 0).toPacket();
 			
 			StdSysTcpCode.MthdType mthdType = MthdType.ATHN_COMMCHATHN_DEV_TCP;
-			String strBody = packetUtil.getBody(mthdType.getValue(), 100,100);
+			String strBody = packetUtil.getBody(mthdType.getValue(), 100, 100, "", "");
 			byte[] body = strBody.getBytes();
 			
 			System.out.println(" body : "+ new String(body) +" \n header : "+ new String(header));
@@ -1150,7 +859,7 @@ public class Main {
 					byte[] header = packetUtil.getHeader(mthdType, 0).toPacket();
 //					byte[] header = getHeader(mthdType).getBytes();
 					
-					String strBody = packetUtil.getBody(mthdType.getValue(), 200,200);
+					String strBody = packetUtil.getBody(mthdType.getValue(), 200,200,"","");
 					byte[] body = strBody.getBytes();
 					System.out.println("=====================keep alive=====================");
 		    		client.sendData(header, body, mthdType.getValue());
@@ -1200,5 +909,109 @@ public class Main {
 			}
 		});
 		
+	}
+
+	
+	public String getPropValue(String key) {
+		Properties tagProperties = new Properties();
+
+		String dir = this.getClass().getResource("").getPath();
+		String reDir = dir.substring(1,dir.length()-20);
+		reDir.replaceAll("/", "\\\\");
+		String value = null;
+		InputStream is = null;
+		try {			
+//			is = new FileInputStream(reDir+"tag.properties");
+			is = new FileInputStream(".\\tag.properties");
+			tagProperties.load(is);
+			value = tagProperties.getProperty(key);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		} finally {
+			try {is.close();} catch (IOException e) {}
+		}
+		return value;
+	}
+	
+	public String getSavePropValue(String key) {
+		Properties tagProperties = new Properties();
+
+		String dir = this.getClass().getResource("").getPath();
+		String reDir = dir.substring(1,dir.length()-20);
+		reDir.replaceAll("/", "\\\\");
+		String value = null;
+		InputStream is = null;
+		try {			
+//			is = new FileInputStream(reDir+"saveTag.properties");
+			is = new FileInputStream(".\\saveTag.properties");
+			tagProperties.load(is);
+			value = tagProperties.getProperty(key);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		} finally {
+			if("resTagVal00".equals(key)){
+				tag31000008 = value;
+			} else if("resTagVal10".equals(key)){
+				if(value.indexOf("/") > -1){
+					String[] values = value.split("/");
+					tag6202 = values[0];
+					tag8002 = values[1];
+				}else{
+					tag6202 = value;
+				}
+			} else if("resTagVal30".equals(key)){
+				if(value.indexOf("/") > -1){
+					String[] values = value.split("/");
+					tag2502 = values[0];
+					tag8002 = values[1];
+				}else{
+					tag2502 = value;
+				}
+			}
+			try {is.close();} catch (IOException e) {}
+		}
+		return value;
+	}
+	
+	public void saveTag() throws FileNotFoundException, IOException{
+		Properties saveTagProperties = new Properties();
+		OutputStream output = null;
+		try {
+			
+			String dir = this.getClass().getResource("").getPath();
+			String reDir = dir.substring(1,dir.length()-20);
+			reDir.replaceAll("/", "\\\\");
+//			output = new FileOutputStream(reDir+"saveTag.properties");
+			output = new FileOutputStream("\\saveTag.properties");
+//			input = new FileInputStream(reDir+"saveTag.properties");
+//			saveTagProperties.load(output);
+			saveTagProperties.putAll(saveMap());
+			saveTagProperties.store(output, "#####################tag properties#####################");
+		} catch (Exception e) {
+			// TODO: handle exception
+		} finally {
+			try {
+				output.close();
+			} catch (IOException e) {
+			}
+		}
+	}
+	
+	public Map saveMap(){
+		String addStr = "";
+		if(tag8002 != null && !"".equals(tag8002)){
+			addStr = "/"+tag8002;
+		}
+		Map paramMap = new HashMap();
+		paramMap.put("resTagSeq00", "31000008");
+		paramMap.put("resTagVal00", tag31000008);
+		paramMap.put("resTagSeq10", "6202/8002");
+		paramMap.put("resTagVal10", tag6202+addStr);
+		paramMap.put("resTagSeq30", "2502/8002");
+		paramMap.put("resTagVal30", tag2502+addStr);
+		
+		return paramMap;
 	}
 }
