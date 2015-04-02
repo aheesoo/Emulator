@@ -267,7 +267,7 @@ public class PacketUtil {
 				infoUpdTypeCd = "11";
 			}else if(devNum == 1 && funNum == 0){//도어락 등록
 				infoUpdTypeCd = "02";
-				devBasVO.setDevId("B479A7171087");
+				devBasVO.setDevId("doorlock_test_01");
 				devBasVO.setDevNm("Door Lock - Keypad_01");
 				devBasVO.setModelNm("KTH00002");
 				devBasVO.setFrmwrVerNo("0304");
@@ -301,9 +301,9 @@ public class PacketUtil {
 			}else if(devNum == 2 && funNum == 0){//open/close sensor 등록
 				infoUpdTypeCd = "02";
 				
-				devBasVO.setDevId("B479A717108704");
-				devBasVO.setDevNm("Sensor - Notification");
-				devBasVO.setModelNm("000000030008");
+				devBasVO.setDevId("sensor_test_01");
+				devBasVO.setDevNm("Sensor - Notification_01");
+				devBasVO.setModelNm("KTH00003");
 				devBasVO.setFrmwrVerNo("0304");
 				
 				Map<String, String> map = new HashMap<String,String>();
@@ -330,9 +330,9 @@ public class PacketUtil {
 			}*/else if(devNum == 3 && funNum == 0){// gas valve 등록
 				infoUpdTypeCd = "02";
 				
-				devBasVO.setDevId("B479A717108703");
-				devBasVO.setDevNm("Valve - open/close");
-				devBasVO.setModelNm("022a01000100");
+				devBasVO.setDevId("valve_test_01");
+				devBasVO.setDevNm("Valve - open/close_01");
+				devBasVO.setModelNm("KTH00004");
 				devBasVO.setFrmwrVerNo("0304");
 				
 				Map<String, String> map = new HashMap<String,String>();
@@ -698,6 +698,9 @@ private static ColecRowVO getReqColecRowVO(ColecRowVO colecRowVO, String snsnTag
 		
 		List<SclgSetupDataInfoVO> sclgSetupDataInfoVOs = cnvyRowVO.getSclgSetupDataInfoVOs();
 		cnvyRow.setSclgSetupDataInfoVOs(sclgSetupDataInfoVOs);
+		
+		List<CmdDataInfoVO> cmdDataInfoVOs = cnvyRowVO.getCmdDataInfoVOs();
+		cnvyRow.setCmdDataInfoVOs(cmdDataInfoVOs);
 		
 		return cnvyRow;
 	}

@@ -161,8 +161,8 @@ public class Main {
 	                       
 	String deviceIdHub = "C_B479A7171CAD";//"B479A717108702";//"iohub";
 	String deviceIdDev01 = "C_B479A7171CAD";
-	String deviceIdDev02 = "iotdevice02";
-	String deviceIdDev03 = "iotdevice03";
+	String deviceIdDev02 = "C_B479A7171CAD";
+	String deviceIdDev03 = "C_B479A7171CAD";
 	
 	public Main() {
         
