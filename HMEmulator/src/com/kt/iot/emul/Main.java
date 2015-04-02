@@ -159,10 +159,10 @@ public class Main {
 	String athnRqtNoDev02 = "";
 	String athnRqtNoDev03 = "";
 	                       
-	String deviceIdHub = "";
-	String deviceIdDev01 = "";
-	String deviceIdDev02 = "";
-	String deviceIdDev03 = "";
+	String deviceIdHub = "C_B479A7171CAD";//"B479A717108702";//"iohub";
+	String deviceIdDev01 = "C_B479A7171CAD";
+	String deviceIdDev02 = "iotdevice02";
+	String deviceIdDev03 = "iotdevice03";
 	
 	public Main() {
         
@@ -236,7 +236,8 @@ public class Main {
 		new Label(groupDevice, SWT.NULL).setText("authNum");
 		authNum = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
 		authNum.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		authNum.setText("F02641FD-C9A7-4F34-96F7-85C0DF65E551");
+//		authNum.setText("F02641FD-C9A7-4F34-96F7-85C0DF65E551");
+		authNum.setText("1001");
 		
 		new Label(groupDevice, SWT.NULL).setText("systemId");
 		extrSysId = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
@@ -247,7 +248,8 @@ public class Main {
 		new Label(groupDevice, SWT.NULL).setText("deviceId");
 		deviceId = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
 		deviceId.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		deviceId.setText("iothub");
+		deviceId.setText(deviceIdHub);
+//		deviceId.setText("B479A717108702");
 		
 		new Label(groupDevice, SWT.NULL).setText("Request/Response");
 		comboReqRes = new Combo(groupDevice, SWT.BORDER);
@@ -390,41 +392,41 @@ public class Main {
 		comboDev.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent event) {
 				if(comboDev.getSelectionIndex() == 0 && comboReqRes.getSelectionIndex() == 0) {
-					deviceId.setText("iothub");
+					deviceId.setText(deviceIdHub);
 					authNum.setText("F02641FD-C9A7-4F34-96F7-85C0DF65E551");
 					setFunction(0);
 					setTag(true, 0, 0);
 				}else if(comboDev.getSelectionIndex() == 1 && comboReqRes.getSelectionIndex() == 0) {
 //					deviceId.setText("iotdevice01");
 					authNum.setText("1001");
-					deviceId.setText("C_B479A7171CAD");
+					deviceId.setText(deviceIdDev01);
 					setFunction(1);
 					setTag(true, 1, 0);
 				}else if(comboDev.getSelectionIndex() == 2 && comboReqRes.getSelectionIndex() == 0) {
-					deviceId.setText("iotdevice02");
+					deviceId.setText(deviceIdDev02);
 					setFunction(2);
 					setTag(true, 2, 0);
 				}else if(comboDev.getSelectionIndex() == 3 && comboReqRes.getSelectionIndex() == 0) {
-					deviceId.setText("iotdevice03");
+					deviceId.setText(deviceIdDev03);
 					setFunction(3);
 					setTag(true, 3, 0);
 				}
 				else if(comboDev.getSelectionIndex() == 0 && comboReqRes.getSelectionIndex() == 1) {
-					deviceId.setText("iothub");
+					deviceId.setText(deviceIdHub);
 					setFunction2(0);
 					setTag(false, 0, 0);
 //					setTagSeqVal("50000008",tag50000008);
 				}else if(comboDev.getSelectionIndex() == 1 && comboReqRes.getSelectionIndex() == 1) {
-					deviceId.setText("C_B479A7171CAD");
+					deviceId.setText(deviceIdDev01);
 					setFunction2(1);
 					setTag(false, 1, 0);
 //					setTagSeqVal("6202",tag6202);
 				}else if(comboDev.getSelectionIndex() == 2 && comboReqRes.getSelectionIndex() == 1) {
-					deviceId.setText("iotdevice02");
+					deviceId.setText(deviceIdDev02);
 					setFunction2(2);
 					setTag(false, 2, 0);
 				}else if(comboDev.getSelectionIndex() == 3 && comboReqRes.getSelectionIndex() == 1) {
-					deviceId.setText("iotdevice03");
+					deviceId.setText(deviceIdDev03);
 					setFunction2(3);
 					setTag(false, 3, 0);
 //					setTagSeqVal("2502",tag2502);

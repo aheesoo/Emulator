@@ -267,8 +267,8 @@ public class PacketUtil {
 				infoUpdTypeCd = "11";
 			}else if(devNum == 1 && funNum == 0){//도어락 등록
 				infoUpdTypeCd = "02";
-				devBasVO.setDevId("B479A717108702");
-				devBasVO.setDevNm("Door Lock - Keypad");
+				devBasVO.setDevId("B479A7171087");
+				devBasVO.setDevNm("Door Lock - Keypad_01");
 				devBasVO.setModelNm("KTH00002");
 				devBasVO.setFrmwrVerNo("0304");
 				
