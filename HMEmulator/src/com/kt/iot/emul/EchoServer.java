@@ -32,7 +32,7 @@ public class EchoServer {
 
 		PrintWriter pw = null;
 
-		int port = 9077; // port번호 지정
+		int port = 9081; // port번호 지정
 
 		String receiveMsg = null; // Client의 받은 문자열 저장
 

@@ -234,7 +234,7 @@ public class PacketUtil {
 			Date amdDtFns = new Date();/** 수정일시종료 */
 			
 			devInfoRetvRqtVO.setExtrSysId(extrSysId);
-			devInfoRetvRqtVO.setM2mSvcNo(m2mSvcNo);
+//			devInfoRetvRqtVO.setM2mSvcNo(m2mSvcNo);
 			devInfoRetvRqtVO.setModelNm(modelNm);
 			devInfoRetvRqtVO.setUseYn(useYn);
 			devInfoRetvRqtVO.setCretDtSt(cretDtSt);
@@ -258,7 +258,7 @@ public class PacketUtil {
 			devBasVO.setAthnRqtNo(athnRqtNo);
 			devBasVO.setAthnNo(athnNo);
 			devBasVO.setDevId(devId);
-			devBasVO.setM2mSvcNo(m2mSvcNo);
+//			devBasVO.setM2mSvcNo(m2mSvcNo);
 			devBasVO.setExtrSysId(extrSysId); 
 			System.out.println(" devNum -> "+devNum+ " / funNum -> "+funNum);
 			if(devNum == 0 && funNum == 0){//IoT GW repair 진행 후 연결상태 전달
@@ -330,8 +330,8 @@ public class PacketUtil {
 			}*/else if(devNum == 3 && funNum == 0){// gas valve 등록
 				infoUpdTypeCd = "02";
 				
-				devBasVO.setDevId("valve_test_01");
-				devBasVO.setDevNm("Valve - open/close_01");
+				devBasVO.setDevId("valve_test_02");
+				devBasVO.setDevNm("Valve - open/close_02");
 				devBasVO.setModelNm("KTH00004");
 				devBasVO.setFrmwrVerNo("0304");
 				
@@ -467,7 +467,7 @@ public class PacketUtil {
 				devBasVO.setDevId(devId);
 				devBasVO.setBinSetupDataInfoVOs(binSetupDataInfoVOs);
 				devBasVO.setExtrSysId(devInfoRetvRqtVO.getExtrSysId());
-				devBasVO.setM2mSvcNo(devInfoRetvRqtVO.getM2mSvcNo());
+//				devBasVO.setM2mSvcNo(devInfoRetvRqtVO.getM2mSvcNo());
 				devBasVOs.add(devBasVO);
 			}
 			
