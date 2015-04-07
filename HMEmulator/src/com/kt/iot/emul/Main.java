@@ -108,7 +108,7 @@ public class Main {
 	private static Combo comboVersion;
 	private Combo comboFun;
 	private Combo comboFun2;
-	private Combo comboDev;
+	private static Combo comboDev;
 	// private Combo comboReqRes;
 	private Combo comboLev;
 	private Combo comboLev2;
@@ -166,38 +166,50 @@ public class Main {
 	// public static String tag7005 = "";
 	// public static String tag7006 = "";
 	/**************************************************************************/
+	
+	//".\\Info.properties";  "C:\\Info.properties";    ".\\emulator_server.properties";  "C:\\emulator_server.properties";
+	public String infoDir = getPath("Info.properties");//"C:\\Info.properties";
+	public String serverDir = getPath("emulator_server.properties");//"C:\\emulator_server.properties";
 
-	String athnRqtNoHub = "";
-	String athnRqtNoDev01 = "";
+	String athnRqtNoHub = "";//F02641FD-C9A7-4F34-96F7-85C0DF65E551
+	String athnRqtNoDev01 = "";//1001
 	String athnRqtNoDev02 = "";
 	String athnRqtNoDev03 = "";
 
-	String deviceIdHub = "C_B479A7171CAD";// "B479A717108702";//"iohub";
-	String deviceIdDev01 = "C_B479A7171CAD";
-	String deviceIdDev02 = "C_B479A7171CAD";
-	String deviceIdDev03 = "C_B479A7171CAD";
+	String deviceIdHub = "";// "B479A717108702";//"iohub";
+	String deviceIdDev01 = "";
+	String deviceIdDev02 = "";
+	String deviceIdDev03 = "";
+	
+	public String getPath(String path){
+		String dir = this.getClass().getResource(path).getPath();
+		if (dir.startsWith("file:/")) dir = dir.substring(6, dir.length());
+		else if (dir.startsWith("/")) dir = dir.substring(1, dir.length());
+		
+		String[] dirArr = dir.split("ECEmulator");
+		return dirArr[0]+path;
+	}
 
 	public Main() {
 
 		Properties properties = new Properties();
-		// Properties devInfoProps = new Properties();
 		try {
-			// properties.load(new
-			// FileInputStream("C:\\emulator_server.properties"));
-			properties
-					.load(new FileInputStream(".\\emulator_server.properties"));// 이클립스에서는
-																				// 루트
-																				// 경로
-																				// /
-																				// jar에서는
-																				// 같은
-																				// 프로젝트
-																				// 디렉토리
-			// properties.load(new
-			// FileInputStream("\\emulator_server.properties"));//이클립스에서는 루트 경로
+			String dir = this.getClass().getResource("emulator_server.properties").getPath();
+			
+			properties.load(new FileInputStream(serverDir));
+//			properties.load(new FileInputStream(serverDir));
 			// / jar에서는 같은 프로젝트 디렉토리
-			// devInfoProps.load(new
 			// FileInputStream(reDir+"deviceInfo.properties"));
+			athnRqtNoHub = properties.getProperty("devHubAuthNum");
+			athnRqtNoDev01 = properties.getProperty("devDoorAuthNum");
+			athnRqtNoDev02 = properties.getProperty("devSensorAuthNum");
+			athnRqtNoDev03 = properties.getProperty("devGasAuthNum");
+					               
+			deviceIdHub = properties.getProperty("devHubDevId");
+			deviceIdDev01 = properties.getProperty("devDoorDevId");
+			deviceIdDev02 = properties.getProperty("devSensorDevId");
+			deviceIdDev03 = properties.getProperty("devGasDevId");
+			
 		} catch (IOException e) {
 
 		}
@@ -276,7 +288,7 @@ public class Main {
 		authNum = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
 		authNum.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		// authNum.setText("F02641FD-C9A7-4F34-96F7-85C0DF65E551");
-		authNum.setText("1001");
+		authNum.setText(athnRqtNoHub);
 
 		new Label(groupDevice, SWT.NULL).setText("systemId");
 		extrSysId = new Text(groupDevice, SWT.SINGLE | SWT.BORDER);
@@ -385,22 +397,23 @@ public class Main {
 				}
 			}
 		});
-
 		comboDev.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent event) {
 				if (comboDev.getSelectionIndex() == 0) {
+					authNum.setText(athnRqtNoHub);
 					deviceId.setText(deviceIdHub);
-					authNum.setText("F02641FD-C9A7-4F34-96F7-85C0DF65E551");
 					setFunction(0);
 				} else if (comboDev.getSelectionIndex() == 1) {
 					// deviceId.setText("iotdevice01");
-					authNum.setText("1001");
+					authNum.setText(athnRqtNoDev01);
 					deviceId.setText(deviceIdDev01);
 					setFunction(1);
 				} else if (comboDev.getSelectionIndex() == 2) {
+					authNum.setText(athnRqtNoDev02);
 					deviceId.setText(deviceIdDev02);
 					setFunction(2);
 				} else if (comboDev.getSelectionIndex() == 3) {
+					authNum.setText(athnRqtNoDev03);
 					deviceId.setText(deviceIdDev03);
 					setFunction(3);
 				}
@@ -697,6 +710,7 @@ public class Main {
 			public void run() {
 				buttonInit.setText("Connect");
 				buttonSend.setEnabled(false);
+				comboDev.select(0);
 				// groupDevice.setVisible(false);
 				groupFunction.setVisible(false);
 			}
@@ -778,11 +792,9 @@ public class Main {
 		InputStream is = null;
 		StringBuilder responseData = new StringBuilder();
 		try {
-			// is = new FileInputStream(reDir+"tag.properties");
-			 is = new FileInputStream(".\\Info.properties");
-//			is = new FileInputStream("\\Info.properties");
-			InputStreamReader inputStreamReader = new InputStreamReader(is,
-					"UTF-8");
+//			String dir = this.getClass().getResource("Info.properties").getPath();
+			is = new FileInputStream(infoDir); 
+			InputStreamReader inputStreamReader = new InputStreamReader(is,	"UTF-8");
 			BufferedReader in = new BufferedReader(inputStreamReader);
 			String line = null;
 
@@ -839,10 +851,9 @@ public class Main {
 		String value = funNm.replaceAll(" ", "") + "_value";
 		String[] resultStr = new String[2];
 		try {
-			 is = new FileInputStream(".\\Info.properties");
-//			is = new FileInputStream("\\Info.properties");
-			InputStreamReader inputStreamReader = new InputStreamReader(is,
-					"UTF-8");
+//			String dir = this.getClass().getResource("Info.properties").getPath();
+			is = new FileInputStream(infoDir);
+			InputStreamReader inputStreamReader = new InputStreamReader(is,	"UTF-8");
 			// BufferedReader in = new BufferedReader(inputStreamReader);
 
 			tagProperties.load(inputStreamReader);
@@ -875,12 +886,9 @@ public class Main {
 		OutputStream output = null;
 		try {
 
-			// output = new FileOutputStream(".\\Info.properties");
-			 File targetFile = new File(".\\Info.properties");
-//			File targetFile = new File("\\Info.properties");
-			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(targetFile.getPath()), "UTF-8"));
-
+			File targetFile = new File(infoDir);
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile.getPath()), "UTF-8"));
+			
 			Map saveMap = new HashMap();
 			saveMap = sortByKey(saveTagsMap());
 			Iterator iterator = saveMap.entrySet().iterator();
