@@ -255,8 +255,8 @@ public class PacketUtil {
 			/** 장치정보목록 */
 			DevBasVO devBasVO = new DevBasVO();
 			List<DevBasVO> devBasVOs = new ArrayList<DevBasVO>();
-			devBasVO.setAthnRqtNo(athnRqtNo);
-			devBasVO.setAthnNo(athnNo);
+//			devBasVO.setAthnRqtNo(athnRqtNo);
+//			devBasVO.setAthnNo(athnNo);
 			devBasVO.setDevId(devId);
 //			devBasVO.setM2mSvcNo(m2mSvcNo);
 			devBasVO.setExtrSysId(extrSysId); 
@@ -267,17 +267,17 @@ public class PacketUtil {
 				infoUpdTypeCd = "11";
 			}else if(devNum == 1 && funNum == 0){//도어락 등록
 				infoUpdTypeCd = "02";
-				devBasVO.setDevId("doorlock_test_01");
-				devBasVO.setDevNm("Door Lock - Keypad_01");
-				devBasVO.setModelNm("KTH00002");
-				devBasVO.setFrmwrVerNo("0304");
+				devBasVO.setDevId("W_B479A717108702");
+				devBasVO.setDevNm("");
+				devBasVO.setModelNm("000000030002");
+//				devBasVO.setFrmwrVerNo("0304");
 				
 				Map<String, String> map = new HashMap<String,String>();
-				map.put("HW_VER", "ff");
-				map.put("GEN_DEV_CLASS", "40");
-				map.put("SPCF_DEV_CLASS", "03");
-				map.put("IST_ICON_TY", "0300");
-				map.put("USER_ICON_TY", "0300");
+//				map.put("HW_VER", "ff");
+				map.put("GEN_DEV_CLASS", "10");
+				map.put("SPCF_DEV_CLASS", "01");
+//				map.put("IST_ICON_TY", "0300");
+//				map.put("USER_ICON_TY", "0300");
 				
 				Iterator<String> iterator = map.keySet().iterator();
 				while(iterator.hasNext()){

@@ -167,9 +167,9 @@ public class Main {
 	// public static String tag7006 = "";
 	/**************************************************************************/
 	
-	//".\\Info.properties";  "C:\\Info.properties";    ".\\emulator_server.properties";  "C:\\emulator_server.properties";
-	public String infoDir = getPath("Info.properties");//"C:\\Info.properties";
-	public String serverDir = getPath("emulator_server.properties");//"C:\\emulator_server.properties";
+	//".\\Info.properties";  "C:\\Info.properties";    ".\\emulator_server.properties";  "C:\\emulator_server.properties"; getPath("Info.properties"); getPath("emulator_server.properties");
+	public String infoDir = ".\\Info.properties";//getPath("Info.properties");
+	public String serverDir = ".\\emulator_server.properties";//getPath("emulator_server.properties");
 
 	String athnRqtNoHub = "";//F02641FD-C9A7-4F34-96F7-85C0DF65E551
 	String athnRqtNoDev01 = "";//1001
@@ -194,7 +194,7 @@ public class Main {
 
 		Properties properties = new Properties();
 		try {
-			String dir = this.getClass().getResource("emulator_server.properties").getPath();
+//			String dir = this.getClass().getResource("emulator_server.properties").getPath();
 			
 			properties.load(new FileInputStream(serverDir));
 //			properties.load(new FileInputStream(serverDir));
@@ -896,7 +896,12 @@ public class Main {
 				Entry entry = (Entry) iterator.next();
 				String key = (String) entry.getKey();// (String)iterator.next();
 				String val = (String) entry.getValue();// (String)saveMap.get(key);
-				String keyVal = key + " = " + val + "\n";
+				String keyVal = "";
+				if(key.contains("#")){
+					keyVal = key+"\n";
+				}else{
+					keyVal = key + " = " + val + "\n";
+				}
 				System.out.println("keyVal : " + keyVal);
 				if ("IoT단말연결상태조회_value".equals(key)) {
 					tag31000008 = val;
@@ -941,8 +946,12 @@ public class Main {
 		for (int i = 0; i < texts.length; i++) {
 			if (texts[i].length() > 1) {
 				String str = texts[i].replaceAll(" ", "");
-				String[] textArry = str.split("=");
-				paramMap.put(textArry[0], textArry[1]);
+				if(str.contains("=")){
+					String[] textArry = str.split("=");
+					paramMap.put(textArry[0].trim(), textArry[1].trim());
+				}else if(str.contains("#")){
+					paramMap.put(str.trim(), "");
+				}
 			}
 		}
 		return paramMap;
