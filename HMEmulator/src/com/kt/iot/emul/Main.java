@@ -168,8 +168,10 @@ public class Main {
 	/**************************************************************************/
 	
 	//".\\Info.properties";  "C:\\Info.properties";    ".\\emulator_server.properties";  "C:\\emulator_server.properties"; getPath("Info.properties"); getPath("emulator_server.properties");
-	public String infoDir = ".\\Info.properties";//getPath("Info.properties");
-	public String serverDir = ".\\emulator_server.properties";//getPath("emulator_server.properties");
+	public String infoDir = ".\\Info.properties";
+	public String serverDir = ".\\emulator_server.properties";
+//	public String infoDir = getPath("Info.properties");
+//	public String serverDir = getPath("emulator_server.properties");
 
 	String athnRqtNoHub = "";//F02641FD-C9A7-4F34-96F7-85C0DF65E551
 	String athnRqtNoDev01 = "";//1001
@@ -485,7 +487,7 @@ public class Main {
 								methcode = MthdType.INITA_DEV_UDATERPRT;
 							} else if (comboFun.getSelectionIndex() == 2
 									|| comboFun.getSelectionIndex() == 3
-									|| comboFun.getSelectionIndex() == 4) {
+									|| comboFun.getSelectionIndex() == 4 || comboFun.getSelectionIndex() == 5) {
 								methType = MthdType.COLEC_ITGDATA_RECV
 										.getValue();// 데이터 수집 411
 								methcode = MthdType.COLEC_ITGDATA_RECV;
@@ -649,11 +651,12 @@ public class Main {
 			comboFun.add("Gas valve 등록", 0);// 332
 			comboFun.add("Gas valve 삭제", 1);// 332
 			comboFun.add("Gas valve 상태 통보", 2);// 411
-			comboFun.add("Gav valve 동작 통보", 3);// 411
+			comboFun.add("Gas valve 동작 통보", 3);// 411
 			// comboFun.add("Gav valve 초기화 통보(추가)", 4);//332
 			// comboFun.add("Timeout 보고", 5);//332
 			// comboFun.add("Remainning 보고", 6);//332
 			comboFun.add("과열(Overheat) 보고", 4);// 411
+			comboFun.add("Gas valve Low battery 통보", 5);// 411
 			comboFun.select(0);
 
 			comboFun.setVisible(true);

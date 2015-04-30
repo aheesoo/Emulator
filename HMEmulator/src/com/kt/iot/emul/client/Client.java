@@ -177,6 +177,7 @@ public class Client extends Thread {
 		Main.report("\n received data - hex code : "+Util.byte2Hex(dataBuffer), true);
 		Main.report("\n received data - String : "+new String(dataBuffer), true);
 		System.out.println("receive data - String : "+new String(dataBuffer));
+		System.out.println("byte length  : "+dataBuffer.length);
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().create();
 		
 		short headerLen = MSG_HEADER_SIZE;
@@ -201,7 +202,8 @@ public class Client extends Thread {
 		int dataLength = packLenValue - header.length;
 		byte[] data = new byte[dataLength];
 		System.arraycopy(dataBuffer, header.length, data, 0, packLenValue-header.length); // body data
-System.out.println("msgType -> "+msgType +"  /  mthd -> "+mthd);
+		System.out.println("msgType -> "+msgType +"  /  mthd -> "+mthd);
+		
 		if(MsgType.RESPONSE.equals(msgType)){ // 요청(Request)에 대한 수신
 			if(MthdType.ATHN_COMMCHATHN_DEV_TCP.equals(mthd)){
 				CommChAthnRespVO commChAthnRespVO = gson.fromJson(new String(data), CommChAthnRespVO.class);
