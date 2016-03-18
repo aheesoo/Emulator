@@ -219,6 +219,7 @@ public class Client extends Thread {
 				Main.athnNo = commChAthnNo;
 
 				/** 통신채널 인증 후 keepalive 주기적 요청 */
+//				jobScheduler.scheduleAtFixedRate(job, 1000, 1);
 				jobScheduler.scheduleAtFixedRate(job, 30000, 30000);
 				
 			} 
@@ -266,6 +267,19 @@ public class Client extends Thread {
 				Main.report(new String(data), true);
 			}
 			else if(MthdType.FRMWR_UDATE_STTUS.equals(mthd)){ //813
+				ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
+				
+				/** 메세지헤더 */
+				MsgHeadVO msgHeadVO = comnRespVO.getMsgHeadVO();
+				/** 응답코드 */
+				String respCd = comnRespVO.getRespCd();
+				/** 응답메시지 */
+				String respMsg = comnRespVO.getRespMsg();
+				
+				Main.report("RespMsg : " +respMsg , true);
+				Main.report(new String(data), true);
+			}
+			else if(MthdType.LOG_ITG_LOG.equals(mthd)){ //821
 				ComnRespVO comnRespVO = gson.fromJson(new String(data), ComnRespVO.class);
 				
 				/** 메세지헤더 */
@@ -348,6 +362,7 @@ public class Client extends Thread {
 	class ScheduledJob extends TimerTask {
 		public void run() {
 			Main.keepAlive();
+//			Main.logFileTest();
 		}
 	}
 }

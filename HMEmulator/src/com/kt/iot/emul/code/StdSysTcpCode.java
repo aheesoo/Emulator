@@ -437,7 +437,9 @@ public class StdSysTcpCode
 		/** 펌웨어 데이터 TCP 요청 */
 		FRMWR_DATA_TCP_RQT( (short) 816),
 		/** 패키지 데이터 TCP 요청 */
-		PKG_DATA_TCP_RQT((short) 817)
+		PKG_DATA_TCP_RQT((short) 817),
+		/** 통합로그수집 */
+		LOG_ITG_LOG( ((short)821)),
 		;
 
 		private final Short value;

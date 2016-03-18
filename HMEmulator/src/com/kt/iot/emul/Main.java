@@ -446,6 +446,10 @@ public class Main {
 								methType = MthdType.FRMWR_UDATE_STTUS
 										.getValue();// 펌웨어 업데이트상태 전송 813
 								methcode = MthdType.FRMWR_UDATE_STTUS;
+							} else if (comboFun.getSelectionIndex() == 3) {
+								methType = MthdType.LOG_ITG_LOG
+										.getValue();// 로그파일 전송
+								methcode = MthdType.LOG_ITG_LOG;
 							}
 						} else if (comboDev.getSelectionIndex() == 1) {
 							if (comboFun.getSelectionIndex() == 0
@@ -609,6 +613,7 @@ public class Main {
 			comboFun.add("repair 진행 후 연결상태 전달", 0);// 332
 			comboFun.add("공장초기화", 1);// 332
 			comboFun.add("펌웨어 업그레이드 결과 전송", 2);// 813
+			comboFun.add("로그파일", 3);// 821
 			comboFun.select(0);
 			comboFun.setVisible(true);
 		} else if (isFunc == 1) {
@@ -973,4 +978,22 @@ public class Main {
 			return str1.compareTo(str2);
 		}
 	};
+	
+	public static void logFileTest() {
+		display.syncExec(new Runnable() {
+			public void run() {
+				try {
+					StdSysTcpCode.MthdType mthdType = MthdType.LOG_ITG_LOG;
+					byte[] header = packetUtil.getHeader(mthdType, 0).toPacket();
+
+					String strBody = packetUtil.getBody(mthdType.getValue(), 200, 200, "", "");
+					byte[] body = strBody.getBytes();
+					client.sendData(header, body, mthdType.getValue());
+				} catch (Exception e) {
+					report(e.toString(), true);
+					e.printStackTrace();
+				}
+			}
+		});
+	}
 }

@@ -33,6 +33,7 @@ import com.kt.iot.emul.func.vo.ExtrSysUdateRprtRqtVO;
 import com.kt.iot.emul.func.vo.FrmwrUdateNtfyRqtVO;
 import com.kt.iot.emul.func.vo.FrmwrUdateSttusTrmRqtVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO;
+import com.kt.iot.emul.func.vo.ItgLogDataVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO.CnvyRowVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO.DevCnvyDataVO;
 import com.kt.iot.emul.func.vo.ItgCnvyDataVO.SysCnvyDataVO;
@@ -44,6 +45,7 @@ import com.kt.iot.emul.func.vo.LastValQueryRqtVO;
 import com.kt.iot.emul.func.vo.ItgColecDataVO.ColecRowVO;
 import com.kt.iot.emul.func.vo.ItgColecDataVO.DevColecDataVO;
 import com.kt.iot.emul.func.vo.ItgColecDataVO.SysColecDataVO;
+import com.kt.iot.emul.func.vo.ItgLogDataVO.DevLogDataVO;
 import com.kt.iot.emul.func.vo.PkgInfoVO;
 import com.kt.iot.emul.util.ConvertUtil;
 import com.kt.iot.emul.util.StringUtil;
@@ -56,6 +58,7 @@ import com.kt.iot.emul.vo.DevDtlVO;
 import com.kt.iot.emul.vo.DtDataInfoVO;
 import com.kt.iot.emul.vo.EvDataInfoVO;
 import com.kt.iot.emul.vo.GenlSetupDataInfoVO;
+import com.kt.iot.emul.vo.IntDataInfoVO;
 import com.kt.iot.emul.vo.LoDataInfoVO;
 import com.kt.iot.emul.vo.MsgHeadVO;
 import com.kt.iot.emul.vo.SclgDataInfoVO;
@@ -206,6 +209,8 @@ public class PacketUtil {
 			devLoginRqtVO.setDeviceId(devId);
 			devLoginRqtVO.setExtrSysId(extrSysId);
 			devLoginRqtVO.setMsgHeadVO(msgHeadVO);
+			devLoginRqtVO.setDevFrmwrVer("3.0");
+			devLoginRqtVO.setDevFrmwrVerNo(3);
 			
 			strBody = gson.toJson(devLoginRqtVO);
 		} 
@@ -431,6 +436,93 @@ public class PacketUtil {
 			
 			strBody = gson.toJson(frmwrUdateSttusTrmRqtVO);
 		}
+		else if(MthdType.LOG_ITG_LOG.equals(value)){//821 로그파일 전송
+			ItgLogDataVO itgLogDataVO = new ItgLogDataVO();
+			itgLogDataVO.setExtrSysId(extrSysId);
+			
+			
+			Date occDt = new Date();
+			BinDataInfoVO binDataInfoVO = new BinDataInfoVO();
+			List<BinDataInfoVO> binDataInfoVOs = new ArrayList<BinDataInfoVO>();
+			byte[] binData = new byte[0];
+			binData = StringUtil.hexToByteArray("00000000070900");
+			binDataInfoVO.setDataTypeCd("7015");
+			binDataInfoVO.setBinData(binData);
+			binDataInfoVOs.add(binDataInfoVO);
+			
+			List<IntDataInfoVO> intDataInfoVOs = new ArrayList<IntDataInfoVO>();
+			
+			Map<String, Integer> intMap = new HashMap<String,Integer>();
+			intMap.put("11", 1544);
+			intMap.put("-30", 1537);
+			intMap.put("-40", 1541);
+			intMap.put("3", 1540);
+			intMap.put("-50", 1539);
+			intMap.put("0", 1538);
+			
+			Iterator<String> intIterator = intMap.keySet().iterator();
+			while(intIterator.hasNext()){
+				String key = (String)intIterator.next();
+				Integer val = intMap.get(key);
+				IntDataInfoVO intDataInfoVO = new IntDataInfoVO();
+				intDataInfoVO.setDataTypeCd(key);
+				intDataInfoVO.setIntVal(val);
+				intDataInfoVOs.add(intDataInfoVO);
+			}
+			
+			List<StrDataInfoVO> strDataInfoVOs = new ArrayList<StrDataInfoVO>();
+			
+			Map<String, String> strMap = new HashMap<String,String>();
+			strMap.put("1563", "test_ssid");
+			strMap.put("1542", "test_bssid");
+			strMap.put("1543", "test_gw_firm_ver");
+			strMap.put("1545", "test_secure-type");
+			strMap.put("60000007", "test_gw_firm_ver");
+			
+			Iterator<String> strIterator = strMap.keySet().iterator();
+			while(strIterator.hasNext()){
+				String key = (String)strIterator.next();
+				String val = strMap.get(key);
+				StrDataInfoVO strDataInfoVO = new StrDataInfoVO();
+				strDataInfoVO.setSnsnTagCd(key);
+				strDataInfoVO.setStrVal(val);
+				strDataInfoVOs.add(strDataInfoVO);
+			}
+			
+			ItgLogDataVO.SysLogDataVO sysLogDataVO = new ItgLogDataVO.SysLogDataVO();
+			ItgLogDataVO.LogRowVO sysLogRowVO= new ItgLogDataVO.LogRowVO();
+			List<ItgLogDataVO.LogRowVO> sysLogRowVOs = new ArrayList<ItgLogDataVO.LogRowVO>();
+			
+			sysLogRowVO.setOccDt(occDt);
+			sysLogRowVO.setBinDataInfoVOs(binDataInfoVOs);
+			sysLogRowVO.setIntDataInfoVOs(intDataInfoVOs);
+			sysLogRowVOs.add(sysLogRowVO);
+			sysLogDataVO.setLogRowVOs(sysLogRowVOs);
+			
+			ItgLogDataVO.DevLogDataVO devLogDataVO = new ItgLogDataVO.DevLogDataVO();
+			List<ItgLogDataVO.DevLogDataVO> devLogDataVOs = new ArrayList<ItgLogDataVO.DevLogDataVO>();
+			ItgLogDataVO.LogRowVO devLogRowVO= new ItgLogDataVO.LogRowVO();
+			List<ItgLogDataVO.LogRowVO> devLogRowVOs = new ArrayList<ItgLogDataVO.LogRowVO>();
+			
+//			devLogRowVO.setBinDataInfoVOs(binDataInfoVOs);
+			devLogRowVO.setStrDataInfoVOs(strDataInfoVOs);
+			devLogRowVO.setIntDataInfoVOs(intDataInfoVOs);
+			devLogRowVO.setOccDt(occDt);
+			devLogRowVO.setLogType("");
+			HashMap<String, Object> mapRowExtension = new HashMap<String, Object>();
+			mapRowExtension.put("test", "test");
+			devLogRowVO.setMapRowExtension(mapRowExtension);
+			devLogRowVOs.add(devLogRowVO);
+			devLogDataVO.setDevId(devId);
+			devLogDataVO.setM2mSvcNo(12345678);
+			devLogDataVO.setLogRowVOs(devLogRowVOs);
+			devLogDataVOs.add(devLogDataVO);
+			
+//			itgLogDataVO.setSysLogDataVO(sysLogDataVO);
+			itgLogDataVO.setDevLogDataVOs(devLogDataVOs);
+			
+			strBody = gson.toJson(itgLogDataVO);
+		}
 		return strBody;
 	}
 	
@@ -502,7 +594,6 @@ public class PacketUtil {
 		else if(MthdType.QUERY_LASTVAL.equals(value)){ //711
 			LastValQueryRqtVO lastValQueryRqtVO = gson.fromJson(new String(data), LastValQueryRqtVO.class);
 			LastValQueryRespVO lastValQueryRespVO = new LastValQueryRespVO();
-			
 			/*CmdDataInfoVO cmdDataInfoVO = new CmdDataInfoVO();
 			List<CmdDataInfoVO> cmdDataInfoVOs = lastValQueryRqtVO.getCmdDataInfoVOs();
 			String dataTypeCd = "8002";
@@ -516,10 +607,13 @@ public class PacketUtil {
 			List<DevColecDataVO> devColecDataVOs = new ArrayList<DevColecDataVO>();
 			
 			List<ColecRowVO> colecRowVOs = new ArrayList<ColecRowVO>();
-
+			
+			List<CmdDataInfoVO> cmdDataInfoVOs = new ArrayList<CmdDataInfoVO>();
+			
 			for(CmdDataInfoVO cmdDataInfoVO : lastValQueryRqtVO.getCmdDataInfoVOs()){
 				String dataTypeCd = cmdDataInfoVO.getDataTypeCd();
 				ColecRowVO colecRowVO = new ColecRowVO();
+				
 				System.out.println("dataTypeCd -----> "+dataTypeCd);
 				if("31996202".equals(dataTypeCd) ||"6202".equals(dataTypeCd)){//도어락 상태 확인- 장치상태
 					snsnTagValue = Main.tag6202;
@@ -530,18 +624,23 @@ public class PacketUtil {
 				}else if("2502".equals(dataTypeCd)){//Gas valve 상태 확인 - 장치상태
 					snsnTagValue = Main.tag2502;
 					colecRowVOs.add(getColecRowVO(colecRowVO, "2503", snsnTagValue));
-				}else{
+				}else {
 					
 				}
 			}
 			
+			for(String devId : lastValQueryRqtVO.getInclDevIds()){
+				devColecDataVO.setDevId(devId);
+				devColecDataVOs.add(devColecDataVO);
+			}
+			
 //			devColecDataVO.setDevId("HGD_00112233_KT_IOT_GATEWAY1");
 			devColecDataVO.setColecRowVOs(colecRowVOs);
-			devColecDataVOs.add(devColecDataVO);
+//			devColecDataVOs.add(devColecDataVO);
 
 			lastValQueryRespVO.setExtrSysId(lastValQueryRqtVO.getExtrSysId());
-//			lastValQueryRespVO.setCmdDataInfoVOs(lastValQueryRqtVO.getCmdDataInfoVOs());
-//			lastValQueryRespVO.setCmdDataInfoVOs(cmdDataInfoVOs);
+			lastValQueryRespVO.setCmdDataInfoVOs(lastValQueryRqtVO.getCmdDataInfoVOs());
+			lastValQueryRespVO.setCmdDataInfoVOs(cmdDataInfoVOs);
 			lastValQueryRespVO.setDevColecDataVOs(devColecDataVOs);
 			
 			strBody = gson.toJson(lastValQueryRespVO);
@@ -553,6 +652,16 @@ public class PacketUtil {
 			comnRespVO.setRespCd(respCd);
 			comnRespVO.setRespMsg(respMsg);
 			comnRespVO.setMsgHeadVO(frmwrUdateNtfyRqtVO.getMsgHeadVO());
+			
+			strBody = gson.toJson(comnRespVO);
+		}
+		else if(821 == value){
+			ItgLogDataVO itgLogDataVO = gson.fromJson(new String(data), ItgLogDataVO.class);
+			ComnRespVO comnRespVO = new ComnRespVO();
+			
+			comnRespVO.setRespCd(respCd);
+			comnRespVO.setRespMsg(respMsg);
+			comnRespVO.setMsgHeadVO(itgLogDataVO.getMsgHeadVO());
 			
 			strBody = gson.toJson(comnRespVO);
 		}
